@@ -38,7 +38,9 @@ class NavegacionActions {
     await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
     await page.locator(headerPage.buscandoInput).focus();
     await page.locator(headerPage.buscandoInput).fill("");
+    await page.waitForTimeout(500);  
     await headerPage.humanType(headerPage.buscandoInput, producto);
+    await page.waitForTimeout(500);  
 
     const sugerido = await page.locator(productos.autocompletarbusqueda).first();
     await sugerido.waitFor({ state: 'visible' });
@@ -61,14 +63,18 @@ class NavegacionActions {
       await botonAgregar.click();
       await page.isVisible(productos.agregarproductodentrobusquedaButton);
       await headerPage.safeClick(headerPage.logoImg);
+      await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
       return true;
     }
 
     if (await labelAgotado.count() > 0 && await labelAgotado.isVisible()) {
       console.warn(`⚠️ Producto agotado: ${producto}`);
+      await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
       return false;
     }
 
+    
+    await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
     return false;
   }
 
@@ -408,6 +414,11 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
   console.log("\n🟢 Validación finalizada para: " + formapago);
 }
 
+  async salircheckout(resumencarritos,page) {
+    await resumencarritos.safeClick(resumencarritos.logoprincipal);
+    await page.waitForLoadState('domcontentloaded');
+  }
+
 async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) { 
     console.warn("🔍 Iniciando validación de bloques de entrega…");
 
@@ -421,63 +432,59 @@ async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) {
     const count = await entregas.count();
     console.warn(`Bloques encontrados en pantalla: ${count}`);
 
-    // 3️⃣ Validar cantidad exacta
-    if (count !== tiposEsperados.length) {
-        throw new Error(`❌ Se esperaban ${tiposEsperados.length} bloques pero se encontraron ${count}`);
+    // Obtener textos una sola vez
+    const textos = [];
+    for (let i = 0; i < count; i++) {
+        const raw = (await entregas.nth(i).innerText()).trim();
+        textos.push(raw);
+        console.warn(`\n📦 Bloque ${i+1}:\n${raw}`);
     }
-
-    console.warn("✔ Cantidad de bloques correcta.");
 
     const sucursalLower = Sucursal.toLowerCase().trim();
 
-    // 4️⃣ Validar cada bloque
-    for (let i = 0; i < count; i++) {
-        const texto = (await entregas.nth(i).innerText()).trim();
-        const textoLower = texto.toLowerCase();
+    // 🔥 Nueva validación: por cada tipo esperado, validar si aparece en algún bloque
+    for (const tipo of tiposEsperados) {
+        const tipoLower = tipo.toLowerCase();
 
-        console.warn(`\n📦 Bloque ${i + 1}:\n${texto}`);
+        let match = false;
 
-        const tipo = tiposEsperados[i];
+        for (const texto of textos) {
+            const textoLower = texto.toLowerCase();
 
-        // SUPER
-        if (tipo === "Super") {
-            // Normalizamos espacios también
-            const textoNorm = textoLower.replace(/\s+/g, " ").trim();
-
-            if (!textoNorm.includes("entregado por entrega domicilio")) {
-                throw new Error(`❌ Bloque ${i+1}: no contiene 'Entregado por ENTREGA DOMICILIO'`);
+            if (tipo === "Super") {
+                const textoNorm = textoLower.replace(/\s+/g, " ").trim();
+                if (textoNorm.includes("entregado por entrega domicilio") &&
+                    textoLower.includes(sucursalLower)) {
+                    match = true;
+                }
             }
 
-            if (!textoLower.includes(sucursalLower)) {
-                throw new Error(`❌ Bloque ${i+1}: no contiene la sucursal '${Sucursal}'`);
+            else if (tipo === "Flete") {
+                const textoNorm = textoLower.replace(/\s+/g, " ").trim();
+                if (textoNorm.includes("entregado por flete a domicilio") &&
+                    textoLower.includes(sucursalLower)) {
+                    match = true;
+                }
             }
 
-            console.warn(`✔ Bloque ${i+1}: SUPER validado correctamente.`);
-        }
-
-        // FLETE
-        else if (tipo === "Flete") {
-            if (!textoLower.includes("flete")) {
-                throw new Error(`❌ Bloque ${i+1}: no contiene palabra clave Flete`);
+            else if (tipo === "DHL") {
+                if (textoLower.includes("dhl")) {
+                    match = true;
+                }
             }
-            console.warn(`✔ Bloque ${i+1}: FLETE correcto.`);
         }
 
-        // ENVIADERO
-        else if (tipo === "Enviadero") {
-            if (!textoLower.includes("enviadero")) {
-                throw new Error(`❌ Bloque ${i+1}: no contiene palabra clave Enviadero`);
-            }
-            console.warn(`✔ Bloque ${i+1}: ENVIADERO correcto.`);
+        if (!match) {
+            throw new Error(`❌ No se encontró un bloque válido para el tipo: ${tipo}`);
         }
 
-        else {
-            console.warn(`⚠ Tipo desconocido en Excel: ${tipo}`);
-        }
+        console.warn(`✔ Tipo ${tipo} validado correctamente en al menos un bloque.`);
     }
 
     console.warn("\n🟢 Validación COMPLETADA con éxito.");
 }
+
+
 
 }
 

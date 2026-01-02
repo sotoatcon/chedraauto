@@ -150,17 +150,17 @@ test('C2 - Flujos Transaccionales', async () => {
 
     console.log("➡️ Validando entregas: " + Entregas + " con activos: "+Activos);
 
-    //Agrega activo por activo dentro de los n configurados en un solo row (separados)
-    for (const activo of Activos){
-          console.log("Agregando "+activo+" al carrito");
-        await carritoUtils.buscarYAgregarProducto(page,headerPage,productos,activo);
-    }
-
-    //Definir direccion especifica
+   //Definir direccion especifica
     await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
     await page.waitForTimeout(2000);
     await headerPage.safeClick(headerPage.enviara_button);
     await directionsPage.SeleccionarDireccionEspecifica(Sucursal);    
+    //Agrega activo por activo dentro de los n configurados en un solo row (separados)
+    for (const activo of Activos){
+        console.log("Agregando "+activo+" al carrito");
+        await carritoUtils.buscarYAgregarProducto(page,headerPage,productos,activo);
+    }
+  
     //bloque que ingersa al carrito, hasta el paso 3 donde podremos ver los distintos puntos de entrega
 
     await headerPage.safeClick(headerPage.minicartButton);
@@ -170,9 +170,17 @@ test('C2 - Flujos Transaccionales', async () => {
     await page.waitForTimeout(3000);
     await carritoUtils.avanzarCarrito(page, resumencarritos);
     await page.waitForTimeout(2000);  
+
+    if (!Entregas.includes("Super")) {
+                console.log("No incluye Super, no se seleccionan horarios");
+    }
+    else{
+    console.log("Incluye Super, se seleccionan horarios");
     const botonHorario = page.locator(resumencarritos.horarioentregaButton).first();
     await botonHorario.waitFor({ state: "visible" });
     await botonHorario.click();
+
+    }
 
     //Aqui se consumira la evaluacion de las entregas dentro del paso 3
     await carritoUtils.ValidarEntregas(page, headerPage, Entregas, Sucursal); 
@@ -181,14 +189,30 @@ test('C2 - Flujos Transaccionales', async () => {
     await headerPage.safeClick(resumencarritos.iralpagoButton);
 
     //Aqui debemos de seleccionar el metodo de pago y "concluirlo"
-    headerPage.safeClick(headerPage.formapago(TipoPagoText));
+    await headerPage.safeClick(headerPage.formapago(TipoPagoText));
     
     if(TipoPagoText == "Pago contraentrega (al recibir tu pedido)"){
       console.log("Por ser pago contra entrega no se ejecuta");
     }else{
       console.log("Falta Agregar Captura de los campos");
-      await page.pause();
     }
+
+    //Regresamos a la pagina normal y vaciamos carrito para reiniciar ciclo|
+    await carritoUtils.salircheckout(resumencarritos,page);
+    await headerPage.safeClick(headerPage.minicartButton);  
+    await page.waitForTimeout(2000);
+
+    const vaciarButton = await page.locator(resumencarritos.vaciarcarritoButton);
+    if (await vaciarButton.count() > 0) {
+      console.log('Vaciando el carrito...');
+      await resumencarritos.safeClick(resumencarritos.vaciarcarritoButton);
+      await resumencarritos.safeClick(resumencarritos.eliminarItemsCarritoButton);
+      await headerPage.safeClick(headerPage.cerrarminicartButton);
+    } else {
+      await headerPage.safeClick(headerPage.cerrarminicartButton);
+      console.log('🛒 El carrito ya está vacío.');
+    }
+
   }
 
 

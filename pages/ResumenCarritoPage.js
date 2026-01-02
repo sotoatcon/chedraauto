@@ -40,7 +40,7 @@ class ResumenCarritoPage extends BasePage {
     this.cambiarDireccionLink = "//*[contains(text(),'Selecciona otra dirección')]";
     this.confirmarCambiarDireccionButton = "//*[contains(text(),'Continuar')]";
     this.telefonoCapturadoCheck = "//*[@id='phoneNumber']/..//*[@class='chedrauimx-checkout-io-1-x-user-form__icon']";
-    
+    this.logoprincipal = "//*[@class='checkout-header__logo']";
   }
 
   // 🔹 Locators dinámicos
@@ -51,6 +51,8 @@ class ResumenCarritoPage extends BasePage {
   formapagochedrahuiOption(formapago) {
     return `//*[@class='payment-group-item-name' and contains(text(),'${formapago}')]`;
   }
+
+
 }
 
 module.exports = ResumenCarritoPage;

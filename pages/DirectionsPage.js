@@ -32,7 +32,9 @@ class DirectionsPage extends BasePage {
         await this.page.click(xpathdireccion);
         console.log(`Se da clic en: `+ xpathdireccion);
         await this.page.click(this.enviarestadireccionButton);
-        await this.page.waitForTimeout(6000);
+        await this.page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
+        await this.wait(3000); // breve espera por sugerencias
+
 
     }
 
@@ -59,6 +61,8 @@ class DirectionsPage extends BasePage {
         // 6️⃣ Esperar a que vuelva a cargar la lista y reactivar botón principal
         await this.page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
         await this.safeClick(this.seleccionarDireccionButton);
+        await this.page.waitForTimeout(2000);
+
 
     } catch (error) {
         console.error(`❌ Error al agregar dirección "${nombre}": ${error.message}`);
