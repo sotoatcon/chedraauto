@@ -142,7 +142,7 @@ test('C2 - Flujos Transaccionales', async () => {
 
 
     const TipoPagoText = row['Tipos de pago'];
-    const Activosraw = row['Activos'];
+    const Activosraw = String(row['Activos']);
     const Activos = Activosraw.split(", ").map(t => t.trim());
     const Entregasraw = row['TipoTienda']
     const Entregas = Entregasraw.split(", ").map(t => t.trim());
@@ -160,7 +160,7 @@ test('C2 - Flujos Transaccionales', async () => {
         console.log("Agregando "+activo+" al carrito");
         await carritoUtils.buscarYAgregarProducto(page,headerPage,productos,activo);
     }
-  
+    await page.waitForTimeout(2000);
     //bloque que ingersa al carrito, hasta el paso 3 donde podremos ver los distintos puntos de entrega
 
     await headerPage.safeClick(headerPage.minicartButton);
@@ -213,6 +213,7 @@ test('C2 - Flujos Transaccionales', async () => {
       console.log('🛒 El carrito ya está vacío.');
     }
 
+    await page.waitForTimeout(2000);
   }
 
 

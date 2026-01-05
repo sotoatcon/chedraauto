@@ -443,43 +443,47 @@ async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) {
     const sucursalLower = Sucursal.toLowerCase().trim();
 
     // 🔥 Nueva validación: por cada tipo esperado, validar si aparece en algún bloque
-    for (const tipo of tiposEsperados) {
-        const tipoLower = tipo.toLowerCase();
+   // Validar entregas sin importar el orden
+for (const tipo of tiposEsperados) {
 
-        let match = false;
+    if (tipo === "super") {
 
-        for (const texto of textos) {
-            const textoLower = texto.toLowerCase();
-
-            if (tipo === "Super") {
-                const textoNorm = textoLower.replace(/\s+/g, " ").trim();
-                if (textoNorm.includes("entregado por entrega domicilio") &&
-                    textoLower.includes(sucursalLower)) {
-                    match = true;
-                }
-            }
-
-            else if (tipo === "Flete") {
-                const textoNorm = textoLower.replace(/\s+/g, " ").trim();
-                if (textoNorm.includes("entregado por flete a domicilio") &&
-                    textoLower.includes(sucursalLower)) {
-                    match = true;
-                }
-            }
-
-            else if (tipo === "DHL") {
-                if (textoLower.includes("dhl")) {
-                    match = true;
-                }
-            }
-        }
+        const match = bloques.some(b =>
+            b.includes("entregado por entrega domicilio") &&
+            b.includes(Sucursal.toLowerCase())
+        );
 
         if (!match) {
-            throw new Error(`❌ No se encontró un bloque válido para el tipo: ${tipo}`);
+            throw new Error(`❌ No se encontró ningún bloque SUPER válido para sucursal ${Sucursal}`);
         }
 
-        console.warn(`✔ Tipo ${tipo} validado correctamente en al menos un bloque.`);
+        console.warn(`✔ SUPER encontrado correctamente.`);
     }
+
+    else if (tipo === "flete") {
+
+        const match = bloques.some(b => b.includes("flete"));
+
+        if (!match) {
+            throw new Error(`❌ No se encontró ningún bloque FLETE`);
+        }
+
+        console.warn(`✔ FLETE encontrado correctamente.`);
+    }
+
+    else if (tipo === "dhl") {
+
+        const match = bloques.some(b => b.includes("dhl"));
+
+        if (!match) {
+            throw new Error(`❌ No se encontró ningún bloque DHL`);
+        }
+
+        console.warn(`✔ DHL encontrado correctamente.`);
+    }
+}
+
+
 
     console.warn("\n🟢 Validación COMPLETADA con éxito.");
 }
