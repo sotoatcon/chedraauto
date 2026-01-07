@@ -422,72 +422,151 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
 async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) { 
     console.warn("🔍 Iniciando validación de bloques de entrega…");
 
+    // Normalizar tipos esperados
     const tiposEsperados = Array.isArray(TipoTienda) 
-        ? TipoTienda.map(t => t.trim())
-        : TipoTienda.split(",").map(t => t.trim());
+        ? TipoTienda.map(t => t.trim().toLowerCase())
+        : TipoTienda.split(",").map(t => t.trim().toLowerCase());
 
     console.warn("Tipos esperados:", tiposEsperados);
 
+    // Obtener bloques del DOM
     const entregas = page.locator("//*[@class='chedrauimx-checkout-io-1-x-package__delivery']");
     const count = await entregas.count();
     console.warn(`Bloques encontrados en pantalla: ${count}`);
+    // 1️⃣ Validar número de bloques – REGLA CRÍTICA
+    if (count !== tiposEsperados.length) {
+        throw new Error(`❌ Se esperaban ${tiposEsperados.length} bloques pero solo hay ${count}`);
+    }
 
-    // Obtener textos una sola vez
-    const textos = [];
+    // 2️⃣ Guardar textos
+    const textosLower = [];
     for (let i = 0; i < count; i++) {
         const raw = (await entregas.nth(i).innerText()).trim();
-        textos.push(raw);
+        textosLower.push(raw.toLowerCase());
         console.warn(`\n📦 Bloque ${i+1}:\n${raw}`);
     }
 
     const sucursalLower = Sucursal.toLowerCase().trim();
 
-    // 🔥 Nueva validación: por cada tipo esperado, validar si aparece en algún bloque
-   // Validar entregas sin importar el orden
-for (const tipo of tiposEsperados) {
+    // 3️⃣ Validación por cada tipo, sin importar orden
+    for (const tipo of tiposEsperados) {
 
-    if (tipo === "super") {
-
-        const match = bloques.some(b =>
-            b.includes("entregado por entrega domicilio") &&
-            b.includes(Sucursal.toLowerCase())
-        );
-
-        if (!match) {
-            throw new Error(`❌ No se encontró ningún bloque SUPER válido para sucursal ${Sucursal}`);
+        if (tipo === "super") {
+            const match = textosLower.some(b =>
+                b.includes("entregado por entrega domicilio") &&
+                b.includes(sucursalLower)
+            );
+            if (!match) throw new Error(`❌ Falta bloque SUPER para sucursal ${Sucursal}`);
+            console.warn("✔ SUPER encontrado correctamente.");
         }
 
-        console.warn(`✔ SUPER encontrado correctamente.`);
-    }
-
-    else if (tipo === "flete") {
-
-        const match = bloques.some(b => b.includes("flete"));
-
-        if (!match) {
-            throw new Error(`❌ No se encontró ningún bloque FLETE`);
+        else if (tipo === "flete") {
+            const match = textosLower.some(b => b.includes("flete"));
+            if (!match) throw new Error(`❌ Falta bloque FLETE`);
+            console.warn("✔ FLETE encontrado correctamente.");
         }
 
-        console.warn(`✔ FLETE encontrado correctamente.`);
-    }
-
-    else if (tipo === "dhl") {
-
-        const match = bloques.some(b => b.includes("dhl"));
-
-        if (!match) {
-            throw new Error(`❌ No se encontró ningún bloque DHL`);
+        else if (tipo === "dhl") {
+            const match = textosLower.some(b => b.includes("dhl"));
+            if (!match) throw new Error(`❌ Falta bloque DHL`);
+            console.warn("✔ DHL encontrado correctamente.");
         }
 
-        console.warn(`✔ DHL encontrado correctamente.`);
+        else {
+            console.warn(`⚠ Tipo desconocido: ${tipo}`);
+        }
     }
-}
-
-
 
     console.warn("\n🟢 Validación COMPLETADA con éxito.");
 }
 
+async crearDatosPago(row) {
+    const tipo = row["Forma Pago"]; 
+
+    if (tipo.includes("Tarjeta")) {
+    return {
+      numero: row["NumeroTarjeta"],
+      nombre: row["Nombre"],
+      mes: row["Mes"],
+      ano: row["Ano"],
+      cvv: row["Codigo"],
+      formapago: row['Forma Pago']
+    };
+  }
+
+  if (tipo.includes("Vales")) {
+    return {
+      monto: row["Monto"],
+      numero: row["NumeroTarjeta"],
+      cvv: row["Codigo"],
+      formapago: row['Forma Pago']
+
+    };
+  }
+
+  throw new Error("Tipo de pago no soportado: " + tipo);
+
+}
+
+async LlenarFormularioPago(page, headerPage, tipoPago, datos) { 
+  console.warn("📝 Llenando formulario de pago para: " + tipoPago);
+  console.warn("Datos recibidos:", datos);
+
+  let ctx;
+  // 1️⃣ Determinar contexto (iframe o no)
+  if (datos.formapago.includes("Vales")) {
+    // 🔹 Vales NO usan iframe
+    ctx = page;
+    console.warn("📌 Tipo de pago detectado: VALES");
+    // Scroll al formulario
+    await page.locator(headerPage.formapago(tipoPago)).scrollIntoViewIfNeeded();
+    await headerPage.safeClick(headerPage.formapago(tipoPago));
+    // 2️⃣ Llenado de campos Vales
+    console.warn("Llenando campos");
+    await headerPage.humanType(headerPage.tarjetachedrahui_montoInput,String(datos.monto));
+    await headerPage.humanType(headerPage.tarjetachedrahui_codigoInput,String(datos.cvv));
+    let locator = page.locator(headerPage.tarjetachedrahui_numeroInput);
+    await locator.click({ force: true });
+    await locator.fill(datos.numero);
+    //await headerPage.humanType(headerPage.tarjetachedrahui_numeroInput,String(datos.numero));
+    /*
+    await locator.click();
+    await locator.pressSequentially(String(datos.numero));
+    */
+    
+    await page.waitForTimeout(1000);
+    await headerPage.safeClick(headerPage.tarjetachedrahui_validarButton);
+    await page.pause();
+    
+  } else {
+
+    // 🔹 Tarjetas, Puntos BBVA, Vales de Despensa → usan iframe
+    console.warn("📌 Tipo de pago detectado: TARJETA");
+    await page.locator(headerPage.iframeformapago(tipoPago)).scrollIntoViewIfNeeded();
+    const iframe = page.frameLocator(headerPage.iframeformapago(tipoPago));
+    ctx = iframe;
+    // 2️⃣ Llenado de campos dentro del iframe
+    console.warn("Llenando campos");
+    // Número tarjeta
+    await ctx.locator(headerPage.tarjeta_numeroInput).humanType(String(datos.numero));
+    // Nombre
+    await ctx.locator(headerPage.tarjeta_nombreInput).humanType(String(datos.nombre));
+    // Mes vencimiento
+    await ctx.locator(headerPage.tarjeta_mesSelect).selectOption(String(datos.mes));
+    // Año vencimiento
+    await ctx.locator(headerPage.tarjeta_anoSelect).selectOption(String(datos.ano));
+    // CVV
+    await ctx.locator(headerPage.tarjeta_codigoInput).humanType(String(datos.cvv));
+    // Meses a pagar → este ya viene preseleccionado, pero si quieres llenarlo:
+    try {
+      await ctx.locator(headerPage.tarjeta_mesesapagarSelect).selectOption("1"); 
+    } catch {
+      console.warn("ⓘ Campo meses a pagar siempre viene lleno, se ignora.");
+    }
+  }
+  console.warn("Llenado de formulario COMPLETADO");
+
+}
 
 
 }

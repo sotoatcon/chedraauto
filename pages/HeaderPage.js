@@ -22,7 +22,7 @@ class HeaderPage extends BasePage {
     this.tarjeta_nombreInput = "//*[@id='creditCardpayment-card-0Name']";
     this.tarjeta_codigoInput = "//*[@id='creditCardpayment-card-0Code']";
     this.tarjeta_mesSelect = "//*[@id='creditCardpayment-card-0Month']";
-    this.tarjeta_anoSelect = "//*[@id='creditCardpayment-card-0Code']";
+    this.tarjeta_anoSelect = "//*[@id='creditCardpayment-card-0Year']";
     this.tarjeta_mesesapagarSelect = "//*[@id='creditCardpayment-card-0Brand']";
     this.tarjetachedrahui_codigoInput= "//*[contains(text(),'Código de seguridad')]/..//input";
     this.tarjetachedrahui_numeroInput = "//*[@id='card-number-vale']";

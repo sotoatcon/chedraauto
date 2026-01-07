@@ -194,9 +194,11 @@ test('C2 - Flujos Transaccionales', async () => {
     if(TipoPagoText == "Pago contraentrega (al recibir tu pedido)"){
       console.log("Por ser pago contra entrega no se ejecuta");
     }else{
-      console.log("Falta Agregar Captura de los campos");
+      let datos = await carritoUtils.crearDatosPago(row);
+      await carritoUtils.LlenarFormularioPago(page, headerPage,TipoPagoText, datos); 
     }
 
+    await headerPage.safeClick(headerPage.pagar_Button);
     //Regresamos a la pagina normal y vaciamos carrito para reiniciar ciclo|
     await carritoUtils.salircheckout(resumencarritos,page);
     await headerPage.safeClick(headerPage.minicartButton);  
