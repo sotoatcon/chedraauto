@@ -90,7 +90,6 @@ await page.click('#btn-continuar-validate-d');
 
 //modificaciones
 console.log('Se presionó boton login');
-await page.pause();
   
 
 
