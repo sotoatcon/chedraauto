@@ -26,11 +26,11 @@ class DirectionsPage extends BasePage {
     }
 
     async SeleccionarDireccionEspecifica(direccion) {
-        console.log(`Se inicia seleccion de direccion`);    
+        console.log(`\nSe inicia seleccion de direccion`);    
         const xpathdireccion = this.xpathDireccionEspecifica(direccion);
-        console.log(`xpath es: `+ xpathdireccion);
+        console.log(`\nxpath es: `+ xpathdireccion);
         await this.page.click(xpathdireccion);
-        console.log(`Se da clic en: `+ xpathdireccion);
+        console.log(`\nSe da clic en: `+ xpathdireccion);
         await this.page.click(this.enviarestadireccionButton);
         await this.page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
         await this.wait(3000); // breve espera por sugerencias

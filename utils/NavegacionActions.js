@@ -15,7 +15,9 @@ class NavegacionActions {
       await resumencarritos.humanType(resumencarritos.contactonombreInput, 'Joaquin');
       await resumencarritos.humanType(resumencarritos.contactoapellidoInput, 'Soto Castillo');
       await resumencarritos.humanType(resumencarritos.contactotelefonoInput, '5550553518');
-      await page.waitForSelector(resumencarritos.telefonoCapturadoCheck, { state: 'visible', timeout: 30000 });
+      //await page.waitForSelector(resumencarritos.telefonoCapturadoCheck, { state: 'visible', timeout: 30000 });
+      await page.waitForTimeout(2000);
+      
       await resumencarritos.safeClick(resumencarritos.irenvioButton);
       await page.waitForTimeout(4000);
       return await this.avanzarCarrito(page, resumencarritos);
@@ -61,7 +63,7 @@ class NavegacionActions {
 
     if (await botonAgregar.count() > 0 && await botonAgregar.isVisible()) {
       await botonAgregar.click();
-      await page.isVisible(productos.agregarproductodentrobusquedaButton);
+      await page.isVisible(productos.productoagregadoAlert);
       await headerPage.safeClick(headerPage.logoImg);
       await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
       return true;
@@ -257,8 +259,10 @@ async obtenerProductosEncontrados(page, productosPage) {
       console.log("🛒 Vaciando el carrito...");
 
       await resumencarritos.safeClick(resumencarritos.vaciarcarritoButton);
+      await page.waitForTimeout(2000);
       await resumencarritos.safeClick(resumencarritos.eliminarItemsCarritoButton);
-
+      await page.waitForTimeout(2000);
+ 
       // Cerrar minicart
       await headerPage.safeClick(headerPage.cerrarminicartButton);
     } else {
@@ -430,7 +434,7 @@ async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) {
     console.warn("Tipos esperados:", tiposEsperados);
 
     // Obtener bloques del DOM
-    const entregas = page.locator("//*[@class='chedrauimx-checkout-io-1-x-package__delivery']");
+    const entregas = page.locator("//*[@class='chedrauimx-checkout-io-2-x-package__delivery']");
     const count = await entregas.count();
     console.warn(`Bloques encontrados en pantalla: ${count}`);
     // 1️⃣ Validar número de bloques – REGLA CRÍTICA
@@ -504,6 +508,14 @@ async crearDatosPago(row) {
     };
   }
 
+   if (tipo.includes("Paypal")) {
+    return {
+      correo: row["Nombre"],
+      password: row["Codigo"],
+      formapago: row['Forma Pago']
+    };
+  }
+
   throw new Error("Tipo de pago no soportado: " + tipo);
 
 }
@@ -525,48 +537,110 @@ async LlenarFormularioPago(page, headerPage, tipoPago, datos) {
     console.warn("Llenando campos");
     await headerPage.humanType(headerPage.tarjetachedrahui_montoInput,String(datos.monto));
     await headerPage.humanType(headerPage.tarjetachedrahui_codigoInput,String(datos.cvv));
-    let locator = page.locator(headerPage.tarjetachedrahui_numeroInput);
-    await locator.click({ force: true });
-    await locator.fill(datos.numero);
-    //await headerPage.humanType(headerPage.tarjetachedrahui_numeroInput,String(datos.numero));
+    //let locator = page.locator(headerPage.tarjetachedrahui_numeroInput);
+    //await locator.click({ force: true });
+    //await locator.fill(datos.numero);
+    await headerPage.humanType(headerPage.tarjetachedrahui_numeroInput,String(datos.numero));
     /*
     await locator.click();
     await locator.pressSequentially(String(datos.numero));
-    */
-    
+    */    
     await page.waitForTimeout(1000);
     await headerPage.safeClick(headerPage.tarjetachedrahui_validarButton);
-    await page.pause();
-    
-  } else {
+    //Pagar
+    await headerPage.safeClick(headerPage.pagar_Button);
 
-    // 🔹 Tarjetas, Puntos BBVA, Vales de Despensa → usan iframe
-    console.warn("📌 Tipo de pago detectado: TARJETA");
-    await page.locator(headerPage.iframeformapago(tipoPago)).scrollIntoViewIfNeeded();
-    const iframe = page.frameLocator(headerPage.iframeformapago(tipoPago));
-    ctx = iframe;
-    // 2️⃣ Llenado de campos dentro del iframe
-    console.warn("Llenando campos");
-    // Número tarjeta
-    await ctx.locator(headerPage.tarjeta_numeroInput).humanType(String(datos.numero));
-    // Nombre
-    await ctx.locator(headerPage.tarjeta_nombreInput).humanType(String(datos.nombre));
-    // Mes vencimiento
-    await ctx.locator(headerPage.tarjeta_mesSelect).selectOption(String(datos.mes));
-    // Año vencimiento
-    await ctx.locator(headerPage.tarjeta_anoSelect).selectOption(String(datos.ano));
-    // CVV
-    await ctx.locator(headerPage.tarjeta_codigoInput).humanType(String(datos.cvv));
-    // Meses a pagar → este ya viene preseleccionado, pero si quieres llenarlo:
-    try {
-      await ctx.locator(headerPage.tarjeta_mesesapagarSelect).selectOption("1"); 
-    } catch {
-      console.warn("ⓘ Campo meses a pagar siempre viene lleno, se ignora.");
-    }
+    
+  }
+  if(datos.formapago.includes("Tarjeta")){
+      // 🔹 Tarjetas, Puntos BBVA, Vales de Despensa → usan iframe
+      console.warn("📌 Tipo de pago detectado: TARJETA");
+      await page.locator(headerPage.iframeformapago(tipoPago)).scrollIntoViewIfNeeded();
+      const iframe = page.frameLocator(headerPage.iframeformapago(tipoPago));
+      ctx = iframe;
+      // 2️⃣ Llenado de campos dentro del iframe
+      console.warn("Llenando campos");
+      // Número tarjeta
+      await ctx.locator(headerPage.tarjeta_numeroInput).fill(String(datos.numero));
+      // Nombre
+      await ctx.locator(headerPage.tarjeta_nombreInput).fill(String(datos.nombre));
+      // Mes vencimiento
+      await ctx.locator(headerPage.tarjeta_mesSelect).selectOption(String(datos.mes));
+      // Año vencimiento
+      await ctx.locator(headerPage.tarjeta_anoSelect).selectOption(String(datos.ano));
+      // CVV
+      await ctx.locator(headerPage.tarjeta_codigoInput).fill(String(datos.cvv));
+      // Pagar
+      await headerPage.safeClick(headerPage.pagar_Button);
+      await headerPage.safeClick(headerPage.cerrarpagonoprocesadoPopIp);
+      
+  }
+  if(datos.formapago.includes("Paypal")){
+      console.warn("📌 Tipo de pago detectado: PAYPAL");
+      await page.waitForTimeout(2000);
+      // Pagar
+      await headerPage.safeClick(headerPage.pagar_Button);
+      await page.waitForTimeout(2000);
+      // Presionar pagarconpaypal popup
+      await page.waitForSelector(headerPage.paypalIframe, { timeout: 15000 });
+      const paypalframe = page.frameLocator(headerPage.paypalIframe);
+      const [paypalPopup] = await Promise.all([
+        page.waitForEvent('popup'),
+        paypalframe.locator(headerPage.pagarconpaypalButton).click()
+      ]);
+      // Capturar correo
+      await paypalPopup.locator(headerPage.emailpaypalInput).fill(String(datos.correo));
+      // Presionar Sigueinte
+      await paypalPopup.locator(headerPage.siguienteButton).click();
+      /*
+      // Seleccionar login por otra via
+      await paypalPopup.locator(headerPage.loginotraviaLink).click();
+      // Seleccionar login por password
+      await paypalPopup.locator(headerPage.loginporpasswordLink).click();
+      // Capturar password
+      await paypalPopup.locator(headerPage.passwordInput).fill(String(datos.password));
+      // Finalizar login paypal
+      await paypalPopup.locator(headerPage.loginpaypalInput).click();
+      */
+      // Cerrar POP UP para detener flujo airframe
+      await paypalPopup.close();
+
+      // Busca un locator en todos los frames, recursivamente
+      async function findInFrames(page, selector) {
+          // Buscar en el frame principal
+          if (await page.locator(selector).count() > 0) return page.locator(selector);
+
+          // Buscar en iframes recursivamente
+          for (const frame of page.frames()) {
+              if (await frame.locator(selector).count() > 0) {
+                  return frame.locator(selector);
+              }
+          }
+
+          return null;
+      }
+
+      // USO:
+      const unauthorizedButtonXPath = "//*[@class='btn btn-large payment-unauthorized-button']";
+
+      // Buscar el botón dentro o fuera de iframes
+      let unauthorizedButton = await findInFrames(page, unauthorizedButtonXPath);
+
+      if (unauthorizedButton) {
+          console.log("✔️ Botón encontrado, intentando cerrarlo...");
+          await unauthorizedButton.click();
+          console.log("✔️ Popup de compra fallida cerrado.");
+      } else {
+          console.warn("⚠️ No se encontró el popup de compra fallida en ningún iframe.");
+      }
+
+
+      
   }
   console.warn("Llenado de formulario COMPLETADO");
 
 }
+
 
 
 }

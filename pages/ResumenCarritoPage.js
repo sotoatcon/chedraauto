@@ -7,6 +7,7 @@ class ResumenCarritoPage extends BasePage {
     this.page = page;
 
     // 🔹 Locators estáticos
+    this.prodcutoscarritos = "//*[contains(@class,'productMinicartContainer')]//*[@class='vtex-flex-layout-0-x-flexColChild pb0']//a[contains(text(),'')]";
     this.diasEntregaLabel = "//*[@class='chedrauimx-checkout-io-1-x-calendar__day-date']";
     this.paso1URL= "/checkout-io/cart";
     this.paso2URL= "/checkout-io/profile";
@@ -26,8 +27,8 @@ class ResumenCarritoPage extends BasePage {
     this.continuarconlacompraButton = "//button//*[contains(text(),'Continuar con la compra')]";
     this.iralpagoButton = "//button[contains(text(),'Ir al pago')]";
     this.vamosacomprarButton = "//*[contains(text(),'Vamos a comprar')]";
-    this.diasentrega = "//*[@class='chedrauimx-checkout-io-1-x-calendar__day']";
-    this.horarioentregaButton = "//*[@class='chedrauimx-checkout-io-1-x-calendar__day-schedule']";
+    this.diasentrega = "//*[@class='chedrauimx-checkout-io-2-x-calendar__day']";
+    this.horarioentregaButton = "//*[@class='chedrauimx-checkout-io-2-x-calendar__day-schedule']";
     this.contactonombreInput = "//*[@id='firstName']";
     this.contactoapellidoInput = "//*[@id='lastName']";
     this.contactotelefonoInput = "//*[@id='phoneNumber']";
@@ -35,7 +36,7 @@ class ResumenCarritoPage extends BasePage {
     this.editarentregaButton = "//*[@href='/checkout-io/shipping' and @title]";
     this.pagarButton = "//*[@id='payment-data-submit' and contains(@data-bind,('isPaymentButtonVisible'))]";
     this.irenvioButton = "//*[@type='submit' and contains(text(),'Ir al Envío') and @form='profile-form']";
-    this.sucursales = "//*[@class='chedrauimx-checkout-io-1-x-address-list-container__list-button']";
+    this.sucursales = "//*[@class='chedrauimx-checkout-io-2-x-address-list-container__list-button']";
     this.aceptarCambioDireccionButton = "//*[@class='chedrauimx-checkout-io-1-x-alert--button-accept']";
     this.cambiarDireccionLink = "//*[contains(text(),'Selecciona otra dirección')]";
     this.confirmarCambiarDireccionButton = "//*[contains(text(),'Continuar')]";
@@ -50,6 +51,10 @@ class ResumenCarritoPage extends BasePage {
 
   formapagochedrahuiOption(formapago) {
     return `//*[@class='payment-group-item-name' and contains(text(),'${formapago}')]`;
+  }
+
+  productoespecificoOption(producto){
+    return `//*[contains(@class,'productMinicartContainer')]//*[@class='vtex-flex-layout-0-x-flexColChild pb0']//a[contains(text(),'${producto}')]`;
   }
 
 

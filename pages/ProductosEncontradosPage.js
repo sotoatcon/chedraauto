@@ -18,7 +18,7 @@ class ProductosEncontradosPage extends BasePage {
     this.agregarproductolateralButton = "//*[@class='sellerText']/../../../../../../../../..//*[@type='button' and contains(@class,'chedrauimx-add-to-cart')]";
     this.resultadobusquedaLabel = `//*[@class='vtex-product-summary-2-x-nameContainer vtex-product-summary-2-x-nameContainer--global__card--name flex items-start justify-center pv6']//*[contains(@class,'global__card--name t-small')]`;
     this.sinresultadosLabel = "//*[contains(@class,('search-result-not-found'))]//*[contains(text(),'¡Oh, no!')]";
-    
+    this.productoagregadoAlert = "//div[contains(text(),'agregado al carrito')]";
   }
 
   titulobusquedaLabel(producto){

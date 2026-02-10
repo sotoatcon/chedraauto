@@ -16,6 +16,7 @@ const DirectionsPage = require('../../pages/DirectionsPage');
 const excelurl = '.\\data\\FlujosTransaccionales.xlsx';
 const exceltab = 'Datos Flujos';
 const exceltab2 = 'Validaciones Tarjeta';
+const exceltab3 = 'Repetir Compra';
 
 let context;
 let page;
@@ -32,7 +33,7 @@ test.beforeAll(async () => {
 
   context = await chromium.launchPersistentContext('', {
     headless: false,
-    args: ['--start-maximized']
+    args: ['--start-maximized','--disable-blink-features=AutomationControlled']
   });
 
   page = await context.newPage();
@@ -120,6 +121,7 @@ test('C1 - Visualizar metodos de pago', async () => {
 
 });
 */
+/*
 test('C2 - Flujos Transaccionales', async () => { 
   test.setTimeout(300000);
 
@@ -160,7 +162,10 @@ test('C2 - Flujos Transaccionales', async () => {
         console.log("Agregando "+activo+" al carrito");
         await carritoUtils.buscarYAgregarProducto(page,headerPage,productos,activo);
     }
+    await page.waitForTimeout(1000);
+    await headerPage.safeClick(headerPage.bannerSuperiorHref);
     await page.waitForTimeout(2000);
+
     //bloque que ingersa al carrito, hasta el paso 3 donde podremos ver los distintos puntos de entrega
 
     await headerPage.safeClick(headerPage.minicartButton);
@@ -197,12 +202,11 @@ test('C2 - Flujos Transaccionales', async () => {
       let datos = await carritoUtils.crearDatosPago(row);
       await carritoUtils.LlenarFormularioPago(page, headerPage,TipoPagoText, datos); 
     }
-
-    await headerPage.safeClick(headerPage.pagar_Button);
     //Regresamos a la pagina normal y vaciamos carrito para reiniciar ciclo|
     await carritoUtils.salircheckout(resumencarritos,page);
+    await page.waitForTimeout(1000);
     await headerPage.safeClick(headerPage.minicartButton);  
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
 
     const vaciarButton = await page.locator(resumencarritos.vaciarcarritoButton);
     if (await vaciarButton.count() > 0) {
@@ -220,5 +224,35 @@ test('C2 - Flujos Transaccionales', async () => {
 
 
 
+
+});
+*/
+test('C3 - Repetir Compra', async () => { 
+  test.setTimeout(300000);
+
+  // --- Flujo principal ---
+  await page.goto(config.urls.PROD);
+  await headerPage.safeClick(headerPage.aceptarCookiesButton);
+  await page.goto(config.urls.PROD);
+  await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
+  await page.waitForTimeout(2000);
+  
+  
+  //Lee la data del tab del excel
+  const data = getExcelData(excelurl, exceltab3);
+  console.log(data);
+  //Trabaja row por row
+  for (const row of data) {
+  let orden = row['orderid'];
+  
+
+  await headerPage.safeClick(headerPage.micuentaButton);
+  await headerPage.safeClick(headerPage.mispedidosHref);
+  await headerPage.safeClick(headerPage.detalleorden(orden));
+  await page.pause();
+  await headerPage.safeClick(headerPage.repetircompraButton);  
+  await headerPage.safeClick(headerPage.minicartButton);
+  await page.pause();
+  }
 
 });

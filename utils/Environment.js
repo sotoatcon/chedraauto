@@ -1,6 +1,10 @@
 // utils/Environment.js
-const ambiente = process.env.TEST_ENV || 'PROD'; // 'QA'
-const headless = process.env.HEADLESS !== 'false'; // TRUE por defecto
+const ambiente = (process.env.TEST_ENV || 'PROD').trim().replace(/^\uFEFF/, '');
+const headless = process.env.HEADLESS !== 'false';
+
+const isQA = ambiente.toUpperCase() === "QA";
+const isPROD = ambiente.toUpperCase() === "PROD";
+
 
 const sucursales = {
   "Coapa": "Calzada México-Xochimilco, 5149, 14388, Guadalupe, ciudad de méxico",
@@ -24,13 +28,19 @@ const config = {
   headless,
   sucursales,
   correos,
+  isQA,         
+  isPROD,      
+
+
+  
 
   urls: {
     PROD: 'https://www.chedraui.com.mx',
-    QA: 'https://www.chedraui-qa.com.mx',
+    QA: 'https://chedrauimxqa.myvtex.com',
     PRODauth0: 'https://chedraui-prod.us.auth0.com',
     QAauth0: 'https://chedraui-prod-qa.us.auth0.com',
     misdatos: '/account#/mis-datos/',
+    outlook: 'https://outlook.office.com/mail/' ,
   },
 
   getEnviromentURL() {
@@ -39,15 +49,20 @@ const config = {
 
   mailslurp: {
     apiKey: "d1840d194ec422cbe0664c8985d1afe8cec89868d0882c9586aa8f146533ce65",
-    inboxId: "dc5571d8-61ce-4e5e-b962-358b6e9b53af",
-    emailAddress: "dc5571d8-61ce-4e5e-b962-358b6e9b53af@mailslurp.biz",
+    inboxId: "f57f10ba-6bdd-4fe5-b87f-6b48a33a2576",
+    emailAddress: "f57f10ba-6bdd-4fe5-b87f-6b48a33a2576@mailslurp.biz",
   },
 
   emails: {
-    validUser: process.env.EMAIL_VALID_USER || 'usuario.valido@dominio.com',
+    validUser: process.env.EMAIL_VALID_USER || 'joaquin.soto@atconmx.net',
     invalidUser: process.env.EMAIL_INVALID_USER || 'invalido@abc',
     noRegistrado: process.env.EMAIL_NO_REGISTRADO || 'noexistente@dominio.com',
   },
+  password: {
+    validPassword: process.env.EMAIL_VALID_PASSWORD || 'checon25.',
+    invalidPassword: process.env.EMAIL_INVALID_PASSWORD || '4565184',
+  },
+
 
   timeouts: {
     waitForEmail: 200000,
