@@ -49,17 +49,17 @@ const config = {
 
   mailslurp: {
     apiKey: "d1840d194ec422cbe0664c8985d1afe8cec89868d0882c9586aa8f146533ce65",
-    inboxId: "a52c821d-3795-4284-914c-50075593dc6d",
-    emailAddress: "a52c821d-3795-4284-914c-50075593dc6d@mailslurp.biz",
+    inboxId: "4e1741d2-81b9-4ecb-a5ba-bd3646247b04",
+    emailAddress: "4e1741d2-81b9-4ecb-a5ba-bd3646247b04@mailslurp.biz",
   },
 
   emails: {
-    validUser: process.env.EMAIL_VALID_USER || 'joaquin.soto@atconmx.net',
+    validUser: process.env.EMAIL_VALID_USER || 'chedrauienlinea@chedraui.com.mx',
     invalidUser: process.env.EMAIL_INVALID_USER || 'invalido@abc',
     noRegistrado: process.env.EMAIL_NO_REGISTRADO || 'noexistente@dominio.com',
   },
   password: {
-    validPassword: process.env.EMAIL_VALID_PASSWORD || 'checon25.',
+    validPassword: process.env.EMAIL_VALID_PASSWORD || 'SoporteCH.2026',
     invalidPassword: process.env.EMAIL_INVALID_PASSWORD || '4565184',
   },
 
