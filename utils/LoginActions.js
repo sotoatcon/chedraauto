@@ -17,6 +17,7 @@ async function loginConCorreo(page, headerPage, loginPage) {
   console.log("➡️ inbox obtenido:", inbox);
   console.log("🧩 DEBUG isQA =", config.isQA);
   console.log("🧩 DEBUG isPROD =", config.isPROD);
+  console.log("🧩 DEBUG isEMP =", config.isEMP);
   console.log("🧩 DEBUG ambiente =", config.ambiente);
   const loginvtex = new LoginPageVtex(page);
 
@@ -34,6 +35,27 @@ async function loginConCorreo(page, headerPage, loginPage) {
       await obtenerCodigoVtexDesdeOutlook(page,config);
 
     }
+    else if (config.isEMP) {
+      console.log("Estamos en EMP");
+      await page.goto(config.urls.QA, {
+        waitUntil: 'domcontentloaded',
+        timeout: 60000
+      });
+
+      await loginvtex.humanType(loginvtex.emailInput, config.emails.validUser);
+      await loginvtex.safeClick(loginvtex.nextButton);
+      const code = await obtenerCodigoVtexDesdeOutlook(page, config);
+
+      if (!/^\d{6}$/.test(code)) {
+        throw new Error(`Código OTP inválido recibido: ${code}`);
+      } else {
+        console.log("El código recibido es: " + code);
+      }
+
+      await page.fill('//*[@data-testid="token-input"]//input', code);
+      await page.click('//button[@tabindex="0"]');
+
+    }
     else if (config.isPROD) {
       console.log("Estamos en PROD");
       await page.goto(config.urls.PROD, {
@@ -42,9 +64,8 @@ async function loginConCorreo(page, headerPage, loginPage) {
       });
     }
 
-  //TODA ESTA LOGICA ES PARA ISPROD, ya que espera cargue el sitio default y comienza el flujo del login
-  //ESTO NO SUCEDE PARA QA, PORQUE NUNCA TE CARGA EL SITIO DE LA URL, DIRECTAMENTE PASA POR EL LOGIN DE VTEX, LISTO PARA PONER EMAIL Y POSTERIORMENTE CODIGO, UNA VEZ HECHO AUTOMATICAMENTE APARECES LOGUEADO EN EL SITIO DE QA
-  await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 40000 });
+  
+    await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 40000 });
 
   if (!(await page.title()).toLowerCase().includes('supermercado')) {
     throw new Error('No se encontró "supermercado" en el título de la página');
@@ -94,8 +115,11 @@ console.log('Se presionó boton login');
 
 
   // Esperar redirección al home
-await page.waitForURL(/chedraui.*\.com\.mx/, { timeout: 20000 });
-  
+if (config.isPROD) {
+    await page.waitForURL(/chedraui.*\.com\.mx/, { timeout: 20000 });
+}else if (config.isEMP){
+await page.waitForURL(/.*chedraui.*/i, { timeout: 20000 });
+}
   // ===== Guardar sesión =====
   console.log(' Login exitoso, guardando sesión...');
 
@@ -118,74 +142,93 @@ await page.waitForURL(/chedraui.*\.com\.mx/, { timeout: 20000 });
 }
 
 async function obtenerCodigoVtexDesdeOutlook(page, config) {
-  console.log("➡️ Iniciando navegador STEALTH para Outlook...");
+  console.log("➡️ Iniciando navegador STEALTH real Playwright...");
 
-  // IMPORTS LOCALES (evita tocar tus otros archivos)
-  const { chromium } = require('playwright-extra');
-  const stealth = require('playwright-extra-plugin-stealth')();
-  chromium.use(stealth);
+  const { chromium } = require('playwright');
 
-  // Lanzar navegador stealth
-  const browser = await chromium.launch({ headless: false });
-  const context = await browser.newContext();
-  const stealthPage = await context.newPage();
-
-  console.log("➡️ Abriendo Outlook Web en modo stealth...");
-  await stealthPage.goto(config.urls.outlook, {
-    waitUntil: 'domcontentloaded',
-    timeout: 60000
+  const browser = await chromium.launch({
+    headless: false,
+    args: [
+      '--disable-blink-features=AutomationControlled',
+      '--disable-dev-shm-usage',
+      '--no-sandbox'
+    ]
   });
 
-  // 1️⃣ LOGIN - Email
+  const context = await browser.newContext({
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36',
+  });
+
+  const stealthPage = await context.newPage();
+
+  // LOGIN
+  await stealthPage.goto(config.urls.outlook, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
   try {
     await stealthPage.fill('input[type="email"]', config.emails.validUser);
     await stealthPage.click('input[type="submit"]');
-  } catch {
-    console.log("⚠️ No apareció input de email (posible sesión existente).");
-  }
+  } catch {}
 
-  // 2️⃣ LOGIN - Password
   try {
     await stealthPage.waitForSelector('input[type="password"]', { timeout: 15000 });
     await stealthPage.fill('input[type="password"]', config.password.validPassword);
     await stealthPage.click('input[type="submit"]');
-  } catch {
-    console.warn("⚠️ No se pidió contraseña directamente.");
-  }
-
-  // 3️⃣ Stay Signed In
-  try {
-    await stealthPage.click('input[id="idBtn_Back"], button:has-text("No")', { timeout: 8000 });
   } catch {}
 
-  // 4️⃣ Ingreso a la bandeja
+  try { await stealthPage.click('input[id="idBtn_Back"], button:has-text("No")'); } catch {}
+
   console.log("➡️ Esperando bandeja...");
   await stealthPage.waitForSelector('div[role="main"]', { timeout: 30000 });
 
-  // 5️⃣ Buscar correo VTEX
-  console.log("➡️ Buscando correo de VTEX...");
-  const mailSelector = 'span:has-text("noreply@vtexcommerce.com.br"), span:has-text("Your access code is:")';
+  console.log("➡️ Comenzando monitoreo VTEX...");
 
-  await stealthPage.waitForSelector(mailSelector, { timeout: 120000 });
+  // Función para leer el último correo
+  async function leerUltimoCorreo() {
+    const correos = stealthPage.locator('div[role="option"]');
+    const ultimo = correos.first();
+    const texto = await ultimo.innerText().catch(() => "");
+    return { nodo: ultimo, texto };
+  }
 
-  // 6️⃣ Abrir correo
-  await stealthPage.click(mailSelector);
+  function extraerCodigo(texto) {
+    const match = texto.match(/Your access code is:\s*(\d{6})/);
+    return match ? match[1] : null;
+  }
 
-  // 7️⃣ Extraer código
-  await stealthPage.waitForSelector("//*[contains(@style,'font-size:42px')]//strong", {
-    timeout: 20000
-  });
-  const code = await stealthPage.locator("//*[contains(@style,'font-size:42px')]//strong").innerText();
+  // 1️⃣ Esperar a que llegue un correo que empiece con "Your access code is:"
+  let codigoActual = null;
 
-  console.log("📩 Código VTEX obtenido:", code);
+  while (true) {
+    const { nodo, texto } = await leerUltimoCorreo();
 
-  // 🔚 Cerrar navegador stealth
-  await browser.close();
+    const codigo = extraerCodigo(texto);
 
-  return code;
+    if (codigo) {
+      console.log("➡️ Primer correo VTEX detectado:", codigo);
+      codigoActual = codigo;
+      break;
+    }
+
+    console.log("⏳ No hay correo VTEX aún... refrescando...");
+    await stealthPage.reload({ waitUntil: "domcontentloaded" });
+    await stealthPage.waitForTimeout(2000);
+  }
+
+  // 2️⃣ Ya tenemos un código inicial, ahora buscar uno diferente
+  while (true) {
+    const { texto } = await leerUltimoCorreo();
+    const nuevoCodigo = extraerCodigo(texto);
+
+    if (nuevoCodigo && nuevoCodigo !== codigoActual) {
+      console.log("📩 Nuevo código VTEX detectado:", nuevoCodigo);
+      await browser.close();
+      return nuevoCodigo;
+    }
+
+    console.log("⏳ Aún no llega un nuevo código... refrescando...");
+    await stealthPage.reload({ waitUntil: "domcontentloaded" });
+    await stealthPage.waitForTimeout(2000);
+  }
 }
-
-
-
-
 module.exports = { loginConCorreo,obtenerCodigoVtexDesdeOutlook };

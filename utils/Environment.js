@@ -2,6 +2,7 @@
 const ambiente = (process.env.TEST_ENV || 'PROD').trim().replace(/^\uFEFF/, '');
 const headless = process.env.HEADLESS !== 'false';
 
+const isEMP = ambiente.toUpperCase() === "EMP";
 const isQA = ambiente.toUpperCase() === "QA";
 const isPROD = ambiente.toUpperCase() === "PROD";
 
@@ -30,13 +31,12 @@ const config = {
   correos,
   isQA,         
   isPROD,      
-
-
-  
+  isEMP,  
 
   urls: {
     PROD: 'https://www.chedraui.com.mx',
     QA: 'https://chedrauimxqa.myvtex.com',
+    EMPATHY: 'https://wempathy--chedrauimx.myvtex.com',
     PRODauth0: 'https://chedraui-prod.us.auth0.com',
     QAauth0: 'https://chedraui-prod-qa.us.auth0.com',
     misdatos: '/account#/mis-datos/',
@@ -49,8 +49,8 @@ const config = {
 
   mailslurp: {
     apiKey: "d1840d194ec422cbe0664c8985d1afe8cec89868d0882c9586aa8f146533ce65",
-    inboxId: "d0f4e696-adc2-42dc-8bc4-ca7578f48d1e",
-    emailAddress: "d0f4e696-adc2-42dc-8bc4-ca7578f48d1e@mailslurp.biz",
+    inboxId: "037310f4-897f-4be8-8059-3cf7362cd953",
+    emailAddress: "037310f4-897f-4be8-8059-3cf7362cd953@mailslurp.biz",
   },
 
   emails: {
