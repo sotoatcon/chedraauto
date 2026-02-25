@@ -22,8 +22,9 @@ module.exports = async function globalSetup() {
   const directionsPage = new DirectionsPage(page);
   await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
   await directionsPage.safeClick(directionsPage.aceptarCookiesButton);
+  await page.waitForTimeout(3000);
   await directionsPage.safeClick(directionsPage.seleccionarDireccionButton);
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(4000);
 
   // 👉 revisar direcciones existentes
   const editarButtons = page.locator(directionsPage.editardireccionButton);
@@ -39,6 +40,9 @@ module.exports = async function globalSetup() {
     }
   } else {
     console.log(`📦 Ya existen ${count} direcciones.`);
+    if(config.isEMP){
+      await directionsPage.SeleccionarDireccionEspecifica('Sante fe');
+    }
   }
 
   // 👉 Guardar sesión

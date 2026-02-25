@@ -44,11 +44,11 @@ class DirectionsPage extends BasePage {
     try {
         // 1️⃣ Escribir dirección en el campo de búsqueda
         await this.humanType(this.direccionbusquedaInput, direccion);
-        await this.wait(1000); // breve espera por sugerencias
+        await this.wait(2000); // breve espera por sugerencias
 
         // 2️⃣ Esperar a que aparezca la sugerencia y hacer clic
          // 2️⃣ Esperar a que aparezca la sugerencia y hacer clic en la primera
-        await this.page.locator(this.direccionpropuestabusquedaOption).first().waitFor({ state: 'visible', timeout: 10000 });
+        await this.page.locator(this.direccionpropuestabusquedaOption).first().waitFor({ state: 'visible', timeout: 11000 });
         await this.page.locator(this.direccionpropuestabusquedaOption).first().click();
         await this.wait(2000);
         // 3️⃣ Seleccionar “Otro” como alias
@@ -62,7 +62,6 @@ class DirectionsPage extends BasePage {
         await this.page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
         await this.safeClick(this.seleccionarDireccionButton);
         await this.page.waitForTimeout(2000);
-
 
     } catch (error) {
         console.error(`❌ Error al agregar dirección "${nombre}": ${error.message}`);

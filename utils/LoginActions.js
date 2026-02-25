@@ -37,7 +37,7 @@ async function loginConCorreo(page, headerPage, loginPage) {
     }
     else if (config.isEMP) {
       console.log("Estamos en EMP");
-      await page.goto(config.urls.QA, {
+      await page.goto(config.urls.EMPATHY, {
         waitUntil: 'domcontentloaded',
         timeout: 60000
       });

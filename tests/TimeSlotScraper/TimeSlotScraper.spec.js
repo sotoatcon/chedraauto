@@ -50,7 +50,6 @@ test('C1 - TimeSlot Scraper', async () => {
 
   if (fs.existsSync('./sessionLocalStorage.json')) {
     const localStorageData = JSON.parse(fs.readFileSync('./sessionLocalStorage.json'));
-
     // Primero navegar UNA sola vez
     await page.goto(config.urls.PROD, { waitUntil: 'domcontentloaded' });
 

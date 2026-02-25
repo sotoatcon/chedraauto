@@ -64,7 +64,7 @@ test.afterEach(async ({}, testInfo) => {
   await testInfo.browser.close();
 });
 
-/*
+
 test('C1 - Errores Ortográficos', async ({}, testInfo) => {
   const { page, headerPage, productosPage, carritoUtils } = testInfo;
 
@@ -76,6 +76,9 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
   for (const row of data) {
 
     const Termino = row['Término'];
+    const Correccion = row['Correccion']
+      .split(',')
+      .map(e => e.trim().toLowerCase());
     const equivalencias = row['Equivalencia']
       .split(',')
       .map(e => e.trim().toLowerCase());
@@ -105,6 +108,7 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
       const evaluacion = await carritoUtils.evaluarBusquedaErroresOrtograficos(
         page,
         productosPage,
+        Correccion,
         equivalencias
       );
 
@@ -137,8 +141,7 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
     resultados: resultadosTotales         
   });
 });
-*/
-
+/*
 test('C2 - Long Tail', async ({}, testInfo) => {
   const { page, headerPage, productosPage, carritoUtils } = testInfo;
 
@@ -185,6 +188,8 @@ test('C2 - Long Tail', async ({}, testInfo) => {
     resultados: resultadosTotales
   });
 });
+*/
+
 /*
 test('C3 - Frecuencia Alta', async ({}, testInfo) => {
   const { page, headerPage, productosPage, carritoUtils } = testInfo;

@@ -172,7 +172,7 @@ async buscarProducto(page, headerPage, productos, producto) {
   return false;
 }
 
-async evaluarBusquedaErroresOrtograficos(page, productos, equivalencias) {
+async evaluarBusquedaErroresOrtograficos(page, productos,Correccion, equivalencias) {
 
   const productosVisibles = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
   await productosVisibles.first().waitFor({ timeout: 5000 }).catch(() => {});
