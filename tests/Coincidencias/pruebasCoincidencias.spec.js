@@ -70,7 +70,6 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 
   const data = getExcelData(excelurl, excelerrores);
 
-  // 🔥 Arreglo para guardar TODO lo evaluado
   const resultadosTotales = [];
 
   for (const row of data) {
@@ -85,7 +84,6 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 
     console.log(`\n=== Buscando: ${Termino} ===`);
 
-    // 1️⃣ Buscar el término
     const hayResultados = await carritoUtils.buscarProducto(
       page,
       headerPage,
@@ -93,53 +91,64 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
       Termino
     );
 
-    // Estructura base del resultado
+    // 🔥 Estructura del resultado por término
     let registroTermino = {
       termino: Termino,
       equivalencias,
+      correccion: "",     // ← NUEVO
+      corregido: false,   // ← NUEVO
+      CC: 0,              // ← NUEVO
+      CP: 0,              // ← NUEVO
+      SR: false,          // ← NUEVO
+      SN: false,          // ← NUEVO
       hayResultados,
       coincidencias: [],
       noCoincidencias: [],
       listaDetallada: []
     };
 
-    // 2️⃣ Si hay resultados reales, evaluar equivalencias
-    if (hayResultados) {
-      const evaluacion = await carritoUtils.evaluarBusquedaErroresOrtograficos(
-        page,
-        productosPage,
-        Correccion,
-        equivalencias
-      );
+    // 2️⃣ Evaluación principal
+    const evaluacion = await carritoUtils.evaluarBusquedaErroresOrtograficos(
+      page,
+      productosPage,
+      Correccion,
+      equivalencias
+    );
 
-      // Guardamos directamente lo que devolvió el método
-      registroTermino.coincidencias = evaluacion.coincidencias;
-      registroTermino.noCoincidencias = evaluacion.noCoincidencias;
-      registroTermino.listaDetallada = evaluacion.listaDetallada;
+    // Copiamos TODAS las métricas retornadas
+    registroTermino.coincidencias = evaluacion.coincidencias;
+    registroTermino.noCoincidencias = evaluacion.noCoincidencias;
+    registroTermino.listaDetallada  = evaluacion.listaDetallada;
 
-      console.log(`🟢 Coincidencias:`, evaluacion.coincidencias);
-      console.log(`🔸 No Coincidencias:`, evaluacion.noCoincidencias);
+    registroTermino.correccion = evaluacion.correccion;   // NEW
+    registroTermino.corregido  = evaluacion.corregido;    // NEW
+    registroTermino.CC         = evaluacion.CC;           // NEW
+    registroTermino.CP         = evaluacion.CP;           // NEW
+    registroTermino.SR         = evaluacion.SR;           // NEW
+    registroTermino.SN         = evaluacion.SN;           // NEW
 
-    } else {
-      console.log(`❌ No hubo productos reales para evaluar equivalencias`);
-    }
+    console.log(`🟢 Coincidencias:`, evaluacion.coincidencias);
+    console.log(`🔸 No Coincidencias:`, evaluacion.noCoincidencias);
+    console.log(`✨ Corrección mostrada:`, evaluacion.correccion);
+    console.log(`✨ Corregido:`, evaluacion.corregido);
+    console.log(`📌 CC:`, evaluacion.CC);
+    console.log(`📌 CP:`, evaluacion.CP);
+    console.log(`📌 SR:`, evaluacion.SR);
+    console.log(`📌 SN:`, evaluacion.SN);
 
-    // 3️⃣ Guardar el resultado de ESTE término
     resultadosTotales.push(registroTermino);
-    
-    //AQUI SE REALIZA
+
     await page.waitForTimeout(500);
     await headerPage.safeClick(headerPage.logoImg);
     await page.waitForTimeout(200);
     await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
-   // await page.waitForTimeout(200);
   }
 
-  // Generamos el PDF
-  await generarReporteCoincidenciasPDF({
+ /* await generarReporteCoincidenciasPDF({
     nombreTestCase: "C1_ErroresOrtograficos",
-    resultados: resultadosTotales         
+    resultados: resultadosTotales
   });
+  */
 });
 /*
 test('C2 - Long Tail', async ({}, testInfo) => {

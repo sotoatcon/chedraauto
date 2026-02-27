@@ -172,11 +172,59 @@ async buscarProducto(page, headerPage, productos, producto) {
   return false;
 }
 
-async evaluarBusquedaErroresOrtograficos(page, productos,Correccion, equivalencias) {
+async detectarCorreccion(page) {
+  let correccion = "";
+  let corregido = false;
 
-  const productosVisibles = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
-  await productosVisibles.first().waitFor({ timeout: 5000 }).catch(() => {});
+  try {
+    const locator = page.locator(
+      'div.x-base-teleport.x-base-teleport--onlychild >> shadow=button[data-test="set-spellcheck"]'
+    );
+
+    // Esperar máximo 1.5s por si NO aparece corrección
+    await locator.first().waitFor({ timeout: 1500 });
+
+    correccion = await locator.first().innerText();
+    correccion = correccion?.trim() ?? "";
+
+    if (correccion.length > 0) corregido = true;
+
+  } catch {
+    correccion = "";
+    corregido = false;
+  }
+
+  return { correccion, corregido };
+}
+async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalencias) {
+
+  // === 1. DETECTAR CORRECCIÓN EMPATHY ===
+  const { correccion: correccionReal, corregido } = await detectarCorreccion(page);
+
+  // Normalizar textos
+  const correccionEsperada = Correccion?.toLowerCase().trim() || "";
+  const equivalenciasArr = equivalencias
+    ? equivalencias.split(",").map(e => e.trim().toLowerCase())
+    : [];
+
+  // === 2. ESPERAR RESULTADOS VISIBLES ===
+  const resultadosLocator = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
+  await resultadosLocator.first().waitFor({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(500);
+
+  const count = await resultadosLocator.count();
+
+  // === 3. VARIABLES A RETORNAR ===
+  let CC = 0;
+  let CP = 0;
+  let SR = false;
+  let SN = false;
+
+  let coincidencias = [];
+  let noCoincidencias = [];
+  let listaDetallada = [];
+
+  // === 4. ANALIZAR CADA PRODUCTO ===
 
   async function obtenerTextoConReintento(locator) {
     for (let intento = 0; intento < 3; intento++) {
@@ -191,40 +239,46 @@ async evaluarBusquedaErroresOrtograficos(page, productos,Correccion, equivalenci
     return null;
   }
 
-  const count = await productosVisibles.count();
-
-  let coincidencias = [];
-  let noCoincidencias = [];
-  let listaDetallada = [];
-
   for (let i = 0; i < count; i++) {
-
-    let textoProducto = await obtenerTextoConReintento(productosVisibles.nth(i));
+    let textoProducto = await obtenerTextoConReintento(resultadosLocator.nth(i));
 
     if (!textoProducto) {
-      console.log(`⚠️ No se pudo obtener innerText del producto ${i}, registrando como NO LEÍDO`);
-      
-      listaDetallada.push({
-        texto: "[NO LEÍDO]",
-        coincide: false
-      });
-
+      listaDetallada.push({ texto: "[NO LEÍDO]", coincide: false });
       noCoincidencias.push("[NO LEÍDO]");
       continue;
     }
 
-    const coincide = equivalencias.some(eq => textoProducto.includes(eq));
+    const tieneCorreccion = correccionEsperada && textoProducto.includes(correccionEsperada);
+    const tieneEquivalencia = equivalenciasArr.some(eq => textoProducto.includes(eq));
+
+    if (tieneCorreccion) CC++;
+    if (tieneEquivalencia) CP++;
+
+    const coincide = tieneCorreccion || tieneEquivalencia;
 
     if (coincide) coincidencias.push(textoProducto);
     else noCoincidencias.push(textoProducto);
 
-    listaDetallada.push({
-      texto: textoProducto,
-      coincide
-    });
+    listaDetallada.push({ texto: textoProducto, coincide });
   }
 
-  return { coincidencias, noCoincidencias, listaDetallada };
+  // === 5. CALCULAR SR y SN ===
+  if (!corregido && count > 0) SR = true;
+  if (corregido && count === 0) SN = true;
+
+  // === 6. RETORNAR TODO — 🔥 NOMBRES ARREGLADOS ===
+
+  return {
+    correccion: correccionReal, // ← NOMBRE CORREGIDO
+    corregido,
+    CC,
+    CP,
+    SR,
+    SN,
+    coincidencias,
+    noCoincidencias,
+    listaDetallada
+  };
 }
 
 async obtenerProductosEncontrados(page, productosPage) {
@@ -519,6 +573,8 @@ async crearDatosPago(row) {
   throw new Error("Tipo de pago no soportado: " + tipo);
 
 }
+
+
 
 async LlenarFormularioPago(page, headerPage, tipoPago, datos) { 
   console.warn("📝 Llenando formulario de pago para: " + tipoPago);
