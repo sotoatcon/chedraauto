@@ -4,7 +4,7 @@ trigger:
 - main  # Ejecuta este pipeline cada vez que haya un push a la rama 'main'
 
 schedules:
-- cron: '30 13 * * *'  # 6:00 AM (Ajustado a UTC)
+- cron: '30 19 * * *'  # 6:00 AM (Ajustado a UTC)
   displayName: 'Ejecución Diaria 6am'
   branches:
     include:
