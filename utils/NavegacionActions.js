@@ -199,7 +199,7 @@ async detectarCorreccion(page) {
 async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalencias) {
 
   // === 1. DETECTAR CORRECCIÓN EMPATHY ===
-  const { correccion: correccionReal, corregido } = await detectarCorreccion(page);
+  const { correccion: correccionReal, corregido } = await this.detectarCorreccion(page);
 
   // Normalizar textos
   const correccionEsperada = Correccion?.toLowerCase().trim() || "";
