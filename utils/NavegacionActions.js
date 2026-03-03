@@ -164,7 +164,9 @@ async buscarProducto(page, headerPage, productos, producto) {
     }
 
     console.log(`🟢 Conteo estabilizado: ${visibles} productos visibles reales.`);
+    await page.pause();
     return true;
+
   }
 
 
@@ -198,23 +200,54 @@ async detectarCorreccion(page) {
 }
 async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalencias) {
 
+  console.log("=== DEBUG INICIO evaluarBusquedaErroresOrtograficos ===");
+  console.log("Correccion recibido:", Correccion, "tipo:", typeof Correccion);
+  console.log("Equivalencias recibido:", equivalencias);
+  await page.pause();
+
+
   // === 1. DETECTAR CORRECCIÓN EMPATHY ===
   const { correccion: correccionReal, corregido } = await this.detectarCorreccion(page);
 
-  // Normalizar textos
-  const correccionEsperada = Correccion?.toLowerCase().trim() || "";
+  console.log("=== DEBUG detectarCorreccion() ===");
+  console.log("Corrección real detectada:", correccionReal);
+  console.log("¿Hubo corrección?", corregido);
+  await page.pause();
+
+
+  // === Normalizar textos ===
+  const correccionEsperada = typeof Correccion === "string"
+    ? Correccion.toLowerCase().trim()
+    : String(Correccion || "").toLowerCase().trim();
+
   const equivalenciasArr = equivalencias
     ? equivalencias.split(",").map(e => e.trim().toLowerCase())
     : [];
 
+  console.log("=== DEBUG normalización ===");
+  console.log("correccionEsperada:", correccionEsperada);
+  console.log("equivalenciasArr:", equivalenciasArr);
+  await page.pause();
+
+
   // === 2. ESPERAR RESULTADOS VISIBLES ===
   const resultadosLocator = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
+
+  console.log("=== DEBUG esperando resultados ===");
+  console.log("Selector utilizado:", `${productos.resultadobusquedaLabel} >> visible=true`);
+  await page.pause();
+
   await resultadosLocator.first().waitFor({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(500);
 
   const count = await resultadosLocator.count();
 
-  // === 3. VARIABLES A RETORNAR ===
+  console.log("=== DEBUG resultados encontrados ===");
+  console.log("Cantidad de productos:", count);
+  await page.pause();
+
+
+  // === Variables a retornar ===
   let CC = 0;
   let CP = 0;
   let SR = false;
@@ -223,6 +256,7 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
   let coincidencias = [];
   let noCoincidencias = [];
   let listaDetallada = [];
+
 
   // === 4. ANALIZAR CADA PRODUCTO ===
 
@@ -234,13 +268,22 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
           return txt.toLowerCase().trim();
         }
       } catch {}
+
+      console.log(`Reintento para leer texto (${intento + 1}/3)...`);
       await new Promise(r => setTimeout(r, 250));
     }
     return null;
   }
 
   for (let i = 0; i < count; i++) {
+
+    console.log(`=== DEBUG leyendo producto #${i} ===`);
+    await page.pause();
+
     let textoProducto = await obtenerTextoConReintento(resultadosLocator.nth(i));
+
+    console.log("Texto leído:", textoProducto);
+    await page.pause();
 
     if (!textoProducto) {
       listaDetallada.push({ texto: "[NO LEÍDO]", coincide: false });
@@ -250,6 +293,11 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
 
     const tieneCorreccion = correccionEsperada && textoProducto.includes(correccionEsperada);
     const tieneEquivalencia = equivalenciasArr.some(eq => textoProducto.includes(eq));
+
+    console.log("Tiene corrección esperada?", tieneCorreccion);
+    console.log("Tiene equivalencia?", tieneEquivalencia);
+    await page.pause();
+
 
     if (tieneCorreccion) CC++;
     if (tieneEquivalencia) CP++;
@@ -262,14 +310,32 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
     listaDetallada.push({ texto: textoProducto, coincide });
   }
 
+
   // === 5. CALCULAR SR y SN ===
+  console.log("=== DEBUG cálculo SR / SN ===");
+  console.log("corregido:", corregido);
+  console.log("count:", count);
+  await page.pause();
+
   if (!corregido && count > 0) SR = true;
   if (corregido && count === 0) SN = true;
 
-  // === 6. RETORNAR TODO — 🔥 NOMBRES ARREGLADOS ===
+  console.log("SR:", SR);
+  console.log("SN:", SN);
+  await page.pause();
+
+
+  // === 6. RETORNAR TODO ===
+
+  console.log("=== DEBUG FINAL ===");
+  console.log("CC:", CC, "CP:", CP);
+  console.log("coincidencias:", coincidencias);
+  console.log("noCoincidencias:", noCoincidencias);
+  console.log("listaDetallada:", listaDetallada);
+  await page.pause();
 
   return {
-    correccion: correccionReal, // ← NOMBRE CORREGIDO
+    correccion: correccionReal,
     corregido,
     CC,
     CP,
@@ -280,7 +346,6 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
     listaDetallada
   };
 }
-
 async obtenerProductosEncontrados(page, productosPage) {
 
   await page.waitForTimeout(4000);

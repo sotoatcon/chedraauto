@@ -17,35 +17,36 @@ module.exports = async function globalSetup() {
 
   // 👉 login real
   await loginConCorreo(page, headerPage, headerPage);
+    // 👉 abrir menú direcciones
+    const directionsPage = new DirectionsPage(page);
+    await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
+    await directionsPage.safeClick(directionsPage.aceptarCookiesButton);
+    await page.waitForTimeout(3000);
+    await directionsPage.safeClick(directionsPage.seleccionarDireccionButton);
 
-  // 👉 abrir menú direcciones
-  const directionsPage = new DirectionsPage(page);
-  await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
-  await directionsPage.safeClick(directionsPage.aceptarCookiesButton);
-  await page.waitForTimeout(7000);
-  
-  await directionsPage.safeClick(directionsPage.seleccionarDireccionButton);
-  await page.waitForTimeout(7000);
-
-  // 👉 revisar direcciones existentes
-  const editarButtons = page.locator(directionsPage.editardireccionButton);
-  const count = await editarButtons.count();
-
-  if (count === 0) {
-    console.log("⚠️ No hay direcciones, agregando todas las sucursales...");
-    await page.waitForTimeout(500);
-    for (const [nombre, direccion] of Object.entries(config.sucursales)) {
-      console.log(`➡️ Agregando sucursal: ${nombre} (${direccion})`);
-      await directionsPage.agregarDireccion(nombre, direccion);
-      await page.waitForTimeout(500);
-    }
-  } else {
-    console.log(`📦 Ya existen ${count} direcciones.`);
     if(config.isEMP){
-      await directionsPage.SeleccionarDireccionEspecifica('Sante fe');
-    }
-  }
+        await page.waitForTimeout(12000);
+        console.log(`Esperamos a que se carguen direcciones en EMPATY`);
+        await directionsPage.SeleccionarDireccionEspecifica('Sante fe');
+      }
+    else{
+      await page.waitForTimeout(5000);
+            // 👉 revisar direcciones existentes
+      const editarButtons = page.locator(directionsPage.editardireccionButton);
+      const count = await editarButtons.count();
 
+      if (count === 0) {
+        console.log("⚠️ No hay direcciones, agregando todas las sucursales...");
+        await page.waitForTimeout(500);
+        for (const [nombre, direccion] of Object.entries(config.sucursales)) {
+          console.log(`➡️ Agregando sucursal: ${nombre} (${direccion})`);
+          await directionsPage.agregarDireccion(nombre, direccion);
+          await page.waitForTimeout(500);
+        }
+      } else {
+        console.log(`📦 Ya existen ${count} direcciones.`);
+      }
+    }
   // 👉 Guardar sesión
   await context.storageState({ path: 'storageState.json' });
 
