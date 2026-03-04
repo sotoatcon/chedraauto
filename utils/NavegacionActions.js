@@ -220,9 +220,28 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
     ? Correccion.toLowerCase().trim()
     : String(Correccion || "").toLowerCase().trim();
 
-  const equivalenciasArr = equivalencias
-    ? equivalencias.split(",").map(e => e.trim().toLowerCase())
-    : [];
+// === Normalizar equivalencias ===
+let equivalenciasArr = [];
+
+if (typeof equivalencias === "string") {
+  // caso normal: string separado por comas
+  equivalenciasArr = equivalencias
+    .split(",")
+    .map(e => e.trim().toLowerCase());
+}
+
+else if (Array.isArray(equivalencias)) {
+  // ya venía en array
+  equivalenciasArr = equivalencias
+    .map(e => String(e).trim().toLowerCase());
+}
+
+else if (equivalencias != null) {
+  // venía un objeto, número, booleano, lo que sea → convertir a string
+  equivalenciasArr = [String(equivalencias).trim().toLowerCase()];
+}
+
+console.log("equivalenciasArr normalizado:", equivalenciasArr);
 
   console.log("=== DEBUG normalización ===");
   console.log("correccionEsperada:", correccionEsperada);
