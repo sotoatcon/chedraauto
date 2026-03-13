@@ -9,14 +9,20 @@ class DirectionsPage extends BasePage {
     this.editardireccionButton ="//*[@class='chedrauimx-locator-2-x-btnEditAddress']";
     this.seleccionarDireccionButton ="//*[@class='chedrauimx-locator-2-x-selectAddress  chedrauimx-locator-2-x-selectAddress_active']";
     this.direccionpropuestabusquedaOption = "//*[@class='chedrauimx-locator-2-x-InputSelect__content_select_list_item_store_text']";
-    this.direccionbusquedaInput = "//*[contains(text(),'Encuentra tu dirección')]/../..//input"; 
+    this.direccionbusquedaInput = "//*[contains(text(),'Encuentra tu dirección')]/../..//input";
+    this.direccionsucursalInput = "//input[@placeholder='Ejemplo: Av. Miguel de Cervantes No. 397']"; 
     this.aliasotroButton = "//button//*[contains(text(),'Otro')]";
     this.aliasparejaButton ="//button//*[contains(text(),'Novi@')]";
     this.aliastrabajoButton ="//button//*[contains(text(),'Trabajo')]";
     this.aliascasaButton = "//button//*[contains(text(),'Casa')]";
     this.aliastextInput = "//input[@placeholder='Ingresa un alias para esta dirección']";
     this.guardardireccionButton = "//button//*[contains(text(),'Guardar dirección')]";
-    this.enviarestadireccionButton = "//button//*[contains(text(),'Enviar a esta dirección')]";    
+    this.enviarestadireccionButton = "//button//*[contains(text(),'Enviar a esta dirección')]";
+    this.enviaraDiv = "//*[@class='chedrauimx-locator-2-x-triggerAddress']//p";
+    this.seccionDireccionesButtonHeader = "//*[@class='ma0 chedrauimx-locator-2-x-locationTitle']";
+    this.recogerEnTab = "//button[contains(text(),'Recoger en')]";
+    this.recogerEnOpcion = "//*[@name='pickup-point-list']";
+    this.recogerEnButton = "//*[contains(text(),'Recoger en esta tienda')]";
 
     
     }
@@ -29,7 +35,6 @@ class DirectionsPage extends BasePage {
         console.log(`\nSe inicia seleccion de direccion`);    
         const xpathdireccion = this.xpathDireccionEspecifica(direccion);
         console.log(`\nxpath es: `+ xpathdireccion);
-        await this.page.pause();
         await this.page.locator(xpathdireccion).scrollIntoViewIfNeeded();
         await this.page.waitForTimeout(500);
         await this.page.locator(xpathdireccion).click();
@@ -38,6 +43,22 @@ class DirectionsPage extends BasePage {
         await this.page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
         await this.wait(3000); // breve espera por sugerencias
 
+
+    }
+    //SelecionarRecogerEspecifico
+    async SeleccionarRecogerEspecifico() {
+        console.log(`\nSe inicia recoger en`);  
+        await this.safeClick(this.seccionDireccionesButtonHeader);  
+        //await this.safeClick(this.enviaraDiv);
+        await this.safeClick(this.recogerEnTab);
+        await this.humanType(this.direccionsucursalInput,'AV. XICOTÉNCATL KM. 1 CARRET. SAN MARTÍN TEXMELUCAN-TLAX. S/N');
+        await this.page.locator(this.direccionpropuestabusquedaOption).first().waitFor({ state: 'visible', timeout: 11000 });
+        await this.page.locator(this.direccionpropuestabusquedaOption).first().click();
+        await this.page.waitForTimeout(500);
+        await this.page.locator(this.recogerEnOpcion).first().click();
+        await this.safeClick(this.recogerEnButton);
+        await this.page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
+        await this.wait(3000); // breve espera por sugerencias
 
     }
 

@@ -83,18 +83,68 @@ class NavegacionActions {
   /**
    * 🔹 Buscar producto con estabilización de resultados
    */
-async buscarProducto(page, headerPage, productos, producto) {
+async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
   console.warn("Se ingresar a buscarProducto");
 
   await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
 
-  const input = page.locator(headerPage.buscandoInput);
-  await input.waitFor({ state: 'visible' });
+  let busquedaExitosa = false;
 
-  await page.locator(headerPage.buscandoInput).focus();
-  await page.locator(headerPage.buscandoInput).fill("");
-  await headerPage.humanType(headerPage.buscandoInput, producto);
-  await page.keyboard.press('Enter');
+  if (modo === "legacy") {
+    const input = page.locator(headerPage.buscandoInput);
+    await input.waitFor({ state: 'visible' });
+
+    await input.focus();
+    await input.fill("");
+    await headerPage.humanType(headerPage.buscandoInput, producto);
+    await page.keyboard.press('Enter');
+    busquedaExitosa = true;
+  } else {
+    const intentos = [
+      {
+        nombre: "placeholder",
+        locator: page.getByPlaceholder(/que estas buscando|qu\u00e9 est\u00e1s buscando/i).first()
+      }
+    ];
+
+    for (const intento of intentos) {
+      try {
+        await intento.locator.waitFor({ state: "visible", timeout: 4000 });
+        await intento.locator.focus();
+        await intento.locator.fill("");
+        for (const char of producto) {
+          await intento.locator.type(char, { delay: 15 });
+        }
+        await page.keyboard.press("Enter");
+        console.log(`Busqueda escrita con selector: ${intento.nombre}`);
+        busquedaExitosa = true;
+        break;
+      } catch {
+        console.warn(`Fall\u00f3 selector ${intento.nombre}`);
+      }
+    }
+  }
+
+  if (!busquedaExitosa) {
+    const host = page.locator('vtex-search-2-x-searchBarContainer, [class*="searchBar"], [data-testid*="search"]').first();
+    if (modo === "legacy") {
+      console.warn("No fue posible escribir en buscador legacy con locators directos.");
+      throw new Error("No se encontro input visible en buscador legacy.");
+    }
+    console.warn("No fue posible escribir con locators directos, intentando fallback por shadowRoot/evaluate.");
+    await host.evaluate((el, value) => {
+      const root = el.shadowRoot;
+      if (!root) throw new Error("No se encontro shadowRoot en buscador.");
+      const input = root.querySelector('input[data-test="search-input"], input[type="search"], input');
+      if (!input) throw new Error("No se encontro input de busqueda dentro de shadowRoot");
+      input.focus();
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.value = value;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    }, producto);
+  }
 
   // --- 🔸 Espera resultados o mensaje sin resultados ---
   await Promise.race([
@@ -106,51 +156,52 @@ async buscarProducto(page, headerPage, productos, producto) {
 
   // --- 🔸 Si hay resultados, estabilizar el conteo por visibilidad ---
   if (await page.locator(productos.resultadobusquedaLabel).first().isVisible()) {
-    let elementos = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
-
-    let prevVisibleCount = -1;
-    let stableRounds = 0;
     let visibles = 0;
 
-    for (let i = 0; i < 10; i++) {
+    if (modo === "legacy") {
+      const elementos = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
+      visibles = await elementos.count();
+      console.log(`Legacy: visibles directos = ${visibles}`);
+    } else {
+      let elementos = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
+      let prevVisibleCount = -1;
+      let stableRounds = 0;
 
-      elementos = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
-      let total = await elementos.count();
-      visibles = 0;
-
-      for (let j = 0; j < total; j++) {
-        if (await elementos.nth(j).isVisible()) visibles++;
-      }
-
-      console.log(`Iteración ${i} → visibles: ${visibles}, prev: ${prevVisibleCount}`);
-
-      if (visibles === prevVisibleCount) {
-        stableRounds++;
-        console.log(`Visibilidad estable (${stableRounds})`);
-
-        // 🔥 Scroll hasta el botón "Next page"
-        // Volver a leer después del scroll
+      for (let i = 0; i < 10; i++) {
         elementos = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
-        total = await elementos.count();
-        console.log(`Después del scroll → total detectados: ${total}`);
+        let total = await elementos.count();
+        visibles = 0;
 
-        if (stableRounds >= 2) {
-          console.log("🟢 Completado: la lista dejó de crecer");
-          break;
+        for (let j = 0; j < total; j++) {
+          if (await elementos.nth(j).isVisible()) visibles++;
         }
 
-      } else {
-        console.log(`❌ Cambio detectado (visibles: ${visibles}), reseteando...`);
-        stableRounds = 0;
+        console.log(`Iteración ${i} → visibles: ${visibles}, prev: ${prevVisibleCount}`);
+
+        if (visibles === prevVisibleCount) {
+          stableRounds++;
+          console.log(`Visibilidad estable (${stableRounds})`);
+
+          elementos = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
+          total = await elementos.count();
+          console.log(`Después del scroll → total detectados: ${total}`);
+
+          if (stableRounds >= 2) {
+            console.log("🟢 Completado: la lista dejó de crecer");
+            break;
+          }
+
+        } else {
+          console.log(`❌ Cambio detectado (visibles: ${visibles}), reseteando...`);
+          stableRounds = 0;
+          prevVisibleCount = visibles;
+          await page.locator('//*[@class="chedrauimx-search-result-3-x-orderBy--layout"]').scrollIntoViewIfNeeded();
+          await page.waitForTimeout(500);
+          continue;
+        }
+
         prevVisibleCount = visibles;
-        await page.locator('//*[@aria-label="Next page"]').scrollIntoViewIfNeeded();
-        await page.locator('//*[@class="chedrauimx-search-result-3-x-orderBy--layout"]').scrollIntoViewIfNeeded();
-        await page.waitForTimeout(500);
-
-        continue;
       }
-
-      prevVisibleCount = visibles;
     }
 
     const hayMensajeNoResultados = await page
@@ -164,7 +215,6 @@ async buscarProducto(page, headerPage, productos, producto) {
     }
 
     console.log(`🟢 Conteo estabilizado: ${visibles} productos visibles reales.`);
-    await page.pause();
     return true;
 
   }
@@ -174,45 +224,57 @@ async buscarProducto(page, headerPage, productos, producto) {
   return false;
 }
 
-async detectarCorreccion(page) {
-  let correccion = "";
-  let corregido = false;
+  async detectarCorreccion(page, correccionEsperada = "") {
+     console.log('Se ingresa a detectar correccion');
+    let correccion = "";
+    let corregido = false;
+    let locatorUsado = "ninguno";
 
-  try {
-    const locator = page.locator(
-      'div.x-base-teleport.x-base-teleport--onlychild >> shadow=button[data-test="set-spellcheck"]'
-    );
+    try {
+      const host = page.locator('div.x-base-teleport.x-base-teleport--onlychild').first();
+      await host.waitFor({ state: "attached", timeout: 3000 }).catch(() => {});
+      const shadowBtn = page.locator('div.x-base-teleport.x-base-teleport--onlychild >> shadow=button[data-test="set-spellcheck"]').first();
 
-    // Esperar máximo 1.5s por si NO aparece corrección
-    await locator.first().waitFor({ timeout: 1500 });
+      // Esperar máximo 1.5s por si NO aparece corrección
+      await shadowBtn.waitFor({ timeout: 3000 }).catch(() => {});
 
-    correccion = await locator.first().innerText();
-    correccion = correccion?.trim() ?? "";
+      if (await shadowBtn.count() > 0) {
+        locatorUsado = "shadow=button[data-test=\"set-spellcheck\"]";
+        correccion = await shadowBtn.innerText();
+        console.log("se extra inner text "+correccion);
+      }
+      correccion = correccion?.trim() ?? "";
 
-    if (correccion.length > 0) corregido = true;
+      const esperado = (correccionEsperada || "").toString().trim().toLowerCase();
+      const real = (correccion || "").toString().trim().toLowerCase();
+      if (real.length > 0 && esperado.length > 0 && real === esperado) {
+        corregido = true;
+      }
+      console.log(`detectarCorreccion -> locator usado: ${locatorUsado}`);
+      console.log(`detectarCorreccion -> corregido: ${corregido}`);
 
-  } catch {
-    correccion = "";
-    corregido = false;
+    } catch {
+      correccion = "";
+      corregido = false;
+      console.log("detectarCorreccion -> locator usado: ninguno (error)");
+      console.log("detectarCorreccion -> corregido: false");
+    }
+
+    return { correccion, corregido };
   }
-
-  return { correccion, corregido };
-}
 async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalencias) {
 
   console.log("=== DEBUG INICIO evaluarBusquedaErroresOrtograficos ===");
   console.log("Correccion recibido:", Correccion, "tipo:", typeof Correccion);
   console.log("Equivalencias recibido:", equivalencias);
-  await page.pause();
 
 
   // === 1. DETECTAR CORRECCIÓN EMPATHY ===
-  const { correccion: correccionReal, corregido } = await this.detectarCorreccion(page);
+  const { correccion: correccionReal, corregido } = await this.detectarCorreccion(page, "");
 
   console.log("=== DEBUG detectarCorreccion() ===");
   console.log("Corrección real detectada:", correccionReal);
   console.log("¿Hubo corrección?", corregido);
-  await page.pause();
 
 
   // === Normalizar textos ===
@@ -246,7 +308,6 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
   console.log("=== DEBUG normalización ===");
   console.log("correccionEsperada:", correccionEsperada);
   console.log("equivalenciasArr:", equivalenciasArr);
-  await page.pause();
 
 
   // === 2. ESPERAR RESULTADOS VISIBLES ===
@@ -254,7 +315,6 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
 
   console.log("=== DEBUG esperando resultados ===");
   console.log("Selector utilizado:", `${productos.resultadobusquedaLabel} >> visible=true`);
-  await page.pause();
 
   await resultadosLocator.first().waitFor({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(500);
@@ -263,7 +323,6 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
 
   console.log("=== DEBUG resultados encontrados ===");
   console.log("Cantidad de productos:", count);
-  await page.pause();
 
 
   // === Variables a retornar ===
@@ -297,12 +356,10 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
   for (let i = 0; i < count; i++) {
 
     console.log(`=== DEBUG leyendo producto #${i} ===`);
-    await page.pause();
 
     let textoProducto = await obtenerTextoConReintento(resultadosLocator.nth(i));
 
     console.log("Texto leído:", textoProducto);
-    await page.pause();
 
     if (!textoProducto) {
       listaDetallada.push({ texto: "[NO LEÍDO]", coincide: false });
@@ -315,7 +372,6 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
 
     console.log("Tiene corrección esperada?", tieneCorreccion);
     console.log("Tiene equivalencia?", tieneEquivalencia);
-    await page.pause();
 
 
     if (tieneCorreccion) CC++;
@@ -334,14 +390,12 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
   console.log("=== DEBUG cálculo SR / SN ===");
   console.log("corregido:", corregido);
   console.log("count:", count);
-  await page.pause();
 
   if (!corregido && count > 0) SR = true;
   if (corregido && count === 0) SN = true;
 
   console.log("SR:", SR);
   console.log("SN:", SN);
-  await page.pause();
 
 
   // === 6. RETORNAR TODO ===
@@ -351,7 +405,6 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
   console.log("coincidencias:", coincidencias);
   console.log("noCoincidencias:", noCoincidencias);
   console.log("listaDetallada:", listaDetallada);
-  await page.pause();
 
   return {
     correccion: correccionReal,
@@ -658,6 +711,194 @@ async crearDatosPago(row) {
 
 }
 
+  // Sobrescribe la version anterior para manejar empathy/legacy
+  async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalencias, modo = "empathy") {
+
+    console.log("=== DEBUG INICIO evaluarBusquedaErroresOrtograficos ===");
+    console.log("Correccion recibido:", Correccion, "tipo:", typeof Correccion);
+    console.log("Equivalencias recibido:", equivalencias);
+
+    let correccionReal = "";
+    let corregido = false;
+    let correccionEsperada = "";
+    if (Array.isArray(Correccion)) {
+      correccionEsperada = Correccion.map(x => String(x).trim()).find(x => x.length > 0) || "";
+    } else if (typeof Correccion === "string") {
+      correccionEsperada = Correccion.trim();
+    } else if (Correccion != null) {
+      correccionEsperada = String(Correccion).trim();
+    }
+    correccionEsperada = correccionEsperada.toLowerCase();
+
+    if (modo !== "legacy") {
+      const det = await this.detectarCorreccion(page, correccionEsperada);
+      correccionReal = det.correccion;
+      corregido = det.corregido;
+    }
+
+    console.log("=== DEBUG detectarCorreccion() ===");
+    console.log("Correccion real detectada:", correccionReal);
+    console.log("Hubo correccion?", corregido);
+
+    let equivalenciasArr = [];
+    if (typeof equivalencias === "string") {
+      equivalenciasArr = equivalencias
+        .split(",")
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e.length > 0);
+    } else if (Array.isArray(equivalencias)) {
+      equivalenciasArr = equivalencias
+        .map(e => String(e).trim().toLowerCase())
+        .filter(e => e.length > 0);
+    } else if (equivalencias != null) {
+      const val = String(equivalencias).trim().toLowerCase();
+      if (val.length > 0) equivalenciasArr = [val];
+    }
+
+    console.log("equivalenciasArr normalizado:", equivalenciasArr);
+
+    console.log("=== DEBUG normalizacion ===");
+    console.log("correccionEsperada:", correccionEsperada);
+    console.log("equivalenciasArr:", equivalenciasArr);
+
+    let resultadosLocator;
+    if (modo === "legacy") {
+      resultadosLocator = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
+    } else {
+      resultadosLocator = page.locator('[data-test="result-title"] >> visible=true');
+    }
+
+    console.log("=== DEBUG esperando resultados ===");
+    console.log("Selector utilizado:", modo === "legacy" ? `${productos.resultadobusquedaLabel} >> visible=true` : `[data-test="result-title"]`);
+
+    await resultadosLocator.first().waitFor({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
+
+    let count = await resultadosLocator.count();
+    const sinResultadosIcon = await page
+      .locator('//*[contains(@id,"Trazado")]')
+      .first()
+      .isVisible()
+      .catch(() => false);
+
+    if (sinResultadosIcon) {
+      console.log("Sin resultados detectado por icono, forzando count = 0");
+      count = 0;
+    }
+
+    console.log("=== DEBUG resultados encontrados ===");
+    console.log("Cantidad de productos:", count);
+
+    let CC = false;
+    let CP = false;
+    let SR = false;
+    let SN = false;
+    let coincidencias = [];
+    let noCoincidencias = [];
+    let listaDetallada = [];
+    let ccProductos = 0;
+    let cpProductos = 0;
+
+    async function obtenerTextoConReintento(locator) {
+      for (let intento = 0; intento < 3; intento++) {
+        try {
+          let txt = await locator.textContent({ timeout: 500 });
+          if (txt && txt.trim().length > 0) {
+            return txt.toLowerCase().trim();
+          }
+        } catch {}
+
+        console.log("Reintento para leer texto (" + (intento + 1) + "/3)...");
+        await new Promise(r => setTimeout(r, 250));
+      }
+      return null;
+    }
+
+    for (let i = 0; i < count; i++) {
+      console.log("=== DEBUG leyendo producto #" + i + " ===");
+      let textoProducto = await obtenerTextoConReintento(resultadosLocator.nth(i));
+
+      console.log("Texto leido:", textoProducto);
+
+      if (!textoProducto) {
+        listaDetallada.push({ texto: "[NO LEIDO]", correccion: false, equivalencia: false, coincide: false });
+        noCoincidencias.push("[NO LEIDO]");
+        continue;
+      }
+
+      const tieneCorreccion = !!correccionEsperada && textoProducto.includes(correccionEsperada);
+      const tieneEquivalencia = equivalenciasArr.length > 0 && equivalenciasArr.some(eq => textoProducto.includes(eq));
+
+      console.log("Tiene correccion esperada?", tieneCorreccion);
+      console.log("Tiene equivalencia?", tieneEquivalencia);
+
+      if (tieneCorreccion) ccProductos++;
+      if (tieneEquivalencia) cpProductos++;
+
+      const coincide = tieneCorreccion || tieneEquivalencia;
+
+      if (coincide) coincidencias.push(textoProducto);
+      else noCoincidencias.push(textoProducto);
+
+      listaDetallada.push({ texto: textoProducto, correccion: tieneCorreccion, equivalencia: tieneEquivalencia, coincide });
+    }
+
+    const totalProductos = count;
+    const allCorreccion = totalProductos > 0 && ccProductos === totalProductos;
+    const anyEquivalencia = cpProductos > 0;
+    let calificacion = "";
+
+    if (totalProductos === 0) {
+      SN = true;
+      calificacion = "SN";
+    } else if (modo === "legacy") {
+      calificacion = "";
+    } else {
+      if (corregido) {
+        if (allCorreccion) {
+          CC = true;
+          calificacion = "CC";
+        } else if (!allCorreccion && anyEquivalencia) {
+          CP = true;
+          calificacion = "CP";
+        } else {
+          SN = true;
+          calificacion = "SN";
+        }
+      } else {
+        if (anyEquivalencia) {
+          SR = true;
+          calificacion = "SR";
+        } else {
+          SN = true;
+          calificacion = "SN";
+        }
+      }
+    }
+
+    console.log("=== DEBUG FINAL ===");
+    console.log("CC:", CC, "CP:", CP, "SR:", SR, "SN:", SN);
+    console.log("coincidencias:", coincidencias);
+    console.log("noCoincidencias:", noCoincidencias);
+    console.log("listaDetallada:", listaDetallada);
+
+    return {
+      correccion: correccionReal,
+      corregido,
+      CC,
+      CP,
+      SR,
+      SN,
+      coincidencias,
+      noCoincidencias,
+      listaDetallada,
+      calificacion,
+      totalProductos,
+      ccProductos,
+      cpProductos
+    };
+  }
+
 
 
 async LlenarFormularioPago(page, headerPage, tipoPago, datos) { 
@@ -786,3 +1027,43 @@ async LlenarFormularioPago(page, headerPage, tipoPago, datos) {
 }
 
 module.exports = NavegacionActions;
+/*
+ (await page.locator(selector).count() > 0) return page.locator(selector);
+
+          // Buscar en iframes recursivamente
+          for (const frame of page.frames()) {
+              if (await frame.locator(selector).count() > 0) {
+                  return frame.locator(selector);
+              }
+          }
+
+          return null;
+      }
+
+      // USO:
+      const unauthorizedButtonXPath = "//*[@class='btn btn-large payment-unauthorized-button']";
+
+      // Buscar el botón dentro o fuera de iframes
+      let unauthorizedButton = await findInFrames(page, unauthorizedButtonXPath);
+
+      if (unauthorizedButton) {
+          console.log("✔️ Botón encontrado, intentando cerrarlo...");
+          await unauthorizedButton.click();
+          console.log("✔️ Popup de compra fallida cerrado.");
+      } else {
+          console.warn("⚠️ No se encontró el popup de compra fallida en ningún iframe.");
+      }
+
+
+      
+  }
+  console.warn("Llenado de formulario COMPLETADO");
+
+}
+
+
+
+}
+
+module.exports = NavegacionActions;
+*/

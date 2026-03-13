@@ -6,7 +6,7 @@ const env = require('./utils/Environment');
 
 module.exports = defineConfig({
 
-  globalSetup: require.resolve('./global-setup.js'),
+  //globalSetup: require.resolve('./global-setup.js'),
   testDir: './tests',
 
   // 👉 Evita ejecutar TODO el directorio de tests

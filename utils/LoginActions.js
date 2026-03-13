@@ -70,75 +70,78 @@ async function loginConCorreo(page, headerPage, loginPage) {
   if (!(await page.title()).toLowerCase().includes('supermercado')) {
     throw new Error('No se encontró "supermercado" en el título de la página');
   }
+  const ipbaneada=false;
+  if(!ipbaneada){
+          // Ir al login
+      await page.click(headerPage.ingresarButton);
 
-  // Ir al login
-  await page.click(headerPage.ingresarButton);
+      // Llenar email de forma "humana"
+      await page.isVisible('#email-d');
+      await headerPage.humanType('#email-d', emailAddress);
 
-  // Llenar email de forma "humana"
-  await page.isVisible('#email-d');
-  await headerPage.humanType('#email-d', emailAddress);
+      // Esperar botón activo y clic
+      const nextBtn = page.locator('#btn-continuar-mail-d');
+      //await nextBtn.waitFor({ state: 'visible' });
+      await expect(nextBtn).toBeEnabled();
+      await nextBtn.click();
 
-  // Esperar botón activo y clic
-  const nextBtn = page.locator('#btn-continuar-mail-d');
-  //await nextBtn.waitFor({ state: 'visible' });
-  await expect(nextBtn).toBeEnabled();
-  await nextBtn.click();
+      //modificaciones
+      // Seleccionar todos los inputs del OTP (6 dígitos)
+    const baseXPath =   "xpath=//*[@class='d-flex justify-content-center gap-3 mb-2']//*[@class='otp-input form-control text-center']";
 
-  //modificaciones
-  // Seleccionar todos los inputs del OTP (6 dígitos)
-const baseXPath =   "xpath=//*[@class='d-flex justify-content-center gap-3 mb-2']//*[@class='otp-input form-control text-center']";
+    // Obtener el código real
+    const code = await waitForCode(inboxId, config.timeouts.waitForEmail);
 
-// Obtener el código real
-const code = await waitForCode(inboxId, config.timeouts.waitForEmail);
-
-// Validar formato del código
-if (!/^\d{6}$/.test(code)) {
-  throw new Error(`Código OTP inválido recibido: ${code}`);
-}
-else{
-        console.log("El codigo recibido es: "+code);
-}
-
-// 🔥 Llenar cada input usando TU método humanType()
-const selector = `${baseXPath}[1]`;
-const input = page.locator(selector);
-
-for (let i = 0; i < 6; i++) {
-  const digit = code[i];
-  await input.type(digit);
-}
-await page.click('#btn-continuar-validate-d');
-
-//modificaciones
-console.log('Se presionó boton login');
-  
-
-
-  // Esperar redirección al home
-if (config.isPROD) {
-    await page.waitForURL(/chedraui.*\.com\.mx/, { timeout: 20000 });
-}else if (config.isEMP){
-await page.waitForURL(/.*chedraui.*/i, { timeout: 20000 });
-}
-  // ===== Guardar sesión =====
-  console.log(' Login exitoso, guardando sesión...');
-
-  // Guardar cookies
-  const cookies = await page.context().cookies();
-  fs.writeFileSync('sessionCookies.json', JSON.stringify(cookies, null, 2));
-
-  // Guardar localStorage
-  const localStorageData = await page.evaluate(() => {
-    const data = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      data[key] = localStorage.getItem(key);
+    // Validar formato del código
+    if (!/^\d{6}$/.test(code)) {
+      throw new Error(`Código OTP inválido recibido: ${code}`);
     }
-    return data;
-  });
-  fs.writeFileSync('sessionLocalStorage.json', JSON.stringify(localStorageData, null, 2));
+    else{
+            console.log("El codigo recibido es: "+code);
+    }
 
-  console.log(' Sesión guardada en sessionCookies.json y sessionLocalStorage.json');
+    // 🔥 Llenar cada input usando TU método humanType()
+    const selector = `${baseXPath}[1]`;
+    const input = page.locator(selector);
+
+    for (let i = 0; i < 6; i++) {
+      const digit = code[i];
+      await input.type(digit);
+    }
+    await page.click('#btn-continuar-validate-d');
+
+    //modificaciones
+    console.log('Se presionó boton login');
+      
+
+
+      // Esperar redirección al home
+    if (config.isPROD) {
+        await page.waitForURL(/chedraui.*\.com\.mx/, { timeout: 20000 });
+    }else if (config.isEMP){
+    await page.waitForURL(/.*chedraui.*/i, { timeout: 20000 });
+    }
+      // ===== Guardar sesión =====
+      console.log(' Login exitoso, guardando sesión...');
+
+      // Guardar cookies
+      const cookies = await page.context().cookies();
+      fs.writeFileSync('sessionCookies.json', JSON.stringify(cookies, null, 2));
+
+      // Guardar localStorage
+      const localStorageData = await page.evaluate(() => {
+        const data = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          data[key] = localStorage.getItem(key);
+        }
+        return data;
+      });
+      fs.writeFileSync('sessionLocalStorage.json', JSON.stringify(localStorageData, null, 2));
+
+      console.log(' Sesión guardada en sessionCookies.json y sessionLocalStorage.json');
+
+  }
 }
 
 async function obtenerCodigoVtexDesdeOutlook(page, config) {

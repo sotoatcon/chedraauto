@@ -5,7 +5,9 @@ const NavegacionActions = require('../../utils/NavegacionActions');
 const ResumenCarritoPage = require('../../pages/ResumenCarritoPage');
 const { getExcelData } = require('../../utils/excelReader');
 const config = require('../../utils/Environment');
-// const { generarReporteCoincidenciasPDF } = require('../../utils/creadorpdf');
+const { loginConCorreo } = require('../../utils/LoginActions');
+const DirectionsPage = require('../../pages/DirectionsPage');
+const { generarReporteCoincidenciasPDF } = require('../../utils/creadorpdf');
 
 // 📌 Archivos Excel
 const excelurl = '.\\data\\ChedrahuiQA_Lexico.xlsx';
@@ -18,122 +20,171 @@ const excelsemantico = 'Semánticos';
 // 🔥 Paralelismo por archivo
 // =========================================================
 test.describe.configure({ mode: 'parallel' });
+// =========================================================
+// 🔥 BEFORE EACH — Lógica completa para EMP
+// =========================================================
+// =========================================================
+// 🔥 BEFORE EACH — Lógica completa para EMP / QA / PROD
+// =========================================================
+test.beforeEach(async ({ browser, page }, testInfo) => {
 
+  // ============================
+  // 🟣 EMP — LOGIN COMPLETO
+  // ============================
+  if (config.isEMP) {
+    console.log("🔥 EMP MODE — ejecutando login completo...");
 
-// =========================================================
-// 🔥 BEFORE EACH — SIN abrir navegador; page ya viene logueada
-// =========================================================
-// =========================================================
-// BEFORE EACH SIN GOTO - Reutiliza el browser del globalSetup
-// =========================================================
-test.beforeEach(async ({ page }, testInfo) => {
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 }
+    });
 
-  // Instancias de Pages con la misma page del Global Setup
+    const empPage = await context.newPage();
+    testInfo.page = empPage;
+
+    const headerPage = new HeaderPage(empPage);
+
+    console.log("🔐 Ejecutando loginConCorreo...");
+    // 👉 Tus 2 params exactamente como en globalSetup original
+    await loginConCorreo(empPage, headerPage, headerPage);
+
+    // 👉 Instancias exactamente como tú las tenías
+    testInfo.headerPage = headerPage;
+    testInfo.productosPage = new ProductosEncontradosPage(empPage);
+    testInfo.carritoUtils = new NavegacionActions();
+    testInfo.resumencarritos = new ResumenCarritoPage(empPage);
+    testInfo.direcciones = new DirectionsPage(empPage);
+
+    return; // ⚠️ NECESARIO
+  }
+
+  // ==============================================
+  // 🟢 QA/PROD — Reutiliza sesión de storageState
+  // ==============================================
+  console.log("➡️ QA/PROD → Reutilizando sesión existente…");
+
+  testInfo.page = page;
   testInfo.headerPage = new HeaderPage(page);
   testInfo.resumencarritos = new ResumenCarritoPage(page);
   testInfo.productosPage = new ProductosEncontradosPage(page);
   testInfo.carritoUtils = new NavegacionActions();
+  testInfo.direcciones = new DirectionsPage(page);
 
-  // ❌ NO hacer goto aquí
-  // porque el token de sesión de VTEX es temporal y no sobrevive redirecciones nuevas.
-  
-  console.log("➡️ Continuando desde la sesión existente del Global Setup...");
 });
-
-
-// =========================================================
-// ❌ NO usamos afterEach — Playwright cierra solo en parallel
-// =========================================================
-
-
 
 // =========================================================
 // 🟦 TEST C1 – ERRORES ORTOGRÁFICOS
 // =========================================================
-test('C1 - Errores Ortográficos', async ({ page }, testInfo) => {
+test('C1 - Errores Ortográficos', async ({}, testInfo) => {
+
+  const page = testInfo.page;      // ← USAMOS LA PAGE DE EMP
+  const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
 
   console.log('Ingresando a C1');
-  await page.pause();
 
-  const { headerPage, productosPage, carritoUtils } = testInfo;
   const data = getExcelData(excelurl, excelerrores);
 
-  const resultadosTotales = [];
+  const modos = [
+    { label: "empathy", url: config.urls.PRODEMPATHY, modo: "empathy" },
+    { label: "legacy", url: config.urls.PROD, modo: "legacy" }
+  ];
 
-  for (const row of data) {
+  for (const m of modos) {
+    const urlObj = new URL(m.url);
+    if (m.modo === "legacy") {
+      await page.context().addCookies([{
+        name: "VtexWorkspace",
+        value: "master%3A87e55a46-08f4-4377-be23-e91e3bbd4612",
+        domain: urlObj.hostname,
+        path: "/"
+      }]);
+    }
+    if (m.modo === "empathy") {
+      await page.context().addCookies([{
+        name: "VtexWorkspace",
+        value: "wempathyprod",
+        domain: urlObj.hostname,
+        path: "/"
+      }]);
+    }
+    const resultadosTotales = [];
 
-    const Termino = row['Término'];
+    await page.goto(m.url);
+    await page.waitForTimeout(5000);
+    await direcciones.SeleccionarRecogerEspecifico();
 
-    const Correccion = row['Correccion']
-      .split(',')
-      .map(e => e.trim().toLowerCase());
+    for (const row of data) {
+      const Termino = row['Término'];
+      const Correccion = row['Correccion']
+        .split(",")
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e.length > 0);
+      const equivalencias = row['Equivalencia']
+        .split(",")
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e.length > 0);
+      console.log(`\n=== Buscando (${m.label}): ${Termino} ===`);
 
-    const equivalencias = row['Equivalencia']
-      .split(',')
-      .map(e => e.trim().toLowerCase());
+      const hayResultados = await carritoUtils.buscarProducto(
+        page,
+        headerPage,
+        productosPage,
+        Termino,
+        null,
+        m.modo
+      );
 
-    console.log(`\n=== Buscando: ${Termino} ===`);
+      let registroTermino = {
+        termino: Termino,
+        equivalencias,
+        correccion: "",
+        correccionEsperada: Correccion,
+        corregido: false,
+        CC: 0,
+        CP: 0,
+        SR: false,
+        SN: false,
+        hayResultados,
+        coincidencias: [],
+        noCoincidencias: [],
+        listaDetallada: []
+      };
 
-    // 1️⃣ Buscar término
-    const hayResultados = await carritoUtils.buscarProducto(
-      page,
-      headerPage,
-      productosPage,
-      Termino
-    );
-    await page.pause();
+      const evaluacion = await carritoUtils.evaluarBusquedaErroresOrtograficos(
+        page,
+        productosPage,
+        Correccion,
+        equivalencias,
+        m.modo
+      );
 
-    // 2️⃣ Crear estructura base del resultado por término
-    let registroTermino = {
-      termino: Termino,
-      equivalencias,
-      correccion: "",
-      corregido: false,
-      CC: 0,
-      CP: 0,
-      SR: false,
-      SN: false,
-      hayResultados,
-      coincidencias: [],
-      noCoincidencias: [],
-      listaDetallada: []
-    };
+      registroTermino.coincidencias = evaluacion.coincidencias;
+      registroTermino.noCoincidencias = evaluacion.noCoincidencias;
+      registroTermino.listaDetallada = evaluacion.listaDetallada;
+      registroTermino.correccion = evaluacion.correccion;
+      registroTermino.corregido = evaluacion.corregido;
+      registroTermino.CC = evaluacion.CC;
+      registroTermino.CP = evaluacion.CP;
+      registroTermino.SR = evaluacion.SR;
+      registroTermino.SN = evaluacion.SN;
+      registroTermino.calificacion = evaluacion.calificacion;
+      registroTermino.totalProductos = evaluacion.totalProductos;
+      registroTermino.ccProductos = evaluacion.ccProductos;
+      registroTermino.cpProductos = evaluacion.cpProductos;
 
-    await page.pause();
+      resultadosTotales.push(registroTermino);
 
-    // 3️⃣ Evaluar equivalencias y corrección
-    const evaluacion = await carritoUtils.evaluarBusquedaErroresOrtograficos(
-      page,
-      productosPage,
-      Correccion,
-      equivalencias
-    );
+      await page.goto(m.url);
+      await page.waitForLoadState("domcontentloaded");
+      await page.waitForSelector("iframe#launcher", { state: "visible" });
+    }
 
-    // Copiar todas las métricas devueltas
-    registroTermino.coincidencias = evaluacion.coincidencias;
-    registroTermino.noCoincidencias = evaluacion.noCoincidencias;
-    registroTermino.listaDetallada = evaluacion.listaDetallada;
-    registroTermino.correccion = evaluacion.correccion;
-    registroTermino.corregido = evaluacion.corregido;
-    registroTermino.CC = evaluacion.CC;
-    registroTermino.CP = evaluacion.CP;
-    registroTermino.SR = evaluacion.SR;
-    registroTermino.SN = evaluacion.SN;
-
-    resultadosTotales.push(registroTermino);
-
-    // 4️⃣ Volver al home para siguiente iteración
-    await headerPage.safeClick(headerPage.logoImg);
-    await page.waitForLoadState("domcontentloaded");
-    await page.waitForSelector("iframe#launcher", { state: "visible" });
+    await generarReporteCoincidenciasPDF({
+      nombreTestCase: `C1_ErroresOrtograficos_${m.label}`,
+      resultados: resultadosTotales,
+      modo: m.modo
+    });
   }
-
-  /*
-  await generarReporteCoincidenciasPDF({
-    nombreTestCase: "C1_ErroresOrtograficos",
-    resultados: resultadosTotales
-  });
-  */
+  
 });
 
 
@@ -259,7 +310,7 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
     const Termino = row['Término'];
     const equivalencias = row['Equivalencia']
       .split(',')
-      .map(e => e.trim().toLowerCase());
+      .map(e => e.trim().toLowerCase()).filter(e => e.length > 0);
 
     console.log(`\n=== Buscando: ${Termino} ===`);
 
