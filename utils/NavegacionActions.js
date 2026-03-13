@@ -224,43 +224,58 @@ async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
   return false;
 }
 
-  async detectarCorreccion(page, correccionEsperada = "") {
-     console.log('Se ingresa a detectar correccion');
+    async detectarCorreccion(page, correccionEsperada = "") {
+    console.log("Se ingresa a detectar correccion");
     let correccion = "";
     let corregido = false;
-    let locatorUsado = "ninguno";
+    let hayCorreccion = false;
+    const locatorUsado = '[data-test="spellcheck-message"] button[data-test="set-spellcheck"]';
+    const t0 = Date.now();
 
     try {
-      const host = page.locator('div.x-base-teleport.x-base-teleport--onlychild').first();
-      await host.waitFor({ state: "attached", timeout: 3000 }).catch(() => {});
-      const shadowBtn = page.locator('div.x-base-teleport.x-base-teleport--onlychild >> shadow=button[data-test="set-spellcheck"]').first();
-
-      // Esperar máximo 1.5s por si NO aparece corrección
-      await shadowBtn.waitFor({ timeout: 3000 }).catch(() => {});
-
-      if (await shadowBtn.count() > 0) {
-        locatorUsado = "shadow=button[data-test=\"set-spellcheck\"]";
-        correccion = await shadowBtn.innerText();
-        console.log("se extra inner text "+correccion);
+      const btn = page.locator(locatorUsado).first();
+      // Si no aparece en corto, asumimos que no hubo sugerencia (evita sumar segundos al run).
+      await btn.waitFor({ state: "visible", timeout: 800 }).catch(() => {});
+      if (await btn.count().catch(() => 0) > 0) {
+        correccion = await btn.innerText().catch(() => "");
       }
-      correccion = correccion?.trim() ?? "";
 
-      const esperado = (correccionEsperada || "").toString().trim().toLowerCase();
-      const real = (correccion || "").toString().trim().toLowerCase();
-      if (real.length > 0 && esperado.length > 0 && real === esperado) {
-        corregido = true;
+      correccion = (correccion || "").toString().trim();
+
+      // A veces llega como array: ["shampoo"].
+      const esperadoBase = Array.isArray(correccionEsperada)
+        ? (correccionEsperada[0] ?? "")
+        : (correccionEsperada ?? "");
+
+      const esperado = esperadoBase.toString().trim().toLowerCase();
+      const real = correccion.toLowerCase();
+      hayCorreccion = real.length > 0;
+
+      // Si no se pasa esperado, mantenemos compatibilidad: "corregido" = "hay correccion".
+      if (esperado.length > 0) {
+        corregido = hayCorreccion && real === esperado;
+      } else {
+        corregido = hayCorreccion;
       }
+
+      console.log("detectarCorreccion -> locator elegido: A");
       console.log(`detectarCorreccion -> locator usado: ${locatorUsado}`);
+      console.log(`detectarCorreccion -> hayCorreccion: ${hayCorreccion}`);
       console.log(`detectarCorreccion -> corregido: ${corregido}`);
+      console.log(`detectarCorreccion -> ms: ${Date.now() - t0}`);
 
-    } catch {
+    } catch (e) {
       correccion = "";
       corregido = false;
-      console.log("detectarCorreccion -> locator usado: ninguno (error)");
+      hayCorreccion = false;
+      console.log("detectarCorreccion -> locator elegido: A (error)");
+      console.log(`detectarCorreccion -> locator usado: ${locatorUsado}`);
+      console.log("detectarCorreccion -> hayCorreccion: false");
       console.log("detectarCorreccion -> corregido: false");
+      console.log("detectarCorreccion -> error: " + (e && e.message ? e.message : String(e)));
     }
 
-    return { correccion, corregido };
+    return { correccion, corregido, hayCorreccion };
   }
 async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalencias) {
 
@@ -270,11 +285,12 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
 
 
   // === 1. DETECTAR CORRECCIÓN EMPATHY ===
-  const { correccion: correccionReal, corregido } = await this.detectarCorreccion(page, "");
+  const { correccion: correccionReal, corregido, hayCorreccion } = await this.detectarCorreccion(page, Correccion);
 
   console.log("=== DEBUG detectarCorreccion() ===");
   console.log("Corrección real detectada:", correccionReal);
-  console.log("¿Hubo corrección?", corregido);
+  console.log("¿Hubo sugerencia?", hayCorreccion);
+  console.log("¿Corrección esperada?", corregido);
 
 
   // === Normalizar textos ===
@@ -1067,3 +1083,8 @@ module.exports = NavegacionActions;
 
 module.exports = NavegacionActions;
 */
+
+
+
+
+
