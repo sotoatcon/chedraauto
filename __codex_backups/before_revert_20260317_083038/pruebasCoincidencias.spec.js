@@ -9,12 +9,12 @@ const { loginConCorreo } = require('../../utils/LoginActions');
 const DirectionsPage = require('../../pages/DirectionsPage');
 const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generarReporteLongTailPDF } = require('../../utils/creadorpdf');
 
-// Archivos Excel
+// ðŸ“Œ Archivos Excel
 const excelurl = '.\\data\\ChedrahuiQA_Lexico.xlsx';
-const excelerrores = 'Errores Ortogr\u00e1ficos';
+const excelerrores = 'Errores OrtogrÃ¡ficos';
 const excellong = 'Long Tail';
 const excelfrecuencia = 'Frecuencia Alta';
-const excelsemantico = 'Sem\u00e1nticos';
+const excelsemantico = 'SemÃ¡nticos';
 
 // =========================================================
 // ðŸ”¥ Paralelismo por archivo
@@ -245,12 +245,12 @@ test('C1 - Errores OrtogrÃ¡ficos', async ({}, testInfo) => {
      }
  
      for (const row of data) {
-        const Termino = getCell(row, ['T\u00e9rmino', 'Termino', 'TÃ©rmino', 'Tï¿½rmino']);
-        const Categoria = getCell(row, ['Categor\u00eda', 'Categoria', 'CategorÃ­a', 'Categorï¿½a']);
-        const Marca = getCell(row, ['Marca']);
-        const Especificacion = getCell(row, ['Especificaci\u00f3n', 'Especificacion', 'EspecificaciÃ³n', 'Especificaciï¿½n']);
-        const Formato = getCell(row, ['Formato']);
-        const Intencion = getCell(row, ['Intenci\u00f3n', 'Intencion', 'IntenciÃ³n', 'Intenciï¿½n']);
+       const Termino = getCell(row, ['Tï¿½rmino', 'TÃ©rmino', 'Termino']);
+       const Categoria = getCell(row, ['Categoria', 'Categorï¿½a', 'CategorÃ­a']);
+       const Marca = getCell(row, ['Marca']);
+       const Especificacion = getCell(row, ['Especificacion', 'Especificaciï¿½n', 'EspecificaciÃ³n']);
+       const Formato = getCell(row, ['Formato']);
+       const Intencion = getCell(row, ['Intencion', 'Intenciï¿½n', 'IntenciÃ³n']);
  
        console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
  
@@ -369,11 +369,11 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
     }
 
     for (const row of data) {
-      const Termino = getCell(row, ['T\u00e9rmino', 'Termino', 'TÃ©rmino', 'Tï¿½rmino']);
-      const categoriaYAttr = getCell(row, ['Categor\u00eda y atributo clave', 'Categoria y atributo clave', 'CategorÃ­a y atributo clave', 'Categorï¿½a y atributo clave']);
+      const Termino = getCell(row, ['Tï¿½rmino', 'TÃ©rmino', 'Termino']);
+      const categoriaYAttr = getCell(row, ['Categoria y atributo clave', 'Categorï¿½a y atributo clave', 'CategorÃ­a y atributo clave']);
       const marca = getCell(row, ['Marca']);
       const attrSecundario = getCell(row, ['Atributo secundario', 'Atributo Secundario']);
-      const intencionDiferente = getCell(row, ['Mismo universo diferente intenci\u00f3n', 'Mismo universo diferente intencion', 'Mismo universo diferente intenciÃ³n', 'Mismo universo diferente intenciï¿½n']);
+      const intencionDiferente = getCell(row, ['Mismo universo diferente intencion', 'Mismo universo diferente intenciï¿½n']);
 
       console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
 
