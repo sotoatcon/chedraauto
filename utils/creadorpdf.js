@@ -22,7 +22,7 @@ function normalizarTexto(texto) {
 
 
 // ------------------------------------------------------
-//  BUSCAR SUCURSAL POR DIRECCIN
+//  BUSCAR SUCURSAL POR DIRECCION
 // ------------------------------------------------------
 function obtenerSucursalPorDireccion(texto) {
   const textoNormalizado = normalizarTexto(texto);
@@ -95,12 +95,12 @@ async function generarReportePDF({
 
     const contenidoResumen = [
       { text: 'Resumen Final', style: 'titulo' },
-      { text: `Fecha ejecucin: ${fechaHora}`, style: 'subtitulo' },
+      { text: `Fecha ejecución: ${fechaHora}`, style: 'subtitulo' },
       { text: '\n' },
       { text: `Total de sucursales evaluadas: ${totalSucursales}`, style: 'texto' },
-      { text: `Total configuradas con das: ${totalConfiguradas}`, style: 'texto' },
-      { text: `Total sin das configurados: ${totalNoConfiguradas}\n\n`, style: 'texto' },
-      { text: 'Sucursales sin das configurados', style: 'encabezadoNaranja' }
+      { text: `Total configuradas con días: ${totalConfiguradas}`, style: 'texto' },
+      { text: `Total sin días configurados: ${totalNoConfiguradas}\n\n`, style: 'texto' },
+      { text: 'Sucursales sin días configurados', style: 'encabezadoNaranja' }
     ];
 
     if (sucursalesSinDias.length > 0) {
@@ -124,7 +124,7 @@ async function generarReportePDF({
 
       contenidoDetalle.push({
         text: [
-          { text: 'Direccin: ', color: '#ff8800', bold: true },
+          { text: 'Dirección: ', color: '#ff8800', bold: true },
           { text: s.nombre, color: '#000000' }
         ],
         style: 'direccion'
