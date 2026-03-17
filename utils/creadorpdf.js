@@ -22,7 +22,7 @@ function normalizarTexto(texto) {
 
 
 // ------------------------------------------------------
-//  BUSCAR SUCURSAL POR DIRECCIÓN
+//  BUSCAR SUCURSAL POR DIRECCIN
 // ------------------------------------------------------
 function obtenerSucursalPorDireccion(texto) {
   const textoNormalizado = normalizarTexto(texto);
@@ -69,7 +69,7 @@ async function generarReportePDF({
     printer.vfs = vfsFonts.vfs;
 
     // ---------------------------
-    //  CARPETA ÚNICA DE REPORTES
+    //  CARPETA NICA DE REPORTES
     // ---------------------------
     const reportDir = path.join(process.cwd(), 'reports');
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
@@ -90,17 +90,17 @@ async function generarReportePDF({
     if (fs.existsSync(xmlPath)) fs.unlinkSync(xmlPath);
 
     // -------------------------------------------------
-    // CONTENIDO DEL PDF (todo tu código igual)
+    // CONTENIDO DEL PDF (todo tu cdigo igual)
     // -------------------------------------------------
 
     const contenidoResumen = [
       { text: 'Resumen Final', style: 'titulo' },
-      { text: `Fecha ejecución: ${fechaHora}`, style: 'subtitulo' },
+      { text: `Fecha ejecucin: ${fechaHora}`, style: 'subtitulo' },
       { text: '\n' },
       { text: `Total de sucursales evaluadas: ${totalSucursales}`, style: 'texto' },
-      { text: `Total configuradas con días: ${totalConfiguradas}`, style: 'texto' },
-      { text: `Total sin días configurados: ${totalNoConfiguradas}\n\n`, style: 'texto' },
-      { text: 'Sucursales sin días configurados', style: 'encabezadoNaranja' }
+      { text: `Total configuradas con das: ${totalConfiguradas}`, style: 'texto' },
+      { text: `Total sin das configurados: ${totalNoConfiguradas}\n\n`, style: 'texto' },
+      { text: 'Sucursales sin das configurados', style: 'encabezadoNaranja' }
     ];
 
     if (sucursalesSinDias.length > 0) {
@@ -124,7 +124,7 @@ async function generarReportePDF({
 
       contenidoDetalle.push({
         text: [
-          { text: 'Dirección: ', color: '#ff8800', bold: true },
+          { text: 'Direccin: ', color: '#ff8800', bold: true },
           { text: s.nombre, color: '#000000' }
         ],
         style: 'direccion'
@@ -134,7 +134,7 @@ async function generarReportePDF({
 
       const dias = s.dias.slice(0, 4);
 
-      // ENCABEZADOS → ahora muestran la fecha real del scrapeo
+      // ENCABEZADOS -> ahora muestran la fecha real del scrapeo
       const columnas = dias.map(d => d.nombreDia.split('\n')[1] || '');
 
       const diasData = dias.map((d) => {
@@ -207,7 +207,7 @@ async function generarReportePDF({
     };
 
     // ---------------------------
-    // CREACIÓN DEL PDF
+    // CREACIN DEL PDF
     // ---------------------------
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
     const stream = fs.createWriteStream(pdfPath);
@@ -221,22 +221,22 @@ async function generarReportePDF({
 
     return new Promise((resolve, reject) => {
       stream.on('finish', () => {
-        console.log(`📄 PDF generado: ${pdfPath}`);
-        console.log(`📄 XML generado: ${xmlPath}`);
+        console.log(` PDF generado: ${pdfPath}`);
+        console.log(` XML generado: ${xmlPath}`);
         resolve(pdfPath);
       });
       stream.on('error', reject);
     });
 
   } catch (err) {
-    console.error('❌ Error al generar PDF:', err);
+    console.error(' Error al generar PDF:', err);
     throw err;
   }
 }
 
 
 // ------------------------------------------------------
-//  ⚡ NUEVO: REPORTE DE COINCIDENCIAS (C1, C2, C3, C4)
+//   NUEVO: REPORTE DE COINCIDENCIAS (C1, C2, C3, C4)
 // ------------------------------------------------------
 async function generarReporteCoincidenciasPDF({
   nombreTestCase = "TestCase",
@@ -621,7 +621,7 @@ async function generarReporteFrecuenciaAltaPDF({
     contenido.push(
       { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
       { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-      { text: `Calificacion promedio busqueda: ${promBusqueda}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+      // Calificacion promedio busqueda: (temporalmente deshabilitado)
       { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
       { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
     );
@@ -780,7 +780,7 @@ async function generarReporteLongTailPDF({
     contenido.push(
       { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
       { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-      { text: `Calificacion promedio busqueda: ${promBusqueda}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+      // Calificacion promedio busqueda: (temporalmente deshabilitado)
       { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
       { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
     );

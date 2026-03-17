@@ -57,7 +57,7 @@ class NavegacionActions {
         labelAgotado.waitFor({ state: 'visible', timeout: 5000 })
       ]);
     } catch (err) {
-      console.warn(`⏳ Timeout esperando botón o label para producto: ${producto}`);
+      console.warn(` Timeout esperando botn o label para producto: ${producto}`);
       return false;
     }
 
@@ -70,7 +70,7 @@ class NavegacionActions {
     }
 
     if (await labelAgotado.count() > 0 && await labelAgotado.isVisible()) {
-      console.warn(`⚠️ Producto agotado: ${producto}`);
+      console.warn(` Producto agotado: ${producto}`);
       await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
       return false;
     }
@@ -81,7 +81,7 @@ class NavegacionActions {
   }
 
   /**
-   * 🔹 Buscar producto con estabilización de resultados
+   *  Buscar producto con estabilizacin de resultados
    */
 async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
   console.warn("Se ingresar a buscarProducto");
@@ -230,7 +230,7 @@ async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
     const cHost = await page.locator('div.x-base-teleport.x-base-teleport--onlychild').count().catch(() => 0);
     console.log("DEBUG empathy sin resultados -> result-title=" + cTitle + ", base-grid=" + cGrid + ", teleport-hosts=" + cHost);
   }
-  console.log('❌ No se encontraron resultados');
+  console.log(' No se encontraron resultados');
   return false;
 }
 
@@ -294,13 +294,13 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
   console.log("Equivalencias recibido:", equivalencias);
 
 
-  // === 1. DETECTAR CORRECCIÓN EMPATHY ===
+  // === 1. DETECTAR CORRECCIN EMPATHY ===
   const { correccion: correccionReal, corregido, hayCorreccion } = await this.detectarCorreccion(page, Correccion);
 
   console.log("=== DEBUG detectarCorreccion() ===");
-  console.log("Corrección real detectada:", correccionReal);
-  console.log("¿Hubo sugerencia?", hayCorreccion);
-  console.log("¿Corrección esperada?", corregido);
+  console.log("Correccin real detectada:", correccionReal);
+  console.log("Hubo sugerencia?", hayCorreccion);
+  console.log("Correccin esperada?", corregido);
 
 
   // === Normalizar textos ===
@@ -319,19 +319,19 @@ if (typeof equivalencias === "string") {
 }
 
 else if (Array.isArray(equivalencias)) {
-  // ya venía en array
+  // ya vena en array
   equivalenciasArr = equivalencias
     .map(e => String(e).trim().toLowerCase());
 }
 
 else if (equivalencias != null) {
-  // venía un objeto, número, booleano, lo que sea → convertir a string
+  // vena un objeto, nmero, booleano, lo que sea -> convertir a string
   equivalenciasArr = [String(equivalencias).trim().toLowerCase()];
 }
 
 console.log("equivalenciasArr normalizado:", equivalenciasArr);
 
-  console.log("=== DEBUG normalización ===");
+  console.log("=== DEBUG normalizacin ===");
   console.log("correccionEsperada:", correccionEsperada);
   console.log("equivalenciasArr:", equivalenciasArr);
 
@@ -385,18 +385,18 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
 
     let textoProducto = await obtenerTextoConReintento(resultadosLocator.nth(i));
 
-    console.log("Texto leído:", textoProducto);
+    console.log("Texto ledo:", textoProducto);
 
     if (!textoProducto) {
-      listaDetallada.push({ texto: "[NO LEÍDO]", coincide: false });
-      noCoincidencias.push("[NO LEÍDO]");
+      listaDetallada.push({ texto: "[NO LEDO]", coincide: false });
+      noCoincidencias.push("[NO LEDO]");
       continue;
     }
 
     const tieneCorreccion = correccionEsperada && textoProducto.includes(correccionEsperada);
     const tieneEquivalencia = equivalenciasArr.some(eq => textoProducto.includes(eq));
 
-    console.log("Tiene corrección esperada?", tieneCorreccion);
+    console.log("Tiene correccin esperada?", tieneCorreccion);
     console.log("Tiene equivalencia?", tieneEquivalencia);
 
 
@@ -413,7 +413,7 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
 
 
   // === 5. CALCULAR SR y SN ===
-  console.log("=== DEBUG cálculo SR / SN ===");
+  console.log("=== DEBUG clculo SR / SN ===");
   console.log("corregido:", corregido);
   console.log("count:", count);
 
@@ -608,15 +608,15 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
   }
 
   /**
-   * 🛒 Vaciar carrito (reutilizable)
+   *  Vaciar carrito (reutilizable)
    */
   async vaciarCarrito(page, resumencarritos, headerPage) {
-    console.log("↪ Ejecutando vaciarCarrito() ...");
+    console.log(" Ejecutando vaciarCarrito() ...");
 
     const vaciarButton = page.locator(resumencarritos.vaciarcarritoButton);
 
     if (await vaciarButton.count() > 0) {
-      console.log("🛒 Vaciando el carrito...");
+      console.log(" Vaciando el carrito...");
 
       await resumencarritos.safeClick(resumencarritos.vaciarcarritoButton);
       await page.waitForTimeout(2000);
@@ -627,7 +627,7 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
       await headerPage.safeClick(headerPage.cerrarminicartButton);
     } else {
       await headerPage.safeClick(headerPage.cerrarminicartButton);
-      console.log("🧹 El carrito ya estaba vacío.");
+      console.log(" El carrito ya estaba vaco.");
     }
   }
 
@@ -637,7 +637,7 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
 
   const listaProductos = [
     'Aguacate Hass por Kg',  // 1
-    'Plátano Chiapas por Kg', // 2
+    'Pltano Chiapas por Kg', // 2
     'Cebolla Blanca por kg',  // 3
     'Zanahoria por kg',       // 4
     'Ajo por Kg'              // 5
@@ -646,20 +646,20 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
   let productosAgregados = 0;
 
   for (const producto of listaProductos) {
-    console.warn(`Se ingresó al for, producto actual: ` + producto);
+    console.warn(`Se ingres al for, producto actual: ` + producto);
 
     if (productosAgregados >= cantidadAgregar) break;
-    console.warn(`Se ingresó al if productosAgregados`);
+    console.warn(`Se ingres al if productosAgregados`);
 
     try {
       console.warn(`Se intenta agregar producto: ${producto}`);
       const exito = await this.buscarYAgregarProducto(page, headerPage, productos, producto);
       if (exito) {
         productosAgregados++;
-        console.log(`✅ Producto agregado: ${producto} (total agregados: ${productosAgregados})`);
+        console.log(` Producto agregado: ${producto} (total agregados: ${productosAgregados})`);
       }
     } catch (err) {
-      console.warn(`⚠️ No se pudo agregar producto: ${producto} → ${err.message}`);
+      console.warn(` No se pudo agregar producto: ${producto} -> ${err.message}`);
     }
 
     await page.goto(config.urls.PROD);
@@ -674,26 +674,26 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
   await page.waitForTimeout(2000);
   console.warn("Validando formulario de: " + tiposdepago);
 
-  // 1️⃣ Determinar contexto (iframe o page)
+  // 1 Determinar contexto (iframe o page)
   let iframe;
-  let ctx; // 👉 contexto unificado
+  let ctx; //  contexto unificado
 
   if (tiposdepago === "Vales de Colaborador Chedraui") {
     const locator = page.locator(headerPage.formapago(tiposdepago));
     await locator.scrollIntoViewIfNeeded();
     await headerPage.safeClick(headerPage.formapago(tiposdepago));
-    ctx = page; // 🔹 Vales NO usa iframe
+    ctx = page; //  Vales NO usa iframe
     console.warn("Tipo de formulario detectado:\n" + tiposdepago);
   } else {
     const locator = page.locator(headerPage.iframeformapago(tiposdepago));
     await locator.scrollIntoViewIfNeeded();
     iframe = page.frameLocator(headerPage.iframeformapago(tiposdepago));
-    ctx = iframe; // 🔹 Tarjetas usan iframe
+    ctx = iframe; //  Tarjetas usan iframe
     console.warn("Tipo de formulario detectado:\n" + formapago);
     console.warn("Iframe localizado:\n" + headerPage.iframeformapago(tiposdepago));
   }
 
-  // 2️⃣ Definir campos a validar
+  // 2 Definir campos a validar
   let campos = [];
 
   if (formapago.includes("Tarjeta")) {
@@ -713,17 +713,17 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
     ];
   }
 
-  // 3️⃣ Validar existencia de campos
+  // 3 Validar existencia de campos
   for (const campo of campos) {
     console.warn("   Validando existencia del campo: " + campo);
 
     await ctx.locator(campo)
       .waitFor({ state: 'visible', timeout: 5000 })
-      .catch(() => console.warn("⚠ No se encontró"));
+      .catch(() => console.warn(" No se encontr"));
   }
 
-  // 4️⃣ Validar botones según tipo de pago
-  console.warn("\n➡️ Validando botón pagar fuera del frame");
+  // 4 Validar botones segn tipo de pago
+  console.warn("\n Validando botn pagar fuera del frame");
   const pagarBtn = page.locator(headerPage.pagar_Button);
 
   if (formapago.includes("Vales")) {
@@ -737,24 +737,24 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
     if (!validarHabilitado) {
       console.warn("Validar mi Saldo correctamente inhabilitado");
     } else {
-      console.warn("⚠ Validar mi Saldo habilitado con campos vacíos");
+      console.warn(" Validar mi Saldo habilitado con campos vacos");
     }
 
     if (!pagarHabilitado) {
       console.warn("Pagar correctamente inhabilitado");
     } else {
-      console.warn("⚠ Pagar habilitado con vales vacíos");
+      console.warn(" Pagar habilitado con vales vacos");
     }
 
   } else {
     await pagarBtn
       .waitFor({ state: "visible", timeout: 5000 })
-      .catch(() => console.warn("⚠ No se encontró"));
+      .catch(() => console.warn(" No se encontr"));
 
     await headerPage.safeClick(pagarBtn);
 
-    // 5️⃣ Validar mensajes obligatorios
-    console.warn("\n🧪 Validando mensajes de campo obligatorio...");
+    // 5 Validar mensajes obligatorios
+    console.warn("\n Validando mensajes de campo obligatorio...");
 
     for (const campo of campos) {
       const validacion = campo + headerPage.validacioncampoobligatorio_Label;
@@ -767,15 +767,15 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
           });
           console.log("   Mensaje obligatorio OK para: " + campo);
         } catch {
-          console.warn("   No apareció mensaje obligatorio para: " + campo);
+          console.warn("   No apareci mensaje obligatorio para: " + campo);
         }
       } else {
-        console.warn("   No es necesario validar campo meses a pagar porque siempre está capturado");
+        console.warn("   No es necesario validar campo meses a pagar porque siempre est capturado");
       }
     }
   }
 
-  console.log("\n🟢 Validación finalizada para: " + formapago);
+  console.log("\n Validacin finalizada para: " + formapago);
 }
 
   async salircheckout(resumencarritos,page) {
@@ -784,7 +784,7 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
   }
 
 async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) { 
-    console.warn("🔍 Iniciando validación de bloques de entrega…");
+    console.warn(" Iniciando validacin de bloques de entrega...");
 
     // Normalizar tipos esperados
     const tiposEsperados = Array.isArray(TipoTienda) 
@@ -797,22 +797,22 @@ async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) {
     const entregas = page.locator("//*[@class='chedrauimx-checkout-io-2-x-package__delivery']");
     const count = await entregas.count();
     console.warn(`Bloques encontrados en pantalla: ${count}`);
-    // 1️⃣ Validar número de bloques – REGLA CRÍTICA
+    // 1 Validar nmero de bloques - REGLA CRTICA
     if (count !== tiposEsperados.length) {
-        throw new Error(`❌ Se esperaban ${tiposEsperados.length} bloques pero solo hay ${count}`);
+        throw new Error(` Se esperaban ${tiposEsperados.length} bloques pero solo hay ${count}`);
     }
 
-    // 2️⃣ Guardar textos
+    // 2 Guardar textos
     const textosLower = [];
     for (let i = 0; i < count; i++) {
         const raw = (await entregas.nth(i).innerText()).trim();
         textosLower.push(raw.toLowerCase());
-        console.warn(`\n📦 Bloque ${i+1}:\n${raw}`);
+        console.warn(`\n Bloque ${i+1}:\n${raw}`);
     }
 
     const sucursalLower = Sucursal.toLowerCase().trim();
 
-    // 3️⃣ Validación por cada tipo, sin importar orden
+    // 3 Validacin por cada tipo, sin importar orden
     for (const tipo of tiposEsperados) {
 
         if (tipo === "super") {
@@ -820,28 +820,28 @@ async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) {
                 b.includes("entregado por entrega domicilio") &&
                 b.includes(sucursalLower)
             );
-            if (!match) throw new Error(`❌ Falta bloque SUPER para sucursal ${Sucursal}`);
-            console.warn("✔ SUPER encontrado correctamente.");
+            if (!match) throw new Error(` Falta bloque SUPER para sucursal ${Sucursal}`);
+            console.warn(" SUPER encontrado correctamente.");
         }
 
         else if (tipo === "flete") {
             const match = textosLower.some(b => b.includes("flete"));
-            if (!match) throw new Error(`❌ Falta bloque FLETE`);
-            console.warn("✔ FLETE encontrado correctamente.");
+            if (!match) throw new Error(` Falta bloque FLETE`);
+            console.warn(" FLETE encontrado correctamente.");
         }
 
         else if (tipo === "dhl") {
             const match = textosLower.some(b => b.includes("dhl"));
-            if (!match) throw new Error(`❌ Falta bloque DHL`);
-            console.warn("✔ DHL encontrado correctamente.");
+            if (!match) throw new Error(` Falta bloque DHL`);
+            console.warn(" DHL encontrado correctamente.");
         }
 
         else {
-            console.warn(`⚠ Tipo desconocido: ${tipo}`);
+            console.warn(` Tipo desconocido: ${tipo}`);
         }
     }
 
-    console.warn("\n🟢 Validación COMPLETADA con éxito.");
+    console.warn("\n Validacin COMPLETADA con xito.");
 }
 
 async crearDatosPago(row) {
@@ -1071,19 +1071,19 @@ async crearDatosPago(row) {
 
 
 async LlenarFormularioPago(page, headerPage, tipoPago, datos) { 
-  console.warn("📝 Llenando formulario de pago para: " + tipoPago);
+  console.warn(" Llenando formulario de pago para: " + tipoPago);
   console.warn("Datos recibidos:", datos);
 
   let ctx;
-  // 1️⃣ Determinar contexto (iframe o no)
+  // 1 Determinar contexto (iframe o no)
   if (datos.formapago.includes("Vales")) {
-    // 🔹 Vales NO usan iframe
+    //  Vales NO usan iframe
     ctx = page;
-    console.warn("📌 Tipo de pago detectado: VALES");
+    console.warn(" Tipo de pago detectado: VALES");
     // Scroll al formulario
     await page.locator(headerPage.formapago(tipoPago)).scrollIntoViewIfNeeded();
     await headerPage.safeClick(headerPage.formapago(tipoPago));
-    // 2️⃣ Llenado de campos Vales
+    // 2 Llenado de campos Vales
     console.warn("Llenando campos");
     await headerPage.humanType(headerPage.tarjetachedrahui_montoInput,String(datos.monto));
     await headerPage.humanType(headerPage.tarjetachedrahui_codigoInput,String(datos.cvv));
@@ -1103,20 +1103,20 @@ async LlenarFormularioPago(page, headerPage, tipoPago, datos) {
     
   }
   if(datos.formapago.includes("Tarjeta")){
-      // 🔹 Tarjetas, Puntos BBVA, Vales de Despensa → usan iframe
-      console.warn("📌 Tipo de pago detectado: TARJETA");
+      //  Tarjetas, Puntos BBVA, Vales de Despensa -> usan iframe
+      console.warn(" Tipo de pago detectado: TARJETA");
       await page.locator(headerPage.iframeformapago(tipoPago)).scrollIntoViewIfNeeded();
       const iframe = page.frameLocator(headerPage.iframeformapago(tipoPago));
       ctx = iframe;
-      // 2️⃣ Llenado de campos dentro del iframe
+      // 2 Llenado de campos dentro del iframe
       console.warn("Llenando campos");
-      // Número tarjeta
+      // Nmero tarjeta
       await ctx.locator(headerPage.tarjeta_numeroInput).fill(String(datos.numero));
       // Nombre
       await ctx.locator(headerPage.tarjeta_nombreInput).fill(String(datos.nombre));
       // Mes vencimiento
       await ctx.locator(headerPage.tarjeta_mesSelect).selectOption(String(datos.mes));
-      // Año vencimiento
+      // Ao vencimiento
       await ctx.locator(headerPage.tarjeta_anoSelect).selectOption(String(datos.ano));
       // CVV
       await ctx.locator(headerPage.tarjeta_codigoInput).fill(String(datos.cvv));
@@ -1126,7 +1126,7 @@ async LlenarFormularioPago(page, headerPage, tipoPago, datos) {
       
   }
   if(datos.formapago.includes("Paypal")){
-      console.warn("📌 Tipo de pago detectado: PAYPAL");
+      console.warn(" Tipo de pago detectado: PAYPAL");
       await page.waitForTimeout(2000);
       // Pagar
       await headerPage.safeClick(headerPage.pagar_Button);
@@ -1173,15 +1173,15 @@ async LlenarFormularioPago(page, headerPage, tipoPago, datos) {
       // USO:
       const unauthorizedButtonXPath = "//*[@class='btn btn-large payment-unauthorized-button']";
 
-      // Buscar el botón dentro o fuera de iframes
+      // Buscar el botn dentro o fuera de iframes
       let unauthorizedButton = await findInFrames(page, unauthorizedButtonXPath);
 
       if (unauthorizedButton) {
-          console.log("✔️ Botón encontrado, intentando cerrarlo...");
+          console.log(" Botn encontrado, intentando cerrarlo...");
           await unauthorizedButton.click();
-          console.log("✔️ Popup de compra fallida cerrado.");
+          console.log(" Popup de compra fallida cerrado.");
       } else {
-          console.warn("⚠️ No se encontró el popup de compra fallida en ningún iframe.");
+          console.warn(" No se encontr el popup de compra fallida en ningn iframe.");
       }
 
 
@@ -1212,15 +1212,15 @@ module.exports = NavegacionActions;
       // USO:
       const unauthorizedButtonXPath = "//*[@class='btn btn-large payment-unauthorized-button']";
 
-      // Buscar el botón dentro o fuera de iframes
+      // Buscar el botn dentro o fuera de iframes
       let unauthorizedButton = await findInFrames(page, unauthorizedButtonXPath);
 
       if (unauthorizedButton) {
-          console.log("✔️ Botón encontrado, intentando cerrarlo...");
+          console.log(" Botn encontrado, intentando cerrarlo...");
           await unauthorizedButton.click();
-          console.log("✔️ Popup de compra fallida cerrado.");
+          console.log(" Popup de compra fallida cerrado.");
       } else {
-          console.warn("⚠️ No se encontró el popup de compra fallida en ningún iframe.");
+          console.warn(" No se encontr el popup de compra fallida en ningn iframe.");
       }
 
 
