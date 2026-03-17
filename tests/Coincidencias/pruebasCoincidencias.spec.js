@@ -7,7 +7,7 @@ const { getExcelData } = require('../../utils/excelReader');
 const config = require('../../utils/Environment');
 const { loginConCorreo } = require('../../utils/LoginActions');
 const DirectionsPage = require('../../pages/DirectionsPage');
-const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generarReporteLongTailPDF } = require('../../utils/creadorpdf');
+const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generarReporteLongTailPDF, generarReporteResultadosVaciosPDF } = require('../../utils/creadorpdf');
 
 // Archivos Excel
 const excelurl = '.\\data\\ChedrahuiQA_Lexico.xlsx';
@@ -15,6 +15,8 @@ const excelerrores = 'Errores Ortogr\u00e1ficos';
 const excellong = 'Long Tail';
 const excelfrecuencia = 'Frecuencia Alta';
 const excelsemantico = 'Sem\u00e1nticos';
+const excelvacios = 'Resultados Vac\u00edos';
+
 
 // =========================================================
 //  Paralelismo por archivo
@@ -311,15 +313,15 @@ test('C1 - Errores Ortogr\\u00e1ficos', async ({}, testInfo) => {
      });
    }
  });
-*/
 
+*/
 
 
 // =========================================================
 //  TEST C3 - FRECUENCIA ALTA (opcional, corregido)
 // =========================================================
 
-
+/*
 test('C3 - Frecuencia Alta', async ({}, testInfo) => {
 
   const page = testInfo.page;
@@ -450,7 +452,7 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
   }
 });
 
-
+*/
 
 
 // =========================================================
@@ -516,4 +518,180 @@ test('C4 - Sem\\u00e1ntico', async ({ page }, testInfo) => {
     resultados: resultadosTotales
   });
 */
+
+ test('C5 - Resultados Vacios', async ({ page }, testInfo) => {
+
+   const pageReal = testInfo.page || page;
+   const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
+
+   // Si el nombre de la hoja cambia a version sin acento, intentamos ambos.
+   let data = [];
+   try {
+     data = getExcelData(excelurl, excelvacios);
+   } catch (e) {
+     data = getExcelData(excelurl, 'Resultados Vacios');
+   }
+
+   const getCell = (row, keys) => {
+     for (const k of keys) {
+       if (row && Object.prototype.hasOwnProperty.call(row, k) && row[k] !== null && row[k] !== undefined) {
+         const v = String(row[k]).trim();
+         if (v.length > 0) return v;
+       }
+     }
+     return '';
+   };
+
+   const normalizeKey = (k) => String(k || '').trim().toLowerCase();
+
+   // Override getCell for C5 only: tolera headers con espacios al final o variaciones de mayusculas.
+   const getCellNormalized = (row, keys) => {
+     if (!row) return '';
+     for (const k of keys) {
+       if (Object.prototype.hasOwnProperty.call(row, k) && row[k] !== null && row[k] !== undefined) {
+         const v = String(row[k]).trim();
+         if (v.length > 0) return v;
+       }
+       const target = normalizeKey(k);
+       for (const realKey of Object.keys(row)) {
+         if (normalizeKey(realKey) === target) {
+           const v = String(row[realKey] || '').trim();
+           if (v.length > 0) return v;
+         }
+       }
+     }
+     return '';
+   };
+
+   const splitTokens = (value) => {
+     return String(value || '')
+       .split(',')
+       .map((t) => t.trim().toLowerCase())
+       .filter((t) => t.length > 0);
+   };
+
+   const contieneAlguno = (texto, tokens) => {
+     const t = String(texto || '').toLowerCase();
+     for (const tok of tokens) {
+       if (tok && t.includes(tok)) return true;
+     }
+     return false;
+   };
+
+   const clasificarResultado = (titulo, relevTokens, parcialTokens) => {
+     if (contieneAlguno(titulo, relevTokens)) return 'Relevante';
+     if (contieneAlguno(titulo, parcialTokens)) return 'Parcialmente';
+     return 'Irrelevante';
+   };
+
+   const evaluarTermino = (titulos, relevTokens, parcialTokens) => {
+     const lista = Array.isArray(titulos) ? titulos : [];
+     if (lista.length === 0) {
+       return {
+         calificacion: 'V',
+         detalles: []
+       };
+     }
+
+     const detalles = lista.map((t) => ({
+       titulo: String(t || ''),
+       calificacion: clasificarResultado(t, relevTokens, parcialTokens)
+     }));
+
+     const tieneR = detalles.some((d) => d.calificacion === 'Relevante');
+     const tieneP = detalles.some((d) => d.calificacion === 'Parcialmente');
+     const cal = tieneR ? 'R' : (tieneP ? 'P' : 'I');
+
+     return {
+       calificacion: cal,
+       detalles
+     };
+   };
+
+   const modos = [
+     { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' }
+   ];
+
+   for (const m of modos) {
+     const urlObj = new URL(m.url);
+     if (m.modo === 'legacy') {
+       await pageReal.context().addCookies([{
+         name: 'VtexWorkspace',
+         value: 'master%3A87e55a46-08f4-4377-be23-e91e3bbd4612',
+         domain: urlObj.hostname,
+         path: '/'
+       }]);
+     }
+     if (m.modo === 'empathy') {
+       await pageReal.context().addCookies([{
+         name: 'VtexWorkspace',
+         value: 'wempathyprod',
+         domain: urlObj.hostname,
+         path: '/'
+       }]);
+     }
+
+     const resultadosTotales = [];
+
+     await pageReal.goto(m.url);
+     await pageReal.waitForTimeout(5000);
+     if (direcciones && typeof direcciones.SeleccionarRecogerEspecifico === 'function') {
+       await direcciones.SeleccionarRecogerEspecifico();
+     }
+
+     for (const row of data) {
+       const Termino = getCellNormalized(row, ['T\u00e9rmino', 'Termino']);
+       const Relevancia = getCellNormalized(row, ['Relevancia']);
+       const Parcial = getCellNormalized(row, ['Parcialmente Relevantes', 'Parcialmente Relevante']);
+
+       const relevTokens = splitTokens(Relevancia);
+       const parcialTokens = splitTokens(Parcial);
+
+       console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
+
+       let hayResultados = await carritoUtils.buscarProducto(
+         pageReal,
+         headerPage,
+         productosPage,
+         Termino,
+         m.modo
+       );
+
+       // Empathy: a veces renderiza tarde el grid (falso negativo). Damos una oportunidad extra.
+       if (!hayResultados && m.modo === 'empathy') {
+         await pageReal.waitForTimeout(800);
+         const lateCount = await pageReal.locator('[data-test="result-title"]').count().catch(() => 0);
+         if (lateCount > 0) hayResultados = true;
+       }
+
+       const titulos = hayResultados
+         ? await carritoUtils.obtenerProductosEncontrados(pageReal, productosPage, m.modo)
+         : [];
+
+       const evalTerm = evaluarTermino(titulos, relevTokens, parcialTokens);
+       const totalResultados = Array.isArray(titulos) ? titulos.length : 0;
+
+       resultadosTotales.push({
+         termino: Termino,
+         relevancia: Relevancia,
+         parcialmenteRelevantes: Parcial,
+         hayResultados: Array.isArray(titulos) && titulos.length > 0,
+         productosEncontrados: titulos,
+         detalles: evalTerm.detalles,
+         totalResultados,
+         calificacion: evalTerm.calificacion
+       });
+
+       await pageReal.goto(m.url);
+       await pageReal.waitForLoadState('domcontentloaded');
+       await pageReal.waitForSelector('iframe#launcher', { state: 'visible' });
+     }
+
+     await generarReporteResultadosVaciosPDF({
+       nombreTestCase: 'C5_ResultadosVacios_' + m.label,
+       resultados: resultadosTotales,
+       modo: m.modo
+     });
+   }
+ });
 

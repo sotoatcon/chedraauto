@@ -16,14 +16,14 @@ function getExcelData(filePath, sheetName) {
   const sheet = workbook.Sheets[sheetName];
 
   if (!sheet) {
-    throw new Error(`No se encontró la hoja "${sheetName}" en el archivo ${filePath}`);
+    throw new Error(`No se encontro la hoja "${sheetName}" en el archivo ${filePath}`);
   }
 
   // Convierte toda la hoja a JSON, con cada fila como objeto basado en el header
   const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
   if (sheetData.length === 0) {
-    throw new Error(`La hoja "${sheetName}" está vacía`);
+    throw new Error(`La hoja "${sheetName}" esta vacia`);
   }
 
   return sheetData;

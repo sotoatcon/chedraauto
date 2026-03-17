@@ -890,9 +890,165 @@ async function generarReporteLongTailPDF({
   }
 }
 
+// ------------------------------------------------------
+//  REPORTE C5: RESULTADOS VACIOS
+// ------------------------------------------------------
+async function generarReporteResultadosVaciosPDF({
+  nombreTestCase = "C5_ResultadosVacios",
+  fechaEjecucion = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" }),
+  resultados = [],
+  modo = "empathy"
+}) {
+  const esLegacy = modo === "legacy";
+
+  try {
+    if (!Array.isArray(resultados) || resultados.length === 0) {
+      throw new Error("El generador recibio un arreglo vacio.");
+    }
+
+    const fonts = {
+      Roboto: {
+        normal: "Helvetica",
+        bold: "Helvetica-Bold",
+        italics: "Helvetica-Oblique",
+        bolditalics: "Helvetica-BoldOblique"
+      }
+    };
+
+    const printer = new PdfPrinter(fonts);
+    printer.vfs = vfsFonts.vfs;
+
+    const terminosEvaluados = resultados.length;
+    const counts = { R: 0, P: 0, I: 0, V: 0 };
+    resultados.forEach((r) => {
+      const c = String(r.calificacion || "").toUpperCase();
+      if (counts[c] !== undefined) counts[c] += 1;
+    });
+
+    const titulo = esLegacy ? "Resultados Vacios Legacy" : "Resultados Vacios Empathy";
+
+    const contenido = [];
+    contenido.push(
+      { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
+      { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+      { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+      { text: `R: ${counts.R}  P: ${counts.P}  I: ${counts.I}  V: ${counts.V}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+    );
+
+    const resumenBody = [
+      [
+        { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+        { text: "Elementos Encontrados", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+        { text: "Calificacion", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
+      ]
+    ];
+
+    resultados.forEach((r) => {
+      const titulos = Array.isArray(r.productosEncontrados) ? r.productosEncontrados : [];
+      const totalResultados = (r.totalResultados !== undefined && r.totalResultados !== null)
+        ? Number(r.totalResultados) || 0
+        : titulos.length;
+      resumenBody.push([
+        { text: String(r.termino || ""), style: "textoResumen", alignment: "left" },
+        { text: String(totalResultados), style: "textoResumen", alignment: "center" },
+        { text: String(r.calificacion || ""), style: "textoResumen", alignment: "center" }
+      ]);
+    });
+
+    contenido.push({ text: "Resumen de terminos", style: "subtitulo", margin: [0, 10, 0, 8] });
+    contenido.push({
+      table: { widths: ["55%", "25%", "20%"], body: resumenBody },
+      layout: "lightHorizontalLines"
+    });
+
+    contenido.push({ text: "", pageBreak: "after" });
+
+    // Detalle por termino (compacto)
+    for (let i = 0; i < resultados.length; i++) {
+      const r = resultados[i];
+      const titulos = Array.isArray(r.productosEncontrados) ? r.productosEncontrados : [];
+      const det = Array.isArray(r.detalles) ? r.detalles : [];
+      const totalResultados = (r.totalResultados !== undefined && r.totalResultados !== null)
+        ? Number(r.totalResultados) || 0
+        : titulos.length;
+
+      contenido.push(
+        { text: `Termino: "${String(r.termino || "")}"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
+        { text: `Relevancia: ${String(r.relevancia || "")}`, style: "texto" },
+        { text: `Parcialmente Relevantes: ${String(r.parcialmenteRelevantes || "")}`, style: "texto" },
+        { text: `Elementos Encontrados: ${String(totalResultados)}`, style: "texto" },
+        { text: `Calificacion: ${String(r.calificacion || "")}`, style: "texto" },
+        { text: `Hay resultados: ${r.hayResultados ? "SI" : "NO"}`, style: "texto", margin: [0, 0, 0, 10] }
+      );
+
+      if (titulos.length > 0) {
+        const tablaBody = [
+          [
+            { text: "Producto encontrado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" },
+            { text: "Calificacion", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" }
+          ]
+        ];
+
+        const max = Math.min(titulos.length, 24);
+        for (let idx = 0; idx < max; idx++) {
+          const t = titulos[idx];
+          const d = det[idx] || {};
+          tablaBody.push([
+            { text: String(t || ""), style: "texto", alignment: "left" },
+            { text: String(d.calificacion || "Irrelevante"), style: "texto", alignment: "center" }
+          ]);
+        }
+
+        contenido.push({
+          table: { widths: ["80%", "20%"], body: tablaBody },
+          layout: "lightHorizontalLines"
+        });
+      }
+
+      if (i < resultados.length - 1) {
+        contenido.push({ text: "", pageBreak: "after" });
+      }
+    }
+
+    const docDefinition = {
+      content: contenido,
+      styles: {
+        titulo: { fontSize: 18, bold: true, color: "#ff8800", margin: [0, 0, 0, 10] },
+        subtitulo: { fontSize: 12, italics: true, color: "#555", margin: [0, 0, 0, 10] },
+        texto: { fontSize: 10, margin: [0, 2, 0, 2] },
+        textoResumen: { fontSize: 9, margin: [0, 1, 0, 1] },
+        encabezadoNaranja: { fontSize: 12, bold: true, color: "#ff8800", margin: [0, 6, 0, 4] }
+      },
+      defaultStyle: { font: "Roboto" },
+      pageMargins: [40, 60, 40, 60]
+    };
+
+    const reportDir = path.join(process.cwd(), "reports");
+    if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    const pdfPath = path.join(reportDir, `reporteResultadosVacios_${nombreTestCase}_${ts}.pdf`);
+    if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
+    const stream = fs.createWriteStream(pdfPath);
+    pdfDoc.pipe(stream);
+    pdfDoc.end();
+
+    return new Promise((resolve, reject) => {
+      stream.on("finish", () => resolve(pdfPath));
+      stream.on("error", reject);
+    });
+  } catch (err) {
+    console.error("Error al generar PDF Resultados Vacios:", err);
+    throw err;
+  }
+}
+
 module.exports = {
   generarReportePDF,
   generarReporteCoincidenciasPDF,
   generarReporteFrecuenciaAltaPDF,
-  generarReporteLongTailPDF
+  generarReporteLongTailPDF,
+  generarReporteResultadosVaciosPDF
 };
