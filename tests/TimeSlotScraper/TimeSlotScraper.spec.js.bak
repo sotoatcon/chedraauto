@@ -1,4 +1,4 @@
-// tests/TimeSlotScraper.spec.js
+﻿// tests/TimeSlotScraper.spec.js
 const { test, chromium } = require('@playwright/test');
 const HeaderPage = require('../../pages/HeaderPage');
 const ProductosEncontradosPage = require('../../pages/ProductosEncontradosPage'); 
@@ -25,7 +25,7 @@ test('C1 - TimeSlot Scraper', async () => {
   const productos = new ProductosEncontradosPage(page);
   const carritoUtils = new NavegacionActions();
 /*
-  // --- Sesión persistente ---
+  // --- SesiÃ³n persistente ---
   if (fs.existsSync('./sessionCookies.json')) { 
     const cookies = JSON.parse(fs.readFileSync('./sessionCookies.json'));
     await context.addCookies(cookies);
@@ -42,7 +42,7 @@ test('C1 - TimeSlot Scraper', async () => {
   }
 */
 
-  // --- Sesión persistente ---
+  // --- SesiÃ³n persistente ---
   if (fs.existsSync('./sessionCookies.json')) { 
     const cookies = JSON.parse(fs.readFileSync('./sessionCookies.json'));
     await context.addCookies(cookies);
@@ -53,14 +53,14 @@ test('C1 - TimeSlot Scraper', async () => {
     // Primero navegar UNA sola vez
     await page.goto(config.urls.PROD, { waitUntil: 'domcontentloaded' });
 
-    // Inyectar localStorage ANTES de cualquier otra navegación
+    // Inyectar localStorage ANTES de cualquier otra navegaciÃ³n
     await page.evaluate((data) => {
       for (const [key, value] of Object.entries(data)) {
         localStorage.setItem(key, value);
       }
     }, localStorageData);
 
-    // Recargar SOLO después de setear localStorage
+    // Recargar SOLO despuÃ©s de setear localStorage
     await page.reload({ waitUntil: 'domcontentloaded' });
   }
 
@@ -71,16 +71,15 @@ test('C1 - TimeSlot Scraper', async () => {
   await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
 
   await headerPage.safeClick(headerPage.minicartButton);  
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(3000);
 
-  // Centralize the "empty cart + close minicart" flow with retries/fallbacks.
   await carritoUtils.vaciarCarrito(page, resumencarritos, headerPage);
 
   await page.goto(config.urls.PROD);
 
     const listaProductos = [
       'Aguacate Hass por Kg',  // 1
-      'Plátano Chiapas por Kg', // 2
+      'PlÃ¡tano Chiapas por Kg', // 2
       'Cebolla Blanca por kg',  // 3
       'Zanahoria por kg',       // 4
       'Ajo por Kg'              // 5
@@ -89,24 +88,24 @@ test('C1 - TimeSlot Scraper', async () => {
     let productosAgregados = 0;
 
     for (const producto of listaProductos) {
-    console.warn(`Se ingresó al for, producto actual: `+producto);
+    console.warn(`Se ingresÃ³ al for, producto actual: `+producto);
 
     if (productosAgregados >= 4) break;
-      console.warn(`Se ingresó al if productosAgregados`);
+      console.warn(`Se ingresÃ³ al if productosAgregados`);
       
       try {
           console.warn(`Se intenta agregar producto: ${producto}`);
           const exito = await carritoUtils.buscarYAgregarProducto(page, headerPage, productos, producto);
           if (exito) {
             productosAgregados++;
-            console.log(`✅ Producto agregado: ${producto} (total agregados: ${productosAgregados})`);
+            console.log(`âœ… Producto agregado: ${producto} (total agregados: ${productosAgregados})`);
           }
         } catch (err) {
-          console.warn(`⚠️ No se pudo agregar producto: ${producto} → ${err.message}`);
+          console.warn(`âš ï¸ No se pudo agregar producto: ${producto} â†’ ${err.message}`);
         }
   }
 
-  console.log(`🛒 Total de productos agregados al carrito: ${productosAgregados}`);
+  console.log(`ðŸ›’ Total de productos agregados al carrito: ${productosAgregados}`);
   await page.goto(config.urls.PROD);
 
   await headerPage.safeClick(headerPage.minicartButton);
@@ -135,32 +134,32 @@ test('C1 - TimeSlot Scraper', async () => {
     //const sucursal = sucursales.nth(i); // Siempre la primera
     await sucursal.scrollIntoViewIfNeeded();
     const nombreSucursal = (await sucursal.innerText()).trim();
-    console.log(`🏪 Revisando sucursal ${i + 1}: ${nombreSucursal}`);
+    console.log(`ðŸª Revisando sucursal ${i + 1}: ${nombreSucursal}`);
     await sucursal.click();
     await resumencarritos.safeClick(resumencarritos.confirmarCambiarDireccionButton);
     await page.waitForTimeout(1500);
     let diasConfigurados = [];
 
     try {
-      await page.waitForTimeout(4500);
+      await page.waitForTimeout(5000);
       const dias = page.locator(resumencarritos.diasentrega);
       const totalDias = await dias.count();
-      console.log(`CONSOLE\n🗓️ total dias: ${totalDias}`);
+      console.log(`CONSOLE\nðŸ—“ï¸ total dias: ${totalDias}`);
 
       if (totalDias > 0) {
         for (let j = 0; j < totalDias; j++) {
           const diaTexto = await dias.nth(j).innerText();
-          console.log(`\n🗓️ Día ${j + 1}: ${diaTexto.trim()}`);
+          console.log(`\nðŸ—“ï¸ DÃ­a ${j + 1}: ${diaTexto.trim()}`);
 
           // ===> Capturamos TODOS los elementos de horarios en un array real:
           const horariosElementos = await page.$$(resumencarritos.horarioentregaButton);
-          console.log(`⏱️ total de horarios encontrados para ${diaTexto.trim()}: ${horariosElementos.length}`);
+          console.log(`â±ï¸ total de horarios encontrados para ${diaTexto.trim()}: ${horariosElementos.length}`);
 
           let listaHorarios = [];
           for (let k = 0; k < horariosElementos.length; k++) {
             const textoHorario = (await horariosElementos[k].innerText()).trim();
 
-            // Separa el horario del precio si viene junto (por el símbolo $)
+            // Separa el horario del precio si viene junto (por el sÃ­mbolo $)
             const horarioLimpio = textoHorario.split('$')[0].trim();
 
             listaHorarios.push(horarioLimpio);
@@ -171,14 +170,14 @@ test('C1 - TimeSlot Scraper', async () => {
             horarios: listaHorarios.join(', ') + '.'
           });
 
-          console.log(`⏰ Horarios para "${diaTexto.trim()}": ${listaHorarios.join(', ')}.`);
+          console.log(`â° Horarios para "${diaTexto.trim()}": ${listaHorarios.join(', ')}.`);
         }
       } else {
-        console.warn(`❌ Sucursal sin días configurados: ${nombreSucursal}`);
+        console.warn(`âŒ Sucursal sin dÃ­as configurados: ${nombreSucursal}`);
         sucursalesSinDias.push(nombreSucursal);
       }
     } catch (err) {
-      console.warn(`⚠️ Error al obtener los días y horarios para ${nombreSucursal}:`, err);
+      console.warn(`âš ï¸ Error al obtener los dÃ­as y horarios para ${nombreSucursal}:`, err);
       sucursalesSinDias.push(nombreSucursal);
     }
 
@@ -188,7 +187,7 @@ test('C1 - TimeSlot Scraper', async () => {
     });
 
     await resumencarritos.safeClick(resumencarritos.cambiarDireccionLink);    
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
   }
 
 // --- Reporte Final ---
@@ -197,33 +196,33 @@ const fechaHora = new Date().toLocaleString('es-MX', {
   hour12: false
 });
 
-// Cálculos de totales
+// CÃ¡lculos de totales
 const totalSucursales = sucursalesEvaluadas.length;
 const totalConfiguradas = sucursalesEvaluadas.filter(s => s.dias.length > 0).length;
 const totalNoConfiguradas = totalSucursales - totalConfiguradas;
 
-// Impresión general en consola
-console.log('\n📌 Resumen final:');
-console.log(`🕒 Fecha de ejecución: ${fechaHora}`);
-console.log(`🏬 Total de sucursales evaluadas: ${totalSucursales}`);
-console.log(`✅ Total configuradas con días: ${totalConfiguradas}`);
-console.log(`🚫 Total sin días configurados: ${totalNoConfiguradas}\n`);
+// ImpresiÃ³n general en consola
+console.log('\nðŸ“Œ Resumen final:');
+console.log(`ðŸ•’ Fecha de ejecuciÃ³n: ${fechaHora}`);
+console.log(`ðŸ¬ Total de sucursales evaluadas: ${totalSucursales}`);
+console.log(`âœ… Total configuradas con dÃ­as: ${totalConfiguradas}`);
+console.log(`ðŸš« Total sin dÃ­as configurados: ${totalNoConfiguradas}\n`);
 
-// --- Construcción base del reporte (texto y XML) ---
-let reporteTexto = `📌 Resumen final\nFecha ejecución: ${fechaHora}\n`;
-reporteTexto += `🏬 Total de sucursales evaluadas: ${totalSucursales}\n`;
-reporteTexto += `✅ Total configuradas con días: ${totalConfiguradas}\n`;
-reporteTexto += `🚫 Total sin días configurados: ${totalNoConfiguradas}\n\n`;
+// --- ConstrucciÃ³n base del reporte (texto y XML) ---
+let reporteTexto = `ðŸ“Œ Resumen final\nFecha ejecuciÃ³n: ${fechaHora}\n`;
+reporteTexto += `ðŸ¬ Total de sucursales evaluadas: ${totalSucursales}\n`;
+reporteTexto += `âœ… Total configuradas con dÃ­as: ${totalConfiguradas}\n`;
+reporteTexto += `ðŸš« Total sin dÃ­as configurados: ${totalNoConfiguradas}\n\n`;
 
 let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-xml += `<testsuite name="Evaluación de Sucursales" tests="${totalSucursales}">\n`;
+xml += `<testsuite name="EvaluaciÃ³n de Sucursales" tests="${totalSucursales}">\n`;
 
-// --- Desglose de sucursales sin días configurados ---
-reporteTexto += `📅 Sucursales con días configurados:\n`;
-console.log(`📅 Sucursales con días configurados:\n`);
+// --- Desglose de sucursales sin dÃ­as configurados ---
+reporteTexto += `ðŸ“… Sucursales con dÃ­as configurados:\n`;
+console.log(`ðŸ“… Sucursales con dÃ­as configurados:\n`);
 for (const s of sucursalesEvaluadas.filter(s => s.dias.length > 0)) {
-  console.log(`🏪 ${s.nombre}`);
-  reporteTexto += `🏪 ${s.nombre}\n`;
+  console.log(`ðŸª ${s.nombre}`);
+  reporteTexto += `ðŸª ${s.nombre}\n`;
 
   if (s.dias.length > 0) {
     for (const d of s.dias) {
@@ -231,14 +230,14 @@ for (const s of sucursalesEvaluadas.filter(s => s.dias.length > 0)) {
       const nombreDia = d.nombreDia || String(d);
       const horarios = d.horarios || '';
 
-      console.log(`   - Día: ${nombreDia}`);
+      console.log(`   - DÃ­a: ${nombreDia}`);
       console.log(`     Horarios: ${horarios}`);
-      reporteTexto += ` - Día: ${nombreDia}\n`;
+      reporteTexto += ` - DÃ­a: ${nombreDia}\n`;
       reporteTexto += `   Horarios: ${horarios}\n`;
     }
   } else {
-    console.log(`   🚫 Sin días configurados`);
-    reporteTexto += `   🚫 Sin días configurados\n`;
+    console.log(`   ðŸš« Sin dÃ­as configurados`);
+    reporteTexto += `   ðŸš« Sin dÃ­as configurados\n`;
   }
 
   reporteTexto += `\n`;
@@ -254,7 +253,7 @@ for (const s of sucursalesEvaluadas) {
     xml += `  <testcase classname="Sucursales" name="${s.nombre}"/>\n`;
   } else {
     xml += `  <testcase classname="Sucursales" name="${s.nombre}">\n`;
-    xml += `    <failure message="Sucursal sin días configurados">No se encontraron días configurados</failure>\n`;
+    xml += `    <failure message="Sucursal sin dÃ­as configurados">No se encontraron dÃ­as configurados</failure>\n`;
     xml += `  </testcase>\n`;
   }*/
 }
@@ -266,11 +265,11 @@ if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
 const reportPathTxt = path.join(reportDir, 'reporteSucursales.txt');
 fs.writeFileSync(reportPathTxt, reporteTexto, 'utf8');
-console.log(`\n📄 Reporte TXT generado en: ${reportPathTxt}`);
+console.log(`\nðŸ“„ Reporte TXT generado en: ${reportPathTxt}`);
 
 const reportPathXml = path.join(reportDir, 'reporteSucursales.xml');
 fs.writeFileSync(reportPathXml, xml, 'utf8');
-console.log(`📊 Reporte XML JUnit generado en: ${reportPathXml}`);
+console.log(`ðŸ“Š Reporte XML JUnit generado en: ${reportPathXml}`);
 
 // --- Funciones auxiliares ---
 function normalizarTexto(texto) {
@@ -284,7 +283,7 @@ function normalizarTexto(texto) {
 }
 
 /**
- * Busca la sucursal (clave/nombre canónico) a partir de un texto de dirección.
+ * Busca la sucursal (clave/nombre canÃ³nico) a partir de un texto de direcciÃ³n.
  * Compara contra las direcciones definidas en config.sucursales (objeto clave:direccion).
  * Devuelve la clave encontrada o "Desconocida".
  */
@@ -298,7 +297,7 @@ function obtenerSucursalPorDireccion(texto) {
 
   // Si no hay sucursales, termina temprano
   if (entries.length === 0) {
-    console.warn("⚠️ No hay sucursales configuradas en config.");
+    console.warn("âš ï¸ No hay sucursales configuradas en config.");
     return "Desconocida";
   }
 
@@ -310,17 +309,17 @@ function obtenerSucursalPorDireccion(texto) {
       partes.length >= 2 ? `${partes[0]}, ${partes[1].trim()}` : dirConfigNorm;
     const primerFragmento = partes[0].trim();
 
-    // Comparación de texto normalizado
+    // ComparaciÃ³n de texto normalizado
     if (
       textoNormalizado.includes(primerFragmento) ||
       textoNormalizado.includes(aliasCorto)
     ) {
-      console.warn("✅ Match encontrado →", nombreSucursal);
+      console.warn("âœ… Match encontrado â†’", nombreSucursal);
       return nombreSucursal;
     }
   }
 
-  console.warn("❌ No hubo coincidencias. Se devolverá 'Desconocida'");
+  console.warn("âŒ No hubo coincidencias. Se devolverÃ¡ 'Desconocida'");
   return "Desconocida";
 }
 
@@ -336,8 +335,8 @@ await generarReportePDF({
 /*
 await sendEmail(
   config.correos,
-  '📄 Reporte PDF',
-  'Adjunto el reporte más reciente.',
+  'ðŸ“„ Reporte PDF',
+  'Adjunto el reporte mÃ¡s reciente.',
   '../reports/reporteSucursales.pdf'
 );
 */

@@ -614,7 +614,28 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
     console.log(" Ejecutando vaciarCarrito() ...");
 
     const vaciarButton = page.locator(resumencarritos.vaciarcarritoButton);
+    const cerrarMiniCart = async () => {
+      // When the drawer is closed, the close icon can exist but be off-viewport.
+      // Prefer Escape as a universal close, but try the button first.
+      try {
+        await headerPage.safeClick(headerPage.cerrarminicartButton);
+        return;
+      } catch (e) {
+        try {
+          await page.locator(headerPage.cerrarminicartButton).first().click({ timeout: 2000, force: true });
+          return;
+        } catch {
+          // ignore
+        }
+      }
 
+      try {
+        await page.keyboard.press("Escape");
+      } catch {
+        // ignore
+      }
+    };
+ 
     if (await vaciarButton.count() > 0) {
       console.log(" Vaciando el carrito...");
 
@@ -624,10 +645,10 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
       await page.waitForTimeout(2000);
  
       // Cerrar minicart
-      await headerPage.safeClick(headerPage.cerrarminicartButton);
+      await cerrarMiniCart();
     } else {
-      await headerPage.safeClick(headerPage.cerrarminicartButton);
-      console.log(" El carrito ya estaba vaco.");
+      console.log(" El carrito ya estaba vacio.");
+      await cerrarMiniCart();
     }
   }
 

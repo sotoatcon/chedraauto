@@ -30,7 +30,7 @@ class HeaderPage extends BasePage {
     this.misfavoritosHref = "//*[@href='/account#/favorites']";
     this.mislistasHref = "//*[@href='/account#/wishlist']";
     this.bannerSuperiorHref ="//*[contains(@class,'sliderItem--top-bar-slider')]//a[@title]";
-    this.minicartButton = "//*[@href='#icon-minicart']";
+    this.minicartButton = "//*[@href='#hpa-cart']";
     this.agregardireccionButton = "//*[@class='chedrauimx-locator-2-x-triggerAddress']"
     this.direccionButton = "//*[@class='chedrauimx-locator-2-x-triggerAddress']";
     this.ingresarButton = "//*[contains(text(),'Ingresar')]";
@@ -41,7 +41,8 @@ class HeaderPage extends BasePage {
     this.micuentaButton = "//*[contains(@class,'header-top__login')]//button";
     this.logoImg = "//*[contains(@class,'header--logo')]//*[@href]";
     this.holaUser = "//*[contains(text(),'Hola,')]";
-    this.cerrarminicartButton = "//*[@class=' vtex-minicart-2-x-closeIcon']"; 
+    // Prefer the real close button (avoid clicking the SVG and avoid hidden duplicates).
+    this.cerrarminicartButton = "button.vtex-minicart-2-x-closeIconButton:visible";
     this.tarjeta_numeroInput = "//*[@id='creditCardpayment-card-0Number']";
     this.tarjeta_nombreInput = "//*[@id='creditCardpayment-card-0Name']";
     this.tarjeta_codigoInput = "//*[@id='creditCardpayment-card-0Code']";
