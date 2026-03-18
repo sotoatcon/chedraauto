@@ -102,7 +102,7 @@ test.beforeEach(async ({ page }, testInfo) => {
 //  TEST C1 - ERRORES ORTOGRFICOS
 // =========================================================
 
-/*
+
 test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 
   const page = testInfo.page;      // <- USAMOS LA PAGE DE EMP
@@ -116,6 +116,9 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
     { label: "empathy", url: config.urls.PRODEMPATHY, modo: "empathy" },
     { label: "legacy", url: config.urls.PROD, modo: "legacy" }
   ];
+
+  // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
+  const resultadosCombinados = { empathy: [], legacy: [] };
 
   for (const m of modos) {
     const urlObj = new URL(m.url);
@@ -215,20 +218,21 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
       await page.waitForSelector("iframe#launcher", { state: "visible" });
     }
 
-    await generarReporteCoincidenciasPDF({
-      nombreTestCase: `C1_ErroresOrtograficos_${m.label}`,
-      resultados: resultadosTotales,
-      modo: m.modo
-    });
+    resultadosCombinados[m.modo] = resultadosTotales;
   }
-  
+
+  await generarReporteCoincidenciasPDF({
+    nombreTestCase: "C1_ErroresOrtograficos",
+    resultados: resultadosCombinados
+  });
+   
 });
 
 
 
 
 // =========================================================
-//  TEST C2 - LONG TAIL (opcional, corregido tambin)
+//  TEST C2 - LONG TAIL (opcional, corregido tambien)
 // =========================================================
  
  test('C2 - Long Tail', async ({ page }, testInfo) => {
@@ -247,12 +251,15 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
      return '';
    };
  
-   const modos = [
-     { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
-     { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
-   ];
- 
-   for (const m of modos) {
+    const modos = [
+      { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
+      { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
+    ];
+
+    // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
+    const resultadosCombinados = { empathy: [], legacy: [] };
+  
+    for (const m of modos) {
      const urlObj = new URL(m.url);
      if (m.modo === 'legacy') {
        await pageReal.context().addCookies([{
@@ -339,16 +346,17 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
        await pageReal.waitForSelector('iframe#launcher', { state: 'visible' });
      }
  
-      await generarReporteLongTailPDF({
-        nombreTestCase: `C2_LongTail_${m.label}`,
-        resultados: resultadosTotales,
-        modo: m.modo
-      });
-    }
-  });
+       resultadosCombinados[m.modo] = resultadosTotales;
+     }
+
+     await generarReporteLongTailPDF({
+       nombreTestCase: "C2_LongTail",
+       resultados: resultadosCombinados
+     });
+   });
 
 
-*/
+
 
 // =========================================================
 //  TEST C3 - FRECUENCIA ALTA (opcional, corregido)
@@ -375,6 +383,9 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
     { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
     { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
   ];
+
+  // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
+  const resultadosCombinados = { empathy: [], legacy: [] };
 
   for (const m of modos) {
     const urlObj = new URL(m.url);
@@ -472,12 +483,13 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
       await page.waitForSelector('iframe#launcher', { state: 'visible' });
     }
 
-    await generarReporteFrecuenciaAltaPDF({
-      nombreTestCase: "C3_FrecuenciaAlta_" + m.label,
-      resultados: resultadosTotales,
-      modo: m.modo
-    });
+    resultadosCombinados[m.modo] = resultadosTotales;
   }
+
+  await generarReporteFrecuenciaAltaPDF({
+    nombreTestCase: "C3_FrecuenciaAlta",
+    resultados: resultadosCombinados
+  });
 });
 
 // =========================================================
@@ -543,7 +555,7 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
     resultados: resultadosTotales
   });
 */
-/*
+
  test('C5 - Resultados Vacios', async ({ page }, testInfo) => {
 
    const pageReal = testInfo.page || page;
@@ -719,4 +731,4 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
      });
    }
  });
-*/
+

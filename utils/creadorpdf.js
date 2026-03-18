@@ -244,10 +244,19 @@ async function generarReporteCoincidenciasPDF({
   resultados = [],
   modo = "empathy"
 }) {
-  const esLegacy = modo === "legacy";
   try {
-    // ---------------------------
-    //  ADAPTADOR DE DATOS
+    const fonts = {
+      Roboto: {
+        normal: "Helvetica",
+        bold: "Helvetica-Bold",
+        italics: "Helvetica-Oblique",
+        bolditalics: "Helvetica-BoldOblique"
+      }
+    };
+
+    const printer = new PdfPrinter(fonts);
+    printer.vfs = vfsFonts.vfs;
+
     const getCorreccionTexto = (r) => {
       const direct = r.correccionEsperada && String(r.correccionEsperada).trim();
       if (direct) return direct;
@@ -262,277 +271,276 @@ async function generarReporteCoincidenciasPDF({
       return "NA";
     };
 
-    const resultadosAdaptados = resultados.map(r => {
-      let listaDetallada = [];
+    const buildSection = (resultadosArr, modoLocal) => {
+      const esLegacy = modoLocal === "legacy";
 
-      if (Array.isArray(r.listaDetallada) && r.listaDetallada.length > 0) {
-        listaDetallada = r.listaDetallada;
-      } else {
-        const coinc = Array.isArray(r.coincidencias) ? r.coincidencias : [];
-        const noCoinc = Array.isArray(r.noCoincidencias) ? r.noCoincidencias : [];
+      const resultadosAdaptados = resultadosArr.map(r => {
+        let listaDetallada = [];
 
-        listaDetallada = [
-          ...coinc.map(t => ({ texto: String(t), correccion: true, equivalencia: false })),
-          ...noCoinc.map(t => ({ texto: String(t), correccion: false, equivalencia: false }))
-        ];
-      }
+        if (Array.isArray(r.listaDetallada) && r.listaDetallada.length > 0) {
+          listaDetallada = r.listaDetallada;
+        } else {
+          const coinc = Array.isArray(r.coincidencias) ? r.coincidencias : [];
+          const noCoinc = Array.isArray(r.noCoincidencias) ? r.noCoincidencias : [];
 
-      const calificacion = r.calificacion || (r.CC ? "CC" : r.CP ? "CP" : r.SR ? "SR" : r.SN ? "SN" : "");
-      const totalProductos = typeof r.totalProductos === "number" ? r.totalProductos : listaDetallada.length;
+          listaDetallada = [
+            ...coinc.map(t => ({ texto: String(t), correccion: true, equivalencia: false })),
+            ...noCoinc.map(t => ({ texto: String(t), correccion: false, equivalencia: false }))
+          ];
+        }
 
-      return {
-        termino: r.termino || r.input || "Sin nombre",
-        equivalencias: r.equivalencias || null,
-        correccion: r.correccion || "",
-        correccionEsperada: r.correccionEsperada || null,
-        calificacion,
-        totalProductos,
-        productosEncontrados: Array.isArray(r.productosEncontrados) ? r.productosEncontrados : [],
-        hayResultados:
-          r.hayResultados === true ||
-          listaDetallada.length > 0 ||
-          (Array.isArray(r.productosEncontrados) && r.productosEncontrados.length > 0),
-        listaDetallada
-      };
-    });
+        const calificacion = r.calificacion || (r.CC ? "CC" : r.CP ? "CP" : r.SR ? "SR" : r.SN ? "SN" : "");
+        const totalProductos = typeof r.totalProductos === "number" ? r.totalProductos : listaDetallada.length;
 
-    if (resultadosAdaptados.length === 0) {
-      throw new Error("El generador recibio un arreglo vacio.");
-    }
-
-    // ---------------------------
-    // METRICAS
-    // ---------------------------
-    const totalEvaluados = resultadosAdaptados.length;
-    const tieneCalificacion = resultadosAdaptados.some(x => typeof x.calificacion === "string" && x.calificacion.length > 0);
-
-    const metricas = {
-      CC: resultadosAdaptados.filter(x => x.calificacion === "CC").length,
-      CP: resultadosAdaptados.filter(x => x.calificacion === "CP").length,
-      SR: resultadosAdaptados.filter(x => x.calificacion === "SR").length,
-      SN: resultadosAdaptados.filter(x => x.calificacion === "SN").length
-    };
-    const legacyStats = resultadosAdaptados.map(t => {
-      const total = t.listaDetallada.length;
-      const correctos = t.listaDetallada.filter(x => x.correccion || x.equivalencia).length;
-      const incorrectos = total - correctos;
-      return { total, correctos, incorrectos };
-    });
-    const legacySinErrores = legacyStats.filter(s => s.total > 0 && s.incorrectos === 0).length;
-    const legacyParcial = legacyStats.filter(s => s.total > 0 && s.correctos > 0 && s.incorrectos > 0).length;
-    const legacyFallidos = legacyStats.filter(s => s.total === 0 || s.correctos === 0).length;
-
-    // ---------------------------
-    // CONFIG PDF
-    // ---------------------------
-    const fonts = {
-      Roboto: {
-        normal: "Helvetica",
-        bold: "Helvetica-Bold",
-        italics: "Helvetica-Oblique",
-        bolditalics: "Helvetica-BoldOblique"
-      }
-    };
-
-    const printer = new PdfPrinter(fonts);
-    printer.vfs = vfsFonts.vfs;
-
-    const contenido = [];
-
-    // ---------------------------
-    // RESUMEN GENERAL
-    // ---------------------------
-    contenido.push(
-      { text: esLegacy ? "Reporte Errores Ortograficos Legacy" : "Reporte Errores Ortograficos Empathy", style: "titulo", margin: [0, 0, 0, 10] },
-      { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-      { text: `Sucursal evaluada: ${Object.keys(config.RecogerEnDirecciones || {})[0] || "Por definir"}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-      { text: `Terminos buscados: ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
-    );
-
-    if (tieneCalificacion) {
-      contenido.push(
-        { text: `CC: ${metricas.CC}`, style: "subtitulo" },
-        { text: `CP: ${metricas.CP}`, style: "subtitulo" },
-        { text: `SR: ${metricas.SR}`, style: "subtitulo" },
-        { text: `SN: ${metricas.SN}`, style: "subtitulo" },
-        { text: "\n" }
-      );
-    }
-
-    const resumenTablaBody = [
-      [
-        { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
-        { text: "Correccion", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
-        { text: "Equivalencia", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
-      ]
-    ];
-
-    resultadosAdaptados.forEach(r => {
-      const corr = getCorreccionTexto(r);
-      const equiv = getEquivalenciaTexto(r);
-      resumenTablaBody.push([
-        { text: r.termino, style: "textoResumen", alignment: "left" },
-        { text: corr, style: "textoResumen", alignment: "left" },
-        { text: equiv, style: "textoResumen", alignment: "left" }
-      ]);
-    });
-
-    contenido.push({
-      text: "Resumen de terminos",
-      style: "subtitulo",
-      margin: [0, 10, 0, 8]
-    });
-    contenido.push({
-      table: { widths: ["34%", "33%", "33%"], body: resumenTablaBody },
-      layout: "lightHorizontalLines"
-    });
-
-    if (!esLegacy) {
-      contenido.push(
-        { text: "Definiciones:", style: "subtitulo", margin: [0, 10, 0, 6] },
-        { text: "CC: Hay correccion global y todos los productos tienen la correccion esperada.", style: "textoDef" },
-        { text: "CP: Hay correccion global, no todos los productos tienen correccion, pero si hay equivalencias.", style: "textoDef" },
-        { text: "SR: No hay correccion global, pero si hay equivalencias en los resultados.", style: "textoDef" },
-        { text: "SN: No hay correccion ni equivalencias, o no hay resultados.", style: "textoDef" }
-      );
-    }
-
-    contenido.push({ text: "", pageBreak: "after" });
-
-    // ---------------------------
-    // DETALLE POR TERMINO
-    // ---------------------------
-    for (let i = 0; i < resultadosAdaptados.length; i++) {
-      const termino = resultadosAdaptados[i];
-
-      contenido.push({
-        text: `Resultado de busqueda: "${termino.termino}"`,
-        style: "encabezadoNaranja",
-        margin: [0, 0, 0, 10]
+        return {
+          termino: r.termino || r.input || "Sin nombre",
+          equivalencias: r.equivalencias || null,
+          correccion: r.correccion || "",
+          correccionEsperada: r.correccionEsperada || null,
+          calificacion,
+          totalProductos,
+          productosEncontrados: Array.isArray(r.productosEncontrados) ? r.productosEncontrados : [],
+          hayResultados:
+            r.hayResultados === true ||
+            listaDetallada.length > 0 ||
+            (Array.isArray(r.productosEncontrados) && r.productosEncontrados.length > 0),
+          listaDetallada
+        };
       });
 
-      if (!termino.equivalencias) {
-        const hayProductos = termino.productosEncontrados.length > 0;
+      if (resultadosAdaptados.length === 0) {
+        throw new Error("El generador recibio un arreglo vacio.");
+      }
 
-        if (!hayProductos) {
-          contenido.push({ text: "Busqueda sin exito", style: "texto" });
+      // ---------------------------
+      // METRICAS
+      // ---------------------------
+      const totalEvaluados = resultadosAdaptados.length;
+      const tieneCalificacion = resultadosAdaptados.some(x => typeof x.calificacion === "string" && x.calificacion.length > 0);
+
+      const metricas = {
+        CC: resultadosAdaptados.filter(x => x.calificacion === "CC").length,
+        CP: resultadosAdaptados.filter(x => x.calificacion === "CP").length,
+        SR: resultadosAdaptados.filter(x => x.calificacion === "SR").length,
+        SN: resultadosAdaptados.filter(x => x.calificacion === "SN").length
+      };
+
+      const contenido = [];
+      contenido.push(
+        { text: esLegacy ? "Reporte Errores Ortograficos Legacy" : "Reporte Errores Ortograficos Empathy", style: "titulo", margin: [0, 0, 0, 10] },
+        { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Sucursal evaluada: ${Object.keys(config.RecogerEnDirecciones || {})[0] || "Por definir"}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Terminos buscados: ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+      );
+
+      if (tieneCalificacion) {
+        contenido.push(
+          { text: `CC: ${metricas.CC}`, style: "subtitulo" },
+          { text: `CP: ${metricas.CP}`, style: "subtitulo" },
+          { text: `SR: ${metricas.SR}`, style: "subtitulo" },
+          { text: `SN: ${metricas.SN}`, style: "subtitulo" },
+          { text: "\n" }
+        );
+      }
+
+      const resumenTablaBody = [
+        [
+          { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Correccion", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Equivalencia", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
+        ]
+      ];
+
+      resultadosAdaptados.forEach(r => {
+        const corr = getCorreccionTexto(r);
+        const equiv = getEquivalenciaTexto(r);
+        resumenTablaBody.push([
+          { text: r.termino, style: "textoResumen", alignment: "left" },
+          { text: corr, style: "textoResumen", alignment: "left" },
+          { text: equiv, style: "textoResumen", alignment: "left" }
+        ]);
+      });
+
+      contenido.push({
+        text: "Resumen de terminos",
+        style: "subtitulo",
+        margin: [0, 10, 0, 8]
+      });
+      contenido.push({
+        table: { widths: ["34%", "33%", "33%"], body: resumenTablaBody },
+        layout: "lightHorizontalLines"
+      });
+
+      if (!esLegacy) {
+        contenido.push(
+          { text: "Definiciones:", style: "subtitulo", margin: [0, 10, 0, 6] },
+          { text: "CC: Hay correccion global y todos los productos tienen la correccion esperada.", style: "textoDef" },
+          { text: "CP: Hay correccion global, no todos los productos tienen correccion, pero si hay equivalencias.", style: "textoDef" },
+          { text: "SR: No hay correccion global, pero si hay equivalencias en los resultados.", style: "textoDef" },
+          { text: "SN: No hay correccion ni equivalencias, o no hay resultados.", style: "textoDef" }
+        );
+      }
+
+      contenido.push({ text: "", pageBreak: "after" });
+
+      // ---------------------------
+      // DETALLE POR TERMINO
+      // ---------------------------
+      for (let i = 0; i < resultadosAdaptados.length; i++) {
+        const termino = resultadosAdaptados[i];
+
+        contenido.push({
+          text: `Resultado de busqueda: "${termino.termino}"`,
+          style: "encabezadoNaranja",
+          margin: [0, 0, 0, 10]
+        });
+
+        if (!termino.equivalencias) {
+          const hayProductos = termino.productosEncontrados.length > 0;
+
+          if (!hayProductos) {
+            contenido.push({ text: "Busqueda sin exito", style: "texto" });
+
+            if (i < resultadosAdaptados.length - 1) {
+              contenido.push({ text: "", pageBreak: "after" });
+            }
+            continue;
+          }
+
+          const tablaBody = [
+            [
+              {
+                text: "Producto encontrado",
+                style: "encabezadoNaranja",
+                fillColor: "#ffe6cc",
+                alignment: "center"
+              }
+            ]
+          ];
+
+          termino.productosEncontrados.forEach(p => {
+            tablaBody.push([{ text: p, style: "texto", alignment: "left" }]);
+          });
+
+          contenido.push({
+            table: { widths: ["100%"], body: tablaBody },
+            layout: "lightHorizontalLines"
+          });
 
           if (i < resultadosAdaptados.length - 1) {
             contenido.push({ text: "", pageBreak: "after" });
           }
+
           continue;
         }
+
+        const equivalenciasTexto = Array.isArray(termino.equivalencias)
+          ? termino.equivalencias.join(", ")
+          : (termino.equivalencias ? String(termino.equivalencias) : "");
+        const correccionTexto = getCorreccionTexto(termino);
+        const totalEncontrados = typeof termino.totalProductos === "number"
+          ? termino.totalProductos
+          : termino.listaDetallada.length;
+        const calificacionTexto = termino.calificacion || "SN";
+        const correccionEsperadaTexto = termino.ccProductos === totalEncontrados && totalEncontrados > 0 ? "Si" : "No";
+
+        contenido.push(
+          { text: `Busqueda: ${termino.termino}`, style: "texto" },
+          { text: `Correccion: ${correccionTexto}`, style: "texto" },
+          { text: `Equivalencias: ${equivalenciasTexto}`, style: "texto" },
+          { text: `Resultados encontrados: ${totalEncontrados}`, style: "texto" }
+        );
+        if (!esLegacy) {
+          contenido.push(
+            { text: `Correccion esperada: ${correccionEsperadaTexto}`, style: "texto" },
+            { text: `Calificacion busqueda: ${calificacionTexto}`, style: "texto", margin: [0, 0, 0, 10] }
+          );
+        } else {
+          contenido.push({ text: "", style: "texto", margin: [0, 0, 0, 10] });
+        }
+        if (esLegacy) {
+          const totalLegacy = termino.listaDetallada.length;
+          const correctosLegacy = termino.listaDetallada.filter(x => x.correccion || x.equivalencia).length;
+          const incorrectosLegacy = totalLegacy - correctosLegacy;
+          contenido.push({ text: `Correctos: ${correctosLegacy} | Incorrectos: ${incorrectosLegacy}`, style: "texto" });
+        }
+
+        const ordenados = [
+          ...termino.listaDetallada.filter(x => x.coincide),
+          ...termino.listaDetallada.filter(x => !x.coincide)
+        ];
+
+        contenido.push({ text: "Listado de terminos evaluados:", style: "subtitulo", margin: [0, 0, 0, 8] });
 
         const tablaBody = [
           [
             {
-              text: "Producto encontrado",
+              text: "Producto",
               style: "encabezadoNaranja",
-              fillColor: "#ffe6cc",
-              alignment: "center"
+              alignment: "center",
+              fillColor: "#ffe6cc"
+            },
+            {
+              text: "Resultado",
+              style: "encabezadoNaranja",
+              alignment: "center",
+              fillColor: "#ffe6cc"
             }
           ]
         ];
 
-        termino.productosEncontrados.forEach(p => {
-          tablaBody.push([{ text: p, style: "texto", alignment: "left" }]);
+        ordenados.forEach(row => {
+          tablaBody.push([
+            { text: row.texto, style: "texto", alignment: "left" },
+            row.correccion
+              ? { text: "Correccion", alignment: "center", color: "green", fontSize: 11 }
+              : row.equivalencia
+                ? { text: "Equivalencia", alignment: "center", color: "#ff9900", fontSize: 11 }
+                : { text: "Incorrecto", alignment: "center", color: "red", fontSize: 11 }
+          ]);
         });
 
         contenido.push({
-          table: { widths: ["100%"], body: tablaBody },
-          layout: "lightHorizontalLines"
+          table: { widths: ["80%", "20%"], body: tablaBody },
+          layout: {
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => "#cccccc",
+            vLineColor: () => "#cccccc"
+          }
         });
 
         if (i < resultadosAdaptados.length - 1) {
           contenido.push({ text: "", pageBreak: "after" });
         }
-
-        continue;
       }
 
-      const equivalenciasTexto = Array.isArray(termino.equivalencias)
-        ? termino.equivalencias.join(", ")
-        : (termino.equivalencias ? String(termino.equivalencias) : "");
-      const correccionTexto = getCorreccionTexto(termino);
-      const totalEncontrados = typeof termino.totalProductos === "number"
-        ? termino.totalProductos
-        : termino.listaDetallada.length;
-      const calificacionTexto = termino.calificacion || "SN";
-      const correccionEsperadaTexto = termino.ccProductos === totalEncontrados && totalEncontrados > 0 ? "Si" : "No";
+      return contenido;
+    };
 
-      contenido.push(
-        { text: `Busqueda: ${termino.termino}`, style: "texto" },
-        { text: `Correccion: ${correccionTexto}`, style: "texto" },
-        { text: `Equivalencias: ${equivalenciasTexto}`, style: "texto" },
-        { text: `Resultados encontrados: ${totalEncontrados}`, style: "texto" }
-      );
-      if (!esLegacy) {
-        contenido.push(
-          { text: `Correccion esperada: ${correccionEsperadaTexto}`, style: "texto" },
-          { text: `Calificacion busqueda: ${calificacionTexto}`, style: "texto", margin: [0, 0, 0, 10] }
-        );
-      } else {
-        contenido.push({ text: "", style: "texto", margin: [0, 0, 0, 10] });
-      }
-      if (esLegacy) {
-        const totalLegacy = termino.listaDetallada.length;
-        const correctosLegacy = termino.listaDetallada.filter(x => x.correccion || x.equivalencia).length;
-        const incorrectosLegacy = totalLegacy - correctosLegacy;
-        contenido.push({ text: `Correctos: ${correctosLegacy} | Incorrectos: ${incorrectosLegacy}`, style: "texto" });
+    const esCombined = resultados && !Array.isArray(resultados) && (Array.isArray(resultados.empathy) || Array.isArray(resultados.legacy));
+    const contenido = [];
+
+    if (esCombined) {
+      const empathyArr = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const legacyArr = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+
+      if (empathyArr.length === 0 && legacyArr.length === 0) {
+        throw new Error("El generador recibio un arreglo vacio.");
       }
 
-      const total = termino.listaDetallada.length;
-      const totalCoinc = termino.listaDetallada.filter(x => x.coincide).length;
-
-
-      const ordenados = [
-        ...termino.listaDetallada.filter(x => x.coincide),
-        ...termino.listaDetallada.filter(x => !x.coincide)
-      ];
-
-      contenido.push({ text: "Listado de terminos evaluados:", style: "subtitulo", margin: [0, 0, 0, 8] });
-
-      const tablaBody = [
-        [
-          {
-            text: "Producto",
-            style: "encabezadoNaranja",
-            alignment: "center",
-            fillColor: "#ffe6cc"
-          },
-          {
-            text: "Resultado",
-            style: "encabezadoNaranja",
-            alignment: "center",
-            fillColor: "#ffe6cc"
-          }
-        ]
-      ];
-
-      ordenados.forEach(row => {
-        tablaBody.push([
-          { text: row.texto, style: "texto", alignment: "left" },
-          row.correccion
-            ? { text: "Correccion", alignment: "center", color: "green", fontSize: 11 }
-            : row.equivalencia
-              ? { text: "Equivalencia", alignment: "center", color: "#ff9900", fontSize: 11 }
-              : { text: "Incorrecto", alignment: "center", color: "red", fontSize: 11 }
-        ]);
-      });
-
-      contenido.push({
-        table: { widths: ["80%", "20%"], body: tablaBody },
-        layout: {
-          hLineWidth: () => 0.5,
-          vLineWidth: () => 0.5,
-          hLineColor: () => "#cccccc",
-          vLineColor: () => "#cccccc"
-        }
-      });
-
-      if (i < resultadosAdaptados.length - 1) {
-        contenido.push({ text: "", pageBreak: "after" });
+      if (empathyArr.length > 0) {
+        contenido.push(...buildSection(empathyArr, "empathy"));
       }
+      if (legacyArr.length > 0) {
+        if (contenido.length > 0) contenido.push({ text: "", pageBreak: "after" });
+        contenido.push(...buildSection(legacyArr, "legacy"));
+      }
+    } else {
+      if (!Array.isArray(resultados) || resultados.length === 0) {
+        throw new Error("El generador recibio un arreglo vacio.");
+      }
+      contenido.push(...buildSection(resultados, modo));
     }
 
     const docDefinition = {
@@ -580,10 +588,20 @@ async function generarReporteFrecuenciaAltaPDF({
   resultados = [],
   modo = "empathy"
 }) {
-  const esLegacy = modo === "legacy";
+  const esResultadosCombinados =
+    resultados &&
+    typeof resultados === "object" &&
+    !Array.isArray(resultados) &&
+    (Array.isArray(resultados.empathy) || Array.isArray(resultados.legacy));
 
   try {
-    if (!Array.isArray(resultados) || resultados.length === 0) {
+    if (esResultadosCombinados) {
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+      if (emp.length === 0 && leg.length === 0) {
+        throw new Error("El generador recibio un arreglo vacio.");
+      }
+    } else if (!Array.isArray(resultados) || resultados.length === 0) {
       throw new Error("El generador recibio un arreglo vacio.");
     }
 
@@ -599,96 +617,115 @@ async function generarReporteFrecuenciaAltaPDF({
     const printer = new PdfPrinter(fonts);
     printer.vfs = vfsFonts.vfs;
 
-    const terminosEvaluados = resultados.length;
-    const sumaProm = resultados.reduce((acc, r) => acc + (Number(r.calificacionPromedio) || 0), 0);
-    const promBusqueda = terminosEvaluados > 0 ? Math.round((sumaProm / terminosEvaluados) * 100) / 100 : 0;
+    const buildSection = (resultadosArr, modoLocal) => {
+      const esLegacyLocal = modoLocal === "legacy";
+      const resultadosLocal = Array.isArray(resultadosArr) ? resultadosArr : [];
 
-    // Promedio global ponderado por resultados (no por terminos).
-    let totalResultados = 0;
-    let sumaCalificaciones = 0;
-    resultados.forEach((r) => {
-      const det = Array.isArray(r.detalles) ? r.detalles : [];
-      totalResultados += det.length;
-      sumaCalificaciones += det.reduce((acc, d) => acc + (Number(d.calificacion) || 0), 0);
-    });
-    const promPorResultado = totalResultados > 0
-      ? Math.round((sumaCalificaciones / totalResultados) * 100) / 100
-      : 0;
+      const terminosEvaluados = resultadosLocal.length;
+      const sumaProm = resultadosLocal.reduce((acc, r) => acc + (Number(r.calificacionPromedio) || 0), 0);
+      const promBusqueda = terminosEvaluados > 0 ? Math.round((sumaProm / terminosEvaluados) * 100) / 100 : 0;
 
-    const titulo = esLegacy ? "Frecuencia Alta Legacy" : "Frecuencia Alta Empathy";
+      // Promedio global ponderado por resultados (no por terminos).
+      let totalResultados = 0;
+      let sumaCalificaciones = 0;
+      resultadosLocal.forEach((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        totalResultados += det.length;
+        sumaCalificaciones += det.reduce((acc, d) => acc + (Number(d.calificacion) || 0), 0);
+      });
+      const promPorResultado = totalResultados > 0
+        ? Math.round((sumaCalificaciones / totalResultados) * 100) / 100
+        : 0;
 
-    const contenido = [];
-    contenido.push(
-      { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
-      { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-      // Calificacion promedio busqueda: (temporalmente deshabilitado)
-      { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-      { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
-    );
+      const titulo = esLegacyLocal ? "Frecuencia Alta Legacy" : "Frecuencia Alta Empathy";
 
-    const resumenBody = [
-      [
-        { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
-        { text: "Calificacion Promedio", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
-        { text: "Resultados Evaluados", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
-      ]
-    ];
-
-    resultados.forEach((r) => {
-      const det = Array.isArray(r.detalles) ? r.detalles : [];
-      resumenBody.push([
-        { text: String(r.termino || ""), style: "textoResumen", alignment: "left" },
-        { text: String(Number(r.calificacionPromedio) || 0), style: "textoResumen", alignment: "center" },
-        { text: String(det.length), style: "textoResumen", alignment: "center" }
-      ]);
-    });
-
-    contenido.push({ text: "Resumen de terminos", style: "subtitulo", margin: [0, 10, 0, 8] });
-    contenido.push({
-      table: { widths: ["55%", "25%", "20%"], body: resumenBody },
-      layout: "lightHorizontalLines"
-    });
-
-    contenido.push({ text: "", pageBreak: "after" });
-
-    // Detalle por termino
-    for (let i = 0; i < resultados.length; i++) {
-      const r = resultados[i];
-      const det = Array.isArray(r.detalles) ? r.detalles : [];
-
-      contenido.push(
-        { text: `Termino: \"${String(r.termino || "")}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
-        { text: `Calificacion Promedio: ${String(Number(r.calificacionPromedio) || 0)}`, style: "texto" },
-        { text: `Resultados Evaluados: ${String(det.length)}`, style: "texto" },
-        { text: `Hay resultados: ${r.hayResultados ? "SI" : "NO"}`, style: "texto", margin: [0, 0, 0, 10] }
+      const contenidoLocal = [];
+      contenidoLocal.push(
+        { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
+        { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        // Calificacion promedio busqueda: (temporalmente deshabilitado)
+        { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
       );
 
-      if (!r.hayResultados || det.length === 0) {
-        contenido.push({ text: "Busqueda sin resultados para evaluar.", style: "texto" });
-      } else {
-        const tablaBody = [
-          [
-            { text: "Producto encontrado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" },
-            { text: "Calificacion", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" }
-          ]
-        ];
+      const resumenBody = [
+        [
+          { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Calificacion Promedio", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Resultados Evaluados", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
+        ]
+      ];
 
-        det.forEach((d) => {
-          tablaBody.push([
-            { text: String(d.titulo || ""), style: "texto", alignment: "left" },
-            { text: String(Number(d.calificacion) || 0), style: "texto", alignment: "center" }
-          ]);
-        });
+      resultadosLocal.forEach((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        resumenBody.push([
+          { text: String(r.termino || ""), style: "textoResumen", alignment: "left" },
+          { text: String(Number(r.calificacionPromedio) || 0), style: "textoResumen", alignment: "center" },
+          { text: String(det.length), style: "textoResumen", alignment: "center" }
+        ]);
+      });
 
-        contenido.push({
-          table: { widths: ["85%", "15%"], body: tablaBody },
-          layout: "lightHorizontalLines"
-        });
+      contenidoLocal.push({ text: "Resumen de terminos", style: "subtitulo", margin: [0, 10, 0, 8] });
+      contenidoLocal.push({
+        table: { widths: ["55%", "25%", "20%"], body: resumenBody },
+        layout: "lightHorizontalLines"
+      });
+
+      contenidoLocal.push({ text: "", pageBreak: "after" });
+
+      // Detalle por termino
+      for (let i = 0; i < resultadosLocal.length; i++) {
+        const r = resultadosLocal[i];
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+
+        contenidoLocal.push(
+          { text: `Termino: \"${String(r.termino || "")}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
+          { text: `Calificacion Promedio: ${String(Number(r.calificacionPromedio) || 0)}`, style: "texto" },
+          { text: `Resultados Evaluados: ${String(det.length)}`, style: "texto" },
+          { text: `Hay resultados: ${r.hayResultados ? "SI" : "NO"}`, style: "texto", margin: [0, 0, 0, 10] }
+        );
+
+        if (!r.hayResultados || det.length === 0) {
+          contenidoLocal.push({ text: "Busqueda sin resultados para evaluar.", style: "texto" });
+        } else {
+          const tablaBody = [
+            [
+              { text: "Producto encontrado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" },
+              { text: "Calificacion", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" }
+            ]
+          ];
+
+          det.forEach((d) => {
+            tablaBody.push([
+              { text: String(d.titulo || ""), style: "texto", alignment: "left" },
+              { text: String(Number(d.calificacion) || 0), style: "texto", alignment: "center" }
+            ]);
+          });
+
+          contenidoLocal.push({
+            table: { widths: ["85%", "15%"], body: tablaBody },
+            layout: "lightHorizontalLines"
+          });
+        }
+
+        if (i < resultadosLocal.length - 1) {
+          contenidoLocal.push({ text: "", pageBreak: "after" });
+        }
       }
 
-      if (i < resultados.length - 1) {
-        contenido.push({ text: "", pageBreak: "after" });
-      }
+      return contenidoLocal;
+    };
+
+    const contenido = [];
+    if (esResultadosCombinados) {
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+
+      if (emp.length > 0) contenido.push(...buildSection(emp, "empathy"));
+      if (emp.length > 0 && leg.length > 0) contenido.push({ text: "", pageBreak: "after" });
+      if (leg.length > 0) contenido.push(...buildSection(leg, "legacy"));
+    } else {
+      contenido.push(...buildSection(resultados, modo));
     }
 
     const docDefinition = {
@@ -736,10 +773,20 @@ async function generarReporteLongTailPDF({
   resultados = [],
   modo = "empathy"
 }) {
-  const esLegacy = modo === "legacy";
+  const esResultadosCombinados =
+    resultados &&
+    typeof resultados === "object" &&
+    !Array.isArray(resultados) &&
+    (Array.isArray(resultados.empathy) || Array.isArray(resultados.legacy));
 
   try {
-    if (!Array.isArray(resultados) || resultados.length === 0) {
+    if (esResultadosCombinados) {
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+      if (emp.length === 0 && leg.length === 0) {
+        throw new Error("El generador recibio un arreglo vacio.");
+      }
+    } else if (!Array.isArray(resultados) || resultados.length === 0) {
       throw new Error("El generador recibio un arreglo vacio.");
     }
 
@@ -755,100 +802,119 @@ async function generarReporteLongTailPDF({
     const printer = new PdfPrinter(fonts);
     printer.vfs = vfsFonts.vfs;
 
-    const terminosEvaluados = resultados.length;
-    const sumaProm = resultados.reduce((acc, r) => acc + (Number(r.calificacionPromedio) || 0), 0);
-    const promBusqueda = terminosEvaluados > 0 ? Math.round((sumaProm / terminosEvaluados) * 100) / 100 : 0;
+    const buildSection = (resultadosArr, modoLocal) => {
+      const esLegacyLocal = modoLocal === "legacy";
+      const resultadosLocal = Array.isArray(resultadosArr) ? resultadosArr : [];
 
-    // Promedio global ponderado por resultados (no por terminos).
-    let totalResultados = 0;
-    let sumaCalificaciones = 0;
-    resultados.forEach((r) => {
-      const det = Array.isArray(r.detalles) ? r.detalles : [];
-      totalResultados += det.length;
-      sumaCalificaciones += det.reduce((acc, d) => acc + (Number(d.calificacion) || 0), 0);
-    });
-    const promPorResultado = totalResultados > 0
-      ? Math.round((sumaCalificaciones / totalResultados) * 100) / 100
-      : 0;
+      const terminosEvaluados = resultadosLocal.length;
+      const sumaProm = resultadosLocal.reduce((acc, r) => acc + (Number(r.calificacionPromedio) || 0), 0);
+      const promBusqueda = terminosEvaluados > 0 ? Math.round((sumaProm / terminosEvaluados) * 100) / 100 : 0;
 
-    const titulo = esLegacy ? "Long Tail Legacy" : "Long Tail Empathy";
+      // Promedio global ponderado por resultados (no por terminos).
+      let totalResultados = 0;
+      let sumaCalificaciones = 0;
+      resultadosLocal.forEach((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        totalResultados += det.length;
+        sumaCalificaciones += det.reduce((acc, d) => acc + (Number(d.calificacion) || 0), 0);
+      });
+      const promPorResultado = totalResultados > 0
+        ? Math.round((sumaCalificaciones / totalResultados) * 100) / 100
+        : 0;
 
-    const contenido = [];
-    contenido.push(
-      { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
-      { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-      // Calificacion promedio busqueda: (temporalmente deshabilitado)
-      { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-      { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
-    );
+      const titulo = esLegacyLocal ? "Long Tail Legacy" : "Long Tail Empathy";
 
-    const resumenBody = [
-      [
-        { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
-        { text: "Calificacion Promedio", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
-        { text: "Resultados Evaluados", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
-      ]
-    ];
-
-    resultados.forEach((r) => {
-      const det = Array.isArray(r.detalles) ? r.detalles : [];
-      resumenBody.push([
-        { text: String(r.termino || ""), style: "textoResumen", alignment: "left" },
-        { text: String(Number(r.calificacionPromedio) || 0), style: "textoResumen", alignment: "center" },
-        { text: String(det.length), style: "textoResumen", alignment: "center" }
-      ]);
-    });
-
-    contenido.push({ text: "Resumen de terminos", style: "subtitulo", margin: [0, 10, 0, 8] });
-    contenido.push({
-      table: { widths: ["55%", "25%", "20%"], body: resumenBody },
-      layout: "lightHorizontalLines"
-    });
-
-    contenido.push({ text: "", pageBreak: "after" });
-
-    // Detalle por termino
-    for (let i = 0; i < resultados.length; i++) {
-      const r = resultados[i];
-      const det = Array.isArray(r.detalles) ? r.detalles : [];
-
-      contenido.push(
-        { text: `Termino: \"${String(r.termino || "")}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
-        { text: `Calificacion Promedio: ${String(Number(r.calificacionPromedio) || 0)}`, style: "texto" },
-        { text: `Categoria: ${String(r.categoria || "")}`, style: "texto" },
-        { text: `Marca: ${String(r.marca || "")}`, style: "texto" },
-        { text: `Especificacion: ${String(r.especificacion || "")}`, style: "texto" },
-        { text: `Formato: ${String(r.formato || "")}`, style: "texto" },
-        { text: `Intencion: ${String(r.intencion || "")}`, style: "texto" },
-        { text: `Hay resultados: ${r.hayResultados ? "SI" : "NO"}`, style: "texto", margin: [0, 0, 0, 10] }
+      const contenidoLocal = [];
+      contenidoLocal.push(
+        { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
+        { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        // Calificacion promedio busqueda: (temporalmente deshabilitado)
+        { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
       );
 
-      if (!r.hayResultados || det.length === 0) {
-        contenido.push({ text: "Busqueda sin resultados para evaluar.", style: "texto" });
-      } else {
-        const tablaBody = [
-          [
-            { text: "Producto encontrado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" },
-            { text: "Calificacion", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" }
-          ]
-        ];
+      const resumenBody = [
+        [
+          { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Calificacion Promedio", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Resultados Evaluados", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
+        ]
+      ];
 
-        det.forEach((d) => {
-          tablaBody.push([
-            { text: String(d.titulo || ""), style: "texto", alignment: "left" },
-            { text: String(Number(d.calificacion) || 0), style: "texto", alignment: "center" }
-          ]);
-        });
+      resultadosLocal.forEach((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        resumenBody.push([
+          { text: String(r.termino || ""), style: "textoResumen", alignment: "left" },
+          { text: String(Number(r.calificacionPromedio) || 0), style: "textoResumen", alignment: "center" },
+          { text: String(det.length), style: "textoResumen", alignment: "center" }
+        ]);
+      });
 
-        contenido.push({
-          table: { widths: ["85%", "15%"], body: tablaBody },
-          layout: "lightHorizontalLines"
-        });
+      contenidoLocal.push({ text: "Resumen de terminos", style: "subtitulo", margin: [0, 10, 0, 8] });
+      contenidoLocal.push({
+        table: { widths: ["55%", "25%", "20%"], body: resumenBody },
+        layout: "lightHorizontalLines"
+      });
+
+      contenidoLocal.push({ text: "", pageBreak: "after" });
+
+      // Detalle por termino
+      for (let i = 0; i < resultadosLocal.length; i++) {
+        const r = resultadosLocal[i];
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+
+        contenidoLocal.push(
+          { text: `Termino: \"${String(r.termino || "")}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
+          { text: `Calificacion Promedio: ${String(Number(r.calificacionPromedio) || 0)}`, style: "texto" },
+          { text: `Categoria: ${String(r.categoria || "")}`, style: "texto" },
+          { text: `Marca: ${String(r.marca || "")}`, style: "texto" },
+          { text: `Especificacion: ${String(r.especificacion || "")}`, style: "texto" },
+          { text: `Formato: ${String(r.formato || "")}`, style: "texto" },
+          { text: `Intencion: ${String(r.intencion || "")}`, style: "texto" },
+          { text: `Hay resultados: ${r.hayResultados ? "SI" : "NO"}`, style: "texto", margin: [0, 0, 0, 10] }
+        );
+
+        if (!r.hayResultados || det.length === 0) {
+          contenidoLocal.push({ text: "Busqueda sin resultados para evaluar.", style: "texto" });
+        } else {
+          const tablaBody = [
+            [
+              { text: "Producto encontrado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" },
+              { text: "Calificacion", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" }
+            ]
+          ];
+
+          det.forEach((d) => {
+            tablaBody.push([
+              { text: String(d.titulo || ""), style: "texto", alignment: "left" },
+              { text: String(Number(d.calificacion) || 0), style: "texto", alignment: "center" }
+            ]);
+          });
+
+          contenidoLocal.push({
+            table: { widths: ["85%", "15%"], body: tablaBody },
+            layout: "lightHorizontalLines"
+          });
+        }
+
+        if (i < resultadosLocal.length - 1) {
+          contenidoLocal.push({ text: "", pageBreak: "after" });
+        }
       }
 
-      if (i < resultados.length - 1) {
-        contenido.push({ text: "", pageBreak: "after" });
-      }
+      return contenidoLocal;
+    };
+
+    const contenido = [];
+    if (esResultadosCombinados) {
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+
+      if (emp.length > 0) contenido.push(...buildSection(emp, "empathy"));
+      if (emp.length > 0 && leg.length > 0) contenido.push({ text: "", pageBreak: "after" });
+      if (leg.length > 0) contenido.push(...buildSection(leg, "legacy"));
+    } else {
+      contenido.push(...buildSection(resultados, modo));
     }
 
     const docDefinition = {
