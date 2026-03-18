@@ -541,6 +541,45 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
     };
   }
 
+  evaluarFrecuenciaAltaEquivalencias(productosEncontrados, equivalencia, relacionados) {
+    const eqTokens = this._splitTokens(equivalencia);
+    const relTokens = this._splitTokens(relacionados);
+
+    const detalles = [];
+    const lista = Array.isArray(productosEncontrados) ? productosEncontrados : [];
+    if (lista.length === 0) {
+      return {
+        detalles,
+        calificacionPromedio: 0
+      };
+    }
+
+    for (const titulo of lista) {
+      const t = String(titulo || "");
+      const eq = this._contieneAlguno(t, eqTokens);
+      // Solo evaluamos relacionados si equivalencia es false.
+      const rel = !eq && this._contieneAlguno(t, relTokens);
+
+      const cal = eq ? 2 : (rel ? 1 : 0);
+
+      detalles.push({
+        titulo: t,
+        equivalencia: eq,
+        relacionado: rel,
+        calificacion: cal
+      });
+    }
+
+    const suma = detalles.reduce((acc, d) => acc + (d.calificacion || 0), 0);
+    const prom = detalles.length > 0 ? (suma / detalles.length) : 0;
+    const calificacionPromedio = Math.round(prom * 100) / 100;
+
+    return {
+      detalles,
+      calificacionPromedio
+    };
+  }
+
   evaluarLongTail(productosEncontrados, categoria, marca, especificacion, formato, intencion) {
     const catTokens = this._splitTokens(categoria);
     const marcaTokens = this._splitTokens(marca);

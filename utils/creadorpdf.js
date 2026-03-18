@@ -659,10 +659,7 @@ async function generarReporteFrecuenciaAltaPDF({
       contenido.push(
         { text: `Termino: \"${String(r.termino || "")}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
         { text: `Calificacion Promedio: ${String(Number(r.calificacionPromedio) || 0)}`, style: "texto" },
-        { text: `Categoria: ${String(r.categoriaYAttr || "")}`, style: "texto" },
-        { text: `Marca: ${String(r.marca || "")}`, style: "texto" },
-        { text: `Atributo: ${String(r.attrSecundario || "")}`, style: "texto" },
-        { text: `Mismo universo: ${String(r.intencionDiferente || "")}`, style: "texto" },
+        { text: `Resultados Evaluados: ${String(det.length)}`, style: "texto" },
         { text: `Hay resultados: ${r.hayResultados ? "SI" : "NO"}`, style: "texto", margin: [0, 0, 0, 10] }
       );
 

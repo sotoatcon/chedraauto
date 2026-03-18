@@ -11,50 +11,75 @@ const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generar
 
 // Archivos Excel
 const excelurl = '.\\data\\ChedrahuiQA_Lexico.xlsx';
-const excelerrores = 'Errores Ortogr\u00e1ficos';
+const excelerrores = 'Errores Ortográficos';
 const excellong = 'Long Tail';
 const excelfrecuencia = 'Frecuencia Alta';
-const excelsemantico = 'Sem\u00e1nticos';
-const excelvacios = 'Resultados Vac\u00edos';
+const excelsemantico = 'Semánticos';
+const excelvacios = 'Resultados Vacíos';
 
 
 // =========================================================
 //  Paralelismo por archivo
 // =========================================================
-test.describe.configure({ mode: 'parallel' });
+// These report tests share session/state (cart, pickup store, workspace cookies).
+// Running them in parallel causes cross-test interference and flaky failures.
+test.describe.configure({ mode: 'serial' });
 // =========================================================
 //  BEFORE EACH -- Lgica completa para EMP
 // =========================================================
 // =========================================================
 //  BEFORE EACH -- Lgica completa para EMP / QA / PROD
 // =========================================================
-test.beforeEach(async ({ browser, page }, testInfo) => {
+let empContext;
+let empPage;
+let empHeaderPage;
+let empProductosPage;
+let empCarritoUtils;
+let empResumenCarrito;
+let empDirecciones;
+
+test.beforeAll(async ({ browser }) => {
+  if (!config.isEMP) return;
+
+  console.log(" EMP MODE -- ejecutando login completo (beforeAll)...");
+
+  empContext = await browser.newContext({
+    viewport: { width: 1280, height: 720 }
+  });
+
+  empPage = await empContext.newPage();
+  empHeaderPage = new HeaderPage(empPage);
+
+  console.log(" Ejecutando loginConCorreo...");
+  // Tus 2 params exactamente como en globalSetup original
+  await loginConCorreo(empPage, empHeaderPage, empHeaderPage);
+
+  // Instancias exactamente como las tenias
+  empProductosPage = new ProductosEncontradosPage(empPage);
+  empCarritoUtils = new NavegacionActions();
+  empResumenCarrito = new ResumenCarritoPage(empPage);
+  empDirecciones = new DirectionsPage(empPage);
+});
+
+test.afterAll(async () => {
+  if (empContext) {
+    await empContext.close();
+    empContext = null;
+  }
+});
+
+test.beforeEach(async ({ page }, testInfo) => {
 
   // ============================
   //  EMP -- LOGIN COMPLETO
   // ============================
   if (config.isEMP) {
-    console.log(" EMP MODE -- ejecutando login completo...");
-
-    const context = await browser.newContext({
-      viewport: { width: 1280, height: 720 }
-    });
-
-    const empPage = await context.newPage();
     testInfo.page = empPage;
-
-    const headerPage = new HeaderPage(empPage);
-
-    console.log(" Ejecutando loginConCorreo...");
-    //  Tus 2 params exactamente como en globalSetup original
-    await loginConCorreo(empPage, headerPage, headerPage);
-
-    //  Instancias exactamente como t las tenas
-    testInfo.headerPage = headerPage;
-    testInfo.productosPage = new ProductosEncontradosPage(empPage);
-    testInfo.carritoUtils = new NavegacionActions();
-    testInfo.resumencarritos = new ResumenCarritoPage(empPage);
-    testInfo.direcciones = new DirectionsPage(empPage);
+    testInfo.headerPage = empHeaderPage;
+    testInfo.productosPage = empProductosPage;
+    testInfo.carritoUtils = empCarritoUtils;
+    testInfo.resumencarritos = empResumenCarrito;
+    testInfo.direcciones = empDirecciones;
 
     return; // WARN NECESARIO
   }
@@ -78,7 +103,7 @@ test.beforeEach(async ({ browser, page }, testInfo) => {
 // =========================================================
 
 /*
-test('C1 - Errores Ortogr\\u00e1ficos', async ({}, testInfo) => {
+test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 
   const page = testInfo.page;      // <- USAMOS LA PAGE DE EMP
   const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
@@ -117,12 +142,20 @@ test('C1 - Errores Ortogr\\u00e1ficos', async ({}, testInfo) => {
     await direcciones.SeleccionarRecogerEspecifico();
 
     for (const row of data) {
-      const Termino = row['T\\u00e9rmino'];
-      const Correccion = row['Correccion']
+      // Excel headers may come with/without accents depending on reader/encoding.
+      const Termino = row['Término'] ?? row['Termino'] ?? row['Término'];
+      if (!Termino) {
+        throw new Error(`No se pudo leer la columna "Término" del Excel. Keys disponibles: ${Object.keys(row || {}).join(', ')}`);
+      }
+
+      const correccionCell = row['Correccion'] ?? row['Corrección'] ?? '';
+      const Correccion = String(correccionCell)
         .split(",")
         .map(e => e.trim().toLowerCase())
         .filter(e => e.length > 0);
-      const equivalencias = row['Equivalencia']
+
+      const equivalenciaCell = row['Equivalencia'] ?? '';
+      const equivalencias = String(equivalenciaCell)
         .split(",")
         .map(e => e.trim().toLowerCase())
         .filter(e => e.length > 0);
@@ -192,12 +225,12 @@ test('C1 - Errores Ortogr\\u00e1ficos', async ({}, testInfo) => {
 });
 
 
-*/
+
 
 // =========================================================
 //  TEST C2 - LONG TAIL (opcional, corregido tambin)
 // =========================================================
-/*
+ 
  test('C2 - Long Tail', async ({ page }, testInfo) => {
  
    const pageReal = testInfo.page || page;
@@ -247,12 +280,12 @@ test('C1 - Errores Ortogr\\u00e1ficos', async ({}, testInfo) => {
      }
  
      for (const row of data) {
-        const Termino = getCell(row, ['T\u00e9rmino', 'Termino']);
-        const Categoria = getCell(row, ['Categor\u00eda', 'Categoria']);
+        const Termino = getCell(row, ['Término', 'Termino']);
+        const Categoria = getCell(row, ['Categoría', 'Categoria']);
         const Marca = getCell(row, ['Marca']);
-        const Especificacion = getCell(row, ['Especificaci\u00f3n', 'Especificacion']);
+        const Especificacion = getCell(row, ['Especificación', 'Especificacion']);
         const Formato = getCell(row, ['Formato']);
-        const Intencion = getCell(row, ['Intenci\u00f3n', 'Intencion']);
+        const Intencion = getCell(row, ['Intención', 'Intencion']);
  
        console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
  
@@ -306,22 +339,22 @@ test('C1 - Errores Ortogr\\u00e1ficos', async ({}, testInfo) => {
        await pageReal.waitForSelector('iframe#launcher', { state: 'visible' });
      }
  
-     await generarReporteLongTailPDF({
-       nombreTestCase: `C2_LongTail_${m.label}`,
-       resultados: resultadosTotales,
-       modo: m.modo
-     });
-   }
- });
+      await generarReporteLongTailPDF({
+        nombreTestCase: `C2_LongTail_${m.label}`,
+        resultados: resultadosTotales,
+        modo: m.modo
+      });
+    }
+  });
+
 
 */
-
 
 // =========================================================
 //  TEST C3 - FRECUENCIA ALTA (opcional, corregido)
 // =========================================================
 
-/*
+
 test('C3 - Frecuencia Alta', async ({}, testInfo) => {
 
   const page = testInfo.page;
@@ -371,11 +404,10 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
     }
 
     for (const row of data) {
-      const Termino = getCell(row, ['T\u00e9rmino', 'Termino']);
-      const categoriaYAttr = getCell(row, ['Categor\u00eda y atributo clave', 'Categoria y atributo clave']);
-      const marca = getCell(row, ['Marca']);
-      const attrSecundario = getCell(row, ['Atributo secundario', 'Atributo Secundario']);
-      const intencionDiferente = getCell(row, ['Mismo universo diferente intenci\u00f3n', 'Mismo universo diferente intencion']);
+      const Termino = getCell(row, ['Término', 'Termino']);
+      // Nueva definicion: evaluar Equivalencia y Relacionados.
+      const equivalencia = getCell(row, ['Equivalencia']);
+      const relacionados = getCell(row, ['Relacionados', 'Relacionado']);
 
       console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
 
@@ -418,20 +450,16 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
         );
       }
 
-      const evaluacion = carritoUtils.evaluarFrecuenciaAlta(
+      const evaluacion = carritoUtils.evaluarFrecuenciaAltaEquivalencias(
         productosEncontrados,
-        categoriaYAttr,
-        marca,
-        attrSecundario,
-        intencionDiferente
+        equivalencia,
+        relacionados
       );
 
       resultadosTotales.push({
         termino: Termino,
-        categoriaYAttr,
-        marca,
-        attrSecundario,
-        intencionDiferente,
+        equivalencia,
+        relacionados,
         hayResultados,
         productosEncontrados,
         detalles: evaluacion.detalles,
@@ -452,14 +480,11 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
   }
 });
 
-*/
-
-
 // =========================================================
-//  TEST C4 - SEMNTICO (opcional, corregido)
+//  TEST C4 - SEMANTICO (opcional, corregido)
 // =========================================================
 /*
-test('C4 - Sem\\u00e1ntico', async ({ page }, testInfo) => {
+test('C4 - Semántico', async ({ page }, testInfo) => {
 
   const { headerPage, productosPage, carritoUtils } = testInfo;
   const data = getExcelData(excelurl, excelsemantico);
@@ -518,7 +543,7 @@ test('C4 - Sem\\u00e1ntico', async ({ page }, testInfo) => {
     resultados: resultadosTotales
   });
 */
-
+/*
  test('C5 - Resultados Vacios', async ({ page }, testInfo) => {
 
    const pageReal = testInfo.page || page;
@@ -640,7 +665,7 @@ test('C4 - Sem\\u00e1ntico', async ({ page }, testInfo) => {
      }
 
      for (const row of data) {
-       const Termino = getCellNormalized(row, ['T\u00e9rmino', 'Termino']);
+       const Termino = getCellNormalized(row, ['Término', 'Termino']);
        const Relevancia = getCellNormalized(row, ['Relevancia']);
        const Parcial = getCellNormalized(row, ['Parcialmente Relevantes', 'Parcialmente Relevante']);
 
@@ -694,4 +719,4 @@ test('C4 - Sem\\u00e1ntico', async ({ page }, testInfo) => {
      });
    }
  });
-
+*/
