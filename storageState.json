@@ -2,20 +2,20 @@
   "cookies": [
     {
       "name": "vid_rt",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNDE5OWE2MS04MTE5LTRhZDUtODkxOC0xN2I2ZWVlOGNjMGQiLCJzZXNzIjoiNDVmMjdjZGYtNWE2MC00OWY0LWIwYTAtNDc1OGRkZTBlYmExIiwiaWF0IjoxNzczODcwMDk5LCJleHAiOjE3NzY0NjIwOTksImlzcyI6InZpZCJ9.q_aDkpwksQ3E8P91IpmdPBGozJlQ3ICthinKbkrSLKw",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNDE5OWE2MS04MTE5LTRhZDUtODkxOC0xN2I2ZWVlOGNjMGQiLCJzZXNzIjoiY2YzZjRhMDgtMDYwZS00Mzk4LWIwZTQtMmUzNzJlZjJlNDU0IiwiaWF0IjoxNzczODc5MzM5LCJleHAiOjE3NzY0NzEzMzksImlzcyI6InZpZCJ9.iJlXlvQLyaUk3cJTKhE7HvIIyjdLXeWacnX9C6ixH24",
       "domain": ".www.chedraui.com.mx",
       "path": "/api/vtexid/refreshtoken/webstore",
-      "expires": 1776462099.918288,
+      "expires": 1776471340.044636,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Strict"
     },
     {
       "name": "_csrf",
-      "value": "SeGFn0CRhdSfvCYhGrEl6PCx",
+      "value": "f14FYL1l_qbhtcxAE3ybuvg2",
       "domain": "chedraui-prod.us.auth0.com",
       "path": "/usernamepassword/login",
-      "expires": 1774734086.419627,
+      "expires": 1774743322.867303,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
@@ -25,87 +25,87 @@
       "value": "master%3A87e55a46-08f4-4377-be23-e91e3bbd4612",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773956445,
+      "expires": 1773965671,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "VtexRCSessionIdv7",
-      "value": "8a87c776-749a-45f8-bab9-b16f42c56868",
+      "value": "d65ba52b-2aca-4be1-8717-051078308da9",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1773871912,
+      "expires": 1773881155,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "VtexRCMacIdv7",
-      "value": "bee805e7-1f98-41d9-9dd9-f8ba61abcf16",
+      "value": "0437247d-9da0-4411-8fdf-b439b6789664",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1805406112,
+      "expires": 1805415355,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "checkout.vtex.com",
-      "value": "__ofid=dd0c61b205b8463ca0e2449121bcb4d3",
+      "value": "__ofid=11c7f914d7c747a68b51741d36ae85c8",
       "domain": ".www.chedraui.com.mx",
       "path": "/",
-      "expires": 1789422114.291004,
+      "expires": 1789431357.057596,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "vtex-search-session",
-      "value": "73f736e09e5f487c80a5eaa48c8e6454",
+      "value": "20d93cef03444c758f99972fb8faae9e",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1773871904.908965,
+      "expires": 1773881147.786071,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "vtex-search-anonymous",
-      "value": "87b4deab13d94194b4a7bc288bcdd766",
+      "value": "0d0e4f9bec9749afb7e008c578f94fa7",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1805406104.909638,
+      "expires": 1805415347.786603,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "sp-variant",
-      "value": "66844d747af2d50d0f2e2357-variantNull",
+      "value": "66844d747af2d50d0f2e2357-variantTreament",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1773871904.908261,
+      "expires": 1773881147.785427,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "g",
-      "value": "cTI6Iz4lAMiVV0knvTsU_1773870082783",
+      "value": "Dhw2gBh6FMU0NVrUN470_1773879319141",
       "domain": ".creativecdn.com",
       "path": "/",
-      "expires": 1805406082.996071,
+      "expires": 1805415319.426906,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "c",
-      "value": "cTI6Iz4lAMiVV0knvTsU_23LKb0xojl6IVrjPposI_1773870082783",
+      "value": "Dhw2gBh6FMU0NVrUN470_23LKb0xojl6IVrjPposI_1773879319141",
       "domain": ".creativecdn.com",
       "path": "/",
-      "expires": 1805406082.996198,
+      "expires": 1805415319.427042,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None",
@@ -114,10 +114,10 @@
     },
     {
       "name": "ts",
-      "value": "1773870082",
+      "value": "1773879319",
       "domain": ".creativecdn.com",
       "path": "/",
-      "expires": 1805406082.996262,
+      "expires": 1805415319.427131,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None",
@@ -126,50 +126,50 @@
     },
     {
       "name": "_gcl_au",
-      "value": "1.1.1027113301.1773870083",
+      "value": "1.1.207676718.1773879320",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1781646083,
+      "expires": 1781655319,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_TargetOne_ShortLivedCookie",
-      "value": "I2594FXZ65FZL9YA8FEK1773870083283",
+      "value": "ABSUAZ4TPUHUE4UT7N5U1773879319743",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773871905,
+      "expires": 1773881148,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_TargetOne_Session_Cookie_start_time",
-      "value": "2026-03-18 21:41:23.283 UTC",
+      "value": "2026-03-19 00:15:19.743 UTC",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773871905,
+      "expires": 1773881148,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_ttp",
-      "value": "3B8UF2ACJso62XnUn6Col7F8NZk",
+      "value": "3B8mxgSb9iMco1S4ZjSu2HGVzlc",
       "domain": ".tiktok.com",
       "path": "/",
-      "expires": 1807566105.399052,
+      "expires": 1807575348.280367,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "XANDR_PANID",
-      "value": "q46g2NL8oYt_03-anqh6zT59E7kNxRvl7yjUs4J39gzAeFHi238brFx2bR7gr3PhyPSbjot0PLQ4vtp5FwtbW9A1S8fm9An6QLkXelTbOJ8.",
+      "value": "NDJuAmk6rF7QJBwC-Z9HcL-NBYo5MzpAnCQrO-3qQ1Zkqfeq4uNoV-U2gpcc3693-Yj90CJGUyHsVP4z94lx-0mYAS38Gmr8ExV_NBY14I8.",
       "domain": ".adnxs.com",
       "path": "/",
-      "expires": 1781646083.897069,
+      "expires": 1781655320.216683,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None",
@@ -178,30 +178,30 @@
     },
     {
       "name": "uuid2",
-      "value": "2323912266642066265",
+      "value": "729009220947989374",
       "domain": ".adnxs.com",
       "path": "/",
-      "expires": 1781646083.897308,
+      "expires": 1781655320.217254,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "anj",
-      "value": "dTM7k!M4/rD>6NRF']wIg2Hc%nTtaC!@wnfH1YbZRGH!W=3=41gikVh6U2-R0XNIjj#^BV7@u`V5f3Ef_VJ<Lkz^zzBQ%j=_sjM.AjP(aW%UtH%nugO%v4VB%nmhW-CT:b",
+      "value": "dTM7k!M4/rD>6NRF']wIg2GUknVZlS!@wnfH1YbZRGH!W=E>VT5c%i-jRFwZ6)L%S2(O9X6E@FYkC$o9/ksFe1r8*83jJ_xjbb<c8`atYlXyb2%nugO%v4VB%ns^*+eix!",
       "domain": ".adnxs.com",
       "path": "/",
-      "expires": 1781646083.89725,
+      "expires": 1781655320.217119,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "MUID",
-      "value": "162ED209E5C762BA37CFC529E4A4633F",
+      "value": "30189BCA78266AF92A318CEB79456B77",
       "domain": ".bing.com",
       "path": "/",
-      "expires": 1807566085.291501,
+      "expires": 1807575320.701179,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
@@ -211,27 +211,27 @@
       "value": "0",
       "domain": ".bat.bing.com",
       "path": "/",
-      "expires": 1774474885.291614,
+      "expires": 1774484120.70133,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
-      "name": "_ga",
-      "value": "GA1.1.27266911.1773870085",
+      "name": "_fbp",
+      "value": "fb.2.1773879320979.430911311920801697",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1808430084.732399,
+      "expires": 1781655348,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
-      "name": "_fbp",
-      "value": "fb.2.1773870084877.724214866701000173",
+      "name": "_ga",
+      "value": "GA1.1.1218167522.1773879321",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1781646105,
+      "expires": 1808439321.099977,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
@@ -241,177 +241,177 @@
       "value": "1",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1807566105,
+      "expires": 1807575348,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_ttp",
-      "value": "01KM1EAWTPYC1B6H8G1E9EHGKJ_.tt.2",
+      "value": "01KM1Q4RN3NWKP59293BEQ28MW_.tt.2",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1807566105,
+      "expires": 1807575348,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "__zlcmid",
-      "value": "1WcoMzrNzCLbbAO",
+      "value": "1WdoN0rtQNxH3E0",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1805406106,
+      "expires": 1805415349,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "IDE",
-      "value": "AHWqTUl40lHfDTqgfWNYoXLFZU_39oAnT1hfY03We8WTFi6BNIJ5HvZvDIAcA_V3V1E",
+      "value": "AHWqTUmNGkdpZmokF85kTAvkyv_GnF_6WYfF79RlzR-xrOudEpQNU1wvVoi3yrycXhA",
       "domain": ".doubleclick.net",
       "path": "/",
-      "expires": 1808430085.439646,
+      "expires": 1808439321.766542,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "udmts",
-      "value": "1773870085.0",
+      "value": "1773879321.0",
       "domain": ".udmserve.net",
       "path": "/",
-      "expires": 1805406085.570786,
+      "expires": 1805415321.81786,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "dt",
-      "value": "33F7D865-B667-3836-9F20-63745FDDB6BD",
+      "value": "15EFA4AF-8A94-36DB-AF14-181AD94934B5",
       "domain": ".udmserve.net",
       "path": "/",
-      "expires": 1805406085.570917,
+      "expires": 1805415321.817969,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "rtbh",
-      "value": "jqVCuWCTNzlSYwI8uKWhdvm_gSirYFCB9bk-40Uydrc",
+      "value": "0gmPcFe7fpSgk7JX4ECQm_mB5oTRAEJgXUafTnE6HV0",
       "domain": ".udmserve.net",
       "path": "/",
-      "expires": 1781646085.570982,
+      "expires": 1781655321.818008,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "did",
-      "value": "s%3Av0%3A9e6d8b03-2727-4bb2-aa4d-e30277b6b813.rC0KJ%2FhWLOuNPbOOw9Fzv2Tv5UREbDzsqY4m9bWZh2Y",
+      "value": "s%3Av0%3Aad1f4861-3d6f-4b53-8c03-cdf0f6faf729.y4Alki13jOtQ42anrW2MH1BNdhvsAp%2BVvqMt6Y9X48E",
       "domain": "chedraui-prod.us.auth0.com",
       "path": "/",
-      "expires": 1805427686.280686,
+      "expires": 1805436922.737848,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "did_compat",
-      "value": "s%3Av0%3A9e6d8b03-2727-4bb2-aa4d-e30277b6b813.rC0KJ%2FhWLOuNPbOOw9Fzv2Tv5UREbDzsqY4m9bWZh2Y",
+      "value": "s%3Av0%3Aad1f4861-3d6f-4b53-8c03-cdf0f6faf729.y4Alki13jOtQ42anrW2MH1BNdhvsAp%2BVvqMt6Y9X48E",
       "domain": "chedraui-prod.us.auth0.com",
       "path": "/",
-      "expires": 1805427686.281859,
+      "expires": 1805436922.738168,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "__rtbh.uid",
-      "value": "%7B%22eventType%22%3A%22uid%22%2C%22id%22%3A%22unknown%22%2C%22expiryDate%22%3A%222027-03-18T21%3A41%3A26.933Z%22%7D",
+      "value": "%7B%22eventType%22%3A%22uid%22%2C%22id%22%3A%22unknown%22%2C%22expiryDate%22%3A%222027-03-19T00%3A15%3A23.399Z%22%7D",
       "domain": "chedraui-prod.us.auth0.com",
       "path": "/",
-      "expires": 1805406086,
+      "expires": 1805415323,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "__rtbh.lid",
-      "value": "%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%22g0Z4uCQneZ9cfs7IQmXk%22%2C%22expiryDate%22%3A%222027-03-18T21%3A41%3A26.934Z%22%7D",
+      "value": "%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%229KIYgjaLfodBf5Sk0OSW%22%2C%22expiryDate%22%3A%222027-03-19T00%3A15%3A23.400Z%22%7D",
       "domain": "chedraui-prod.us.auth0.com",
       "path": "/",
-      "expires": 1805406086,
+      "expires": 1805415323,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "auth0",
-      "value": "s%3AgsRbsksgTYisDMM7iSsIqTgD_2sIrjN6.wR%2FrWBWCvbPwY%2F%2BjAq8R1CCKybGqqBjBba7PW1MJAd4",
+      "value": "s%3A9sAyUD8w3q-a7b4zOHrnIeCUalox65a6.lh4lUBW7%2BWVO44ugB2DPQwDmn4kyavJGde5rN%2FV5PDc",
       "domain": "chedraui-prod.us.auth0.com",
       "path": "/",
-      "expires": 1774734099.332663,
+      "expires": 1774743339.459605,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "auth0_compat",
-      "value": "s%3AgsRbsksgTYisDMM7iSsIqTgD_2sIrjN6.wR%2FrWBWCvbPwY%2F%2BjAq8R1CCKybGqqBjBba7PW1MJAd4",
+      "value": "s%3A9sAyUD8w3q-a7b4zOHrnIeCUalox65a6.lh4lUBW7%2BWVO44ugB2DPQwDmn4kyavJGde5rN%2FV5PDc",
       "domain": "chedraui-prod.us.auth0.com",
       "path": "/",
-      "expires": 1774734099.333,
+      "expires": 1774743339.459889,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "VtexIdclientAutCookie_chedrauimx",
-      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IkQ5RDk0MTQwNkYyNUMxRjJENjMyNERDMEQ3RTE0QjQ5MDI2NzdBQkEiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsImV4cCI6MTc3Mzk1NjQ5OSwidHlwZSI6InVzZXIiLCJ1c2VySWQiOiIxNDE5OWE2MS04MTE5LTRhZDUtODkxOC0xN2I2ZWVlOGNjMGQiLCJpYXQiOjE3NzM4NzAwOTksImZsYWciOiJvYXV0aF92dGV4ZG9tYWluIiwiaXNSZXByZXNlbnRhdGl2ZSI6ZmFsc2UsImlzcyI6InRva2VuLWVtaXR0ZXIiLCJqdGkiOiIzYzZhMDgwNS1lYmM3LTRmOTgtYjE3MS1kOTMxYWRhYTA2ZGMifQ.zYKswYunCWNtKx7IMeZWlSeovUCAZD33WuT4dG-Phwsx1I6wC4at1jomUvu7t_sSp4DhM8YHSKa3CEA1mI3ruQ",
+      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IkQ5RDk0MTQwNkYyNUMxRjJENjMyNERDMEQ3RTE0QjQ5MDI2NzdBQkEiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsImV4cCI6MTc3Mzk2NTczOSwidHlwZSI6InVzZXIiLCJ1c2VySWQiOiIxNDE5OWE2MS04MTE5LTRhZDUtODkxOC0xN2I2ZWVlOGNjMGQiLCJpYXQiOjE3NzM4NzkzMzksImZsYWciOiJvYXV0aF92dGV4ZG9tYWluIiwiaXNSZXByZXNlbnRhdGl2ZSI6ZmFsc2UsImlzcyI6InRva2VuLWVtaXR0ZXIiLCJqdGkiOiI1ZjA4MTFiOS1jNTllLTQzMTYtYmI4OS1mZDU0YTU2ODg0MTYifQ.YCP-FqdlPjHS0FRkcVkeGQVjqgrjLGGDSYfctPXW1w6pP0sE6fyt_zwsgLgqKZ3SuIl_vtz3X3gUSjUFBe7Ilw",
       "domain": ".vtexid.vtex.com.br",
       "path": "/",
-      "expires": 1773956498.804342,
+      "expires": 1773965738.945223,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "VtexIdclientAutCookie_4095fcf9-f929-49a7-a818-8abd1f714a82",
-      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IkQ5RDk0MTQwNkYyNUMxRjJENjMyNERDMEQ3RTE0QjQ5MDI2NzdBQkEiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsImV4cCI6MTc3Mzk1NjQ5OSwidHlwZSI6InVzZXIiLCJ1c2VySWQiOiIxNDE5OWE2MS04MTE5LTRhZDUtODkxOC0xN2I2ZWVlOGNjMGQiLCJpYXQiOjE3NzM4NzAwOTksImZsYWciOiJvYXV0aF92dGV4ZG9tYWluIiwiaXNSZXByZXNlbnRhdGl2ZSI6ZmFsc2UsImlzcyI6InRva2VuLWVtaXR0ZXIiLCJqdGkiOiIzYzZhMDgwNS1lYmM3LTRmOTgtYjE3MS1kOTMxYWRhYTA2ZGMifQ.zYKswYunCWNtKx7IMeZWlSeovUCAZD33WuT4dG-Phwsx1I6wC4at1jomUvu7t_sSp4DhM8YHSKa3CEA1mI3ruQ",
+      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IkQ5RDk0MTQwNkYyNUMxRjJENjMyNERDMEQ3RTE0QjQ5MDI2NzdBQkEiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsImV4cCI6MTc3Mzk2NTczOSwidHlwZSI6InVzZXIiLCJ1c2VySWQiOiIxNDE5OWE2MS04MTE5LTRhZDUtODkxOC0xN2I2ZWVlOGNjMGQiLCJpYXQiOjE3NzM4NzkzMzksImZsYWciOiJvYXV0aF92dGV4ZG9tYWluIiwiaXNSZXByZXNlbnRhdGl2ZSI6ZmFsc2UsImlzcyI6InRva2VuLWVtaXR0ZXIiLCJqdGkiOiI1ZjA4MTFiOS1jNTllLTQzMTYtYmI4OS1mZDU0YTU2ODg0MTYifQ.YCP-FqdlPjHS0FRkcVkeGQVjqgrjLGGDSYfctPXW1w6pP0sE6fyt_zwsgLgqKZ3SuIl_vtz3X3gUSjUFBe7Ilw",
       "domain": ".vtexid.vtex.com.br",
       "path": "/",
-      "expires": 1773956498.804602,
+      "expires": 1773965738.945452,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "VtexIdclientAutCookie_chedrauimx",
-      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IkFGNDQ3QjBERkM2QkJDNzUwM0RFMDZBOUM2NDE0OTQ3NzZBMTU2OTYiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsInNlc3MiOiI0NWYyN2NkZi01YTYwLTQ5ZjQtYjBhMC00NzU4ZGRlMGViYTEiLCJleHAiOjE3NzM5NTY0OTksInR5cGUiOiJ1c2VyIiwidXNlcklkIjoiMTQxOTlhNjEtODExOS00YWQ1LTg5MTgtMTdiNmVlZThjYzBkIiwiaWF0IjoxNzczODcwMDk5LCJpc1JlcHJlc2VudGF0aXZlIjpmYWxzZSwiaXNzIjoidG9rZW4tZW1pdHRlciIsImp0aSI6IjE2MGY5YWI1LThkMGUtNDM1MS05Y2Y4LThjYTkzZmZkYTc2NiJ9.UhJ9bETd3AgpeQT8Fa9sb4L_OpgJF9SBqBZeQ433pPCum_lMV7jwHHguvvRdG1HM685o6-AnOrqrboVJs49lhw",
+      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjNBQzUyQjIzNjgxN0Y4RDEzREQ2MkJDMzkwQTRBRjk5N0YxODhBMDQiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsInNlc3MiOiJjZjNmNGEwOC0wNjBlLTQzOTgtYjBlNC0yZTM3MmVmMmU0NTQiLCJleHAiOjE3NzM5NjU3MzksInR5cGUiOiJ1c2VyIiwidXNlcklkIjoiMTQxOTlhNjEtODExOS00YWQ1LTg5MTgtMTdiNmVlZThjYzBkIiwiaWF0IjoxNzczODc5MzM5LCJpc1JlcHJlc2VudGF0aXZlIjpmYWxzZSwiaXNzIjoidG9rZW4tZW1pdHRlciIsImp0aSI6ImE3NGZhY2M5LTFjYTYtNDA2Zi04NThkLTQ2MGM0YWQ4ZDE0OCJ9.Y3t_PPZqPJbJlJG74JUSEoXrRJ2mR4kGho_UhCqZRTExVKQ9CQkSHHBc4nj3SSlUzEG78S8bUKHojyBrkBa_vg",
       "domain": ".www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773956499.918039,
+      "expires": 1773965740.044424,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "VtexIdclientAutCookie_4095fcf9-f929-49a7-a818-8abd1f714a82",
-      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IkFGNDQ3QjBERkM2QkJDNzUwM0RFMDZBOUM2NDE0OTQ3NzZBMTU2OTYiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsInNlc3MiOiI0NWYyN2NkZi01YTYwLTQ5ZjQtYjBhMC00NzU4ZGRlMGViYTEiLCJleHAiOjE3NzM5NTY0OTksInR5cGUiOiJ1c2VyIiwidXNlcklkIjoiMTQxOTlhNjEtODExOS00YWQ1LTg5MTgtMTdiNmVlZThjYzBkIiwiaWF0IjoxNzczODcwMDk5LCJpc1JlcHJlc2VudGF0aXZlIjpmYWxzZSwiaXNzIjoidG9rZW4tZW1pdHRlciIsImp0aSI6IjE2MGY5YWI1LThkMGUtNDM1MS05Y2Y4LThjYTkzZmZkYTc2NiJ9.UhJ9bETd3AgpeQT8Fa9sb4L_OpgJF9SBqBZeQ433pPCum_lMV7jwHHguvvRdG1HM685o6-AnOrqrboVJs49lhw",
+      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjNBQzUyQjIzNjgxN0Y4RDEzREQ2MkJDMzkwQTRBRjk5N0YxODhBMDQiLCJ0eXAiOiJqd3QifQ.eyJzdWIiOiI1MTNkMDg3ZS1iZWE4LTRmOTYtYjgyMC05ZTAwYzY1MzY1MTVAbWFpbHNsdXJwLmJpeiIsImFjY291bnQiOiJjaGVkcmF1aW14IiwiYXVkaWVuY2UiOiJ3ZWJzdG9yZSIsInNlc3MiOiJjZjNmNGEwOC0wNjBlLTQzOTgtYjBlNC0yZTM3MmVmMmU0NTQiLCJleHAiOjE3NzM5NjU3MzksInR5cGUiOiJ1c2VyIiwidXNlcklkIjoiMTQxOTlhNjEtODExOS00YWQ1LTg5MTgtMTdiNmVlZThjYzBkIiwiaWF0IjoxNzczODc5MzM5LCJpc1JlcHJlc2VudGF0aXZlIjpmYWxzZSwiaXNzIjoidG9rZW4tZW1pdHRlciIsImp0aSI6ImE3NGZhY2M5LTFjYTYtNDA2Zi04NThkLTQ2MGM0YWQ4ZDE0OCJ9.Y3t_PPZqPJbJlJG74JUSEoXrRJ2mR4kGho_UhCqZRTExVKQ9CQkSHHBc4nj3SSlUzEG78S8bUKHojyBrkBa_vg",
       "domain": ".www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773956499.91818,
+      "expires": 1773965740.044542,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "audit_p",
-      "value": "1|7aKwi7K57nOr1NtGpXbBsSb8pG3qRHa3HOzGv/Ixm5wqUPEx5ZNEfhs5FfxlUhxLqfZ4j6pDh+aM1KxoLazIt3VxIOQiUHNDVr6cEODDrE7dFQePtsEulf57sNUYbaYFARO9Zrn1bZiFc+XGNfcTFFJ0FussHgPzvxKiiWCZWHDizc5/vVOEwQ81qHLq4rKSm7QIxwcopQDc6UO785F0Pw==",
+      "value": "1|5FLsULye1K6mBbf+qPkHbWh6c4yL8DJP5fFQ5nEGqeMQyXrXeJ2bB8m2JuUviIQjjJ4oEg1gHLUwHTRO1/p4iBTo3mxXlBe5Pf6vThgmMfpQ/bH73nMvcFWh/UsG4VFW8MiD5ZKjBo6XjVPR84v/m6i4y0phDG90/5h4O4fh6RkFryeWoK7GUITvt+0f5jd0ffBkMEcWHCfQD5U7tEfUTQ==",
       "domain": ".rubiconproject.com",
       "path": "/",
-      "expires": 1805406101.576494,
+      "expires": 1805415341.543936,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None",
@@ -420,20 +420,20 @@
     },
     {
       "name": "khaos",
-      "value": "MMWKGI2D-D-6E5X",
+      "value": "MMWPYJMC-1U-EQHP",
       "domain": ".rubiconproject.com",
       "path": "/",
-      "expires": 1805406101.576634,
+      "expires": 1805415341.544072,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "khaos_p",
-      "value": "MMWKGI2D-D-6E5X",
+      "value": "MMWPYJMC-1U-EQHP",
       "domain": ".rubiconproject.com",
       "path": "/",
-      "expires": 1805406101.576693,
+      "expires": 1805415341.544119,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None",
@@ -442,10 +442,10 @@
     },
     {
       "name": "audit",
-      "value": "1|7aKwi7K57nOr1NtGpXbBsSb8pG3qRHa3HOzGv/Ixm5wqUPEx5ZNEfhs5FfxlUhxLqfZ4j6pDh+aM1KxoLazIt3VxIOQiUHNDVr6cEODDrE7dFQePtsEulf57sNUYbaYFARO9Zrn1bZiFc+XGNfcTFFJ0FussHgPzvxKiiWCZWHDizc5/vVOEwQ81qHLq4rKSm7QIxwcopQDc6UO785F0Pw==",
+      "value": "1|5FLsULye1K6mBbf+qPkHbWh6c4yL8DJP5fFQ5nEGqeMQyXrXeJ2bB8m2JuUviIQjjJ4oEg1gHLUwHTRO1/p4iBTo3mxXlBe5Pf6vThgmMfpQ/bH73nMvcFWh/UsG4VFW8MiD5ZKjBo6XjVPR84v/m6i4y0phDG90/5h4O4fh6RkFryeWoK7GUITvt+0f5jd0ffBkMEcWHCfQD5U7tEfUTQ==",
       "domain": ".rubiconproject.com",
       "path": "/",
-      "expires": 1805406101.576751,
+      "expires": 1805415341.544158,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
@@ -455,7 +455,7 @@
       "value": "1",
       "domain": ".rubiconproject.com",
       "path": "/",
-      "expires": 1781646101.576795,
+      "expires": 1781655341.544191,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None",
@@ -464,20 +464,20 @@
     },
     {
       "name": "tt_viewer",
-      "value": "6c480e4b-7146-44c6-aaba-75cb204dd1df",
+      "value": "839ac56e-a835-4a21-89c1-d4201c9e2d30",
       "domain": ".teads.tv",
       "path": "/",
-      "expires": 1805319703.181008,
+      "expires": 1805328943.381078,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "vtex_session",
-      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjJkOWFkZTA1LTg2NDktNDJmYy1hMWQzLWZmYmFjZWUwMWQ1ZCIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50LmlkIjpbXSwiaWQiOiJkODA4ZDE2MC03OGYyLTRjODUtOGU4Ni1iZWU4M2ZlMzYzNzEiLCJ2ZXJzaW9uIjo0LCJzdWIiOiJzZXNzaW9uIiwiYWNjb3VudCI6ImNoZWRyYXVpbXgiLCJleHAiOjE3NzQzMDIxMDMsImlhdCI6MTc3Mzg3MDEwMywianRpIjoiMmQ4Y2Y1NDctYjJiZC00MDE4LThkMWItYjFjZDY0NWNjZDg2IiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.Wu2vsfXlU7HJWvwNZ_I97AUwyi4q0OHRsPGXx-VVMGc8H0KvhK-Lit-qFkHs0fWHteW6dW1dgLJGiyZc__18SA",
+      "value": "eyJhbGciOiJFUzI1NiIsImtpZCI6Ijg4N2I3NDU4LWE2N2EtNDRiZC04ZmZmLTUyNThhNGY4YmU1OCIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50LmlkIjpbXSwiaWQiOiJiYzc5MTYyMi1mODA5LTQ5NjEtOGY5MC1hMzc3ZjQ2Yzk3YzMiLCJ2ZXJzaW9uIjo0LCJzdWIiOiJzZXNzaW9uIiwiYWNjb3VudCI6ImNoZWRyYXVpbXgiLCJleHAiOjE3NzQzMTEzNDMsImlhdCI6MTc3Mzg3OTM0MywianRpIjoiYzI1ZWQ3ZWUtMTg3OC00ZWY1LTkwMzctMjgwY2M5NmRmZDExIiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.g7PZXd2S3KAY2OMlbBoyxpDWawwERJGbjKpU7716oWH6wjR4pSlqJ73SPfXWXjZ_9Lyq54TLaAGge3W5olDCAQ",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1774302104.646065,
+      "expires": 1774311347.432626,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
@@ -487,197 +487,197 @@
       "value": "eyJjYW1wYWlnbnMiOm51bGwsImNoYW5uZWwiOiIxIiwicHJpY2VUYWJsZXMiOm51bGwsInJlZ2lvbklkIjoiVTFjalkyaGxaSEpoZFdsdGVEQXdOVGs3WTJobFpISmhkV2x0ZURBMk5qZz0iLCJ1dG1fY2FtcGFpZ24iOm51bGwsInV0bV9zb3VyY2UiOm51bGwsInV0bWlfY2FtcGFpZ24iOm51bGwsImN1cnJlbmN5Q29kZSI6Ik1YTiIsImN1cnJlbmN5U3ltYm9sIjoiJCIsImNvdW50cnlDb2RlIjoiTUVYIiwiY3VsdHVyZUluZm8iOiJlcy1NWCIsImFkbWluX2N1bHR1cmVJbmZvIjoiZXMtTVgiLCJjaGFubmVsUHJpdmFjeSI6InB1YmxpYyIsImZhY2V0cyI6ImNvdW50cnk9TUVYO2Nvb3JkaW5hdGVzPS05OC4yMzk2ODQ5LDE5LjAzODAxNjI7In0",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1774302104.646287,
+      "expires": 1774311347.432863,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "BID",
-      "value": "W7QE2TQWGXKWI7CAD9HUEJ6EY",
+      "value": "ZOPGOVMCK7KWI80906KGCLUII",
       "domain": ".toast.com",
       "path": "/",
-      "expires": 1789422103.727647,
+      "expires": 1789431343.874941,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "txpub_1570163526",
-      "value": "jqVCuWCTNzlSYwI8uKWhdvm_gSirYFCB9bk-40Uydrc_:_EXP_:_1789422103_:_EXP_:_1773870103",
+      "value": "0gmPcFe7fpSgk7JX4ECQm_mB5oTRAEJgXUafTnE6HV0_:_EXP_:_1789431343_:_EXP_:_1773879343",
       "domain": ".toast.com",
       "path": "/",
-      "expires": 1789422103.727724,
+      "expires": 1789431343.875044,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "txsync",
-      "value": "1773870103",
+      "value": "1773879343",
       "domain": ".toast.com",
       "path": "/",
-      "expires": 1789422103.727761,
+      "expires": 1789431343.875072,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "_lr_hb_-zvhuxj%2Ftendaenlinea",
-      "value": "{%22heartbeat%22:1773870103951}",
+      "value": "{%22heartbeat%22:1773879346601}",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773956503,
+      "expires": 1773965746,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "__rtbh.lid",
-      "value": "%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%22ASUAPQzdOTkjVfssLr4z%22%2C%22expiryDate%22%3A%222027-03-18T21%3A41%3A43.974Z%22%7D",
+      "value": "%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%22Cs2mAYRY99X3NfMq9BV9%22%2C%22expiryDate%22%3A%222027-03-19T00%3A15%3A46.627Z%22%7D",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1805406103,
+      "expires": 1805415346,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "gid",
-      "value": "4599c530c81a95f00f9ba55794bd6d14",
+      "value": "488d211a73c3e4917d5c49b5117c2636",
       "domain": ".gssprt.jp",
       "path": "/",
-      "expires": 1808430104.812488,
+      "expires": 1808439347.300807,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "rtbhouse",
-      "value": "jqVCuWCTNzlSYwI8uKWhdvm_gSirYFCB9bk-40Uydrc",
+      "value": "0gmPcFe7fpSgk7JX4ECQm_mB5oTRAEJgXUafTnE6HV0",
       "domain": ".gssprt.jp",
       "path": "/",
-      "expires": 1789422104.812767,
+      "expires": 1789431347.300968,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "__rtbh.uid",
+      "value": "%7B%22eventType%22%3A%22uid%22%2C%22id%22%3A%2214199a61-8119-4ad5-8918-17b6eee8cc0d%22%2C%22expiryDate%22%3A%222027-03-19T00%3A15%3A47.654Z%22%7D",
+      "domain": "www.chedraui.com.mx",
+      "path": "/",
+      "expires": 1805415347,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "_TargetOne_Session_Cookie_Time",
-      "value": "1773870105307",
+      "value": "1773879348203",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773871905,
+      "expires": 1773881148,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
-    },
-    {
-      "name": "_uetsid",
-      "value": "35fbfa70231311f18b4271d2ce91e010",
-      "domain": ".chedraui.com.mx",
-      "path": "/",
-      "expires": 1773956505,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_uetvid",
-      "value": "35fc3e00231311f194a25b7619442b7b",
-      "domain": ".chedraui.com.mx",
-      "path": "/",
-      "expires": 1807566105,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "__rtbh.uid",
-      "value": "%7B%22eventType%22%3A%22uid%22%2C%22id%22%3A%2214199a61-8119-4ad5-8918-17b6eee8cc0d%22%2C%22expiryDate%22%3A%222027-03-18T21%3A41%3A46.087Z%22%7D",
-      "domain": "www.chedraui.com.mx",
-      "path": "/",
-      "expires": 1805406106,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "AWSALBCORS",
-      "value": "yEpaAGCKm6YAqmNgkWZtdVpsRVSGVIu2r475kVylxMvmg9JwSENwun3+y0N5E8y1lxY54TL1iaQ2i0RIHihrRUOaA1VwssecYotrCYl1yS1hNKNUsiojyZKUik8Z",
-      "domain": "widget-mediator.zopim.com",
-      "path": "/",
-      "expires": 1774474906.387646,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
     },
     {
       "name": "SOC",
-      "value": "abscGsCo8GsAACWP0JEAAAAA",
+      "value": "abtAM8Co8GwAAPw5Ev0AAAAA",
       "domain": ".socdm.com",
       "path": "/",
-      "expires": 1808430106.80004,
+      "expires": 1808439348.286132,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "TR",
-      "value": "d87591cad569dcb241ca5bbdf1ebd21fb5565fa960aa6999",
+      "value": "108a1e2ed5bafb8230a06c6f343a1d7b65a08ee2c7a1344b",
       "domain": ".send.microad.jp",
       "path": "/",
-      "expires": 1781646106.847847,
+      "expires": 1781655348.362733,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_uetsid",
+      "value": "b74ce5a0232811f1b0aa7f2ec522bb07",
+      "domain": ".chedraui.com.mx",
+      "path": "/",
+      "expires": 1773965748,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_uetvid",
+      "value": "b74d1630232811f188953beb05f6335e",
+      "domain": ".chedraui.com.mx",
+      "path": "/",
+      "expires": 1807575348,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "AWSALBCORS",
+      "value": "HeEnIVcKp1FoGe9e9cqa0Akni//atBF3a/oRVjEnj0BF+hkJwZbeuQFsX9nM12kWRa7+7fOLI0w4HukNR6m4qpJsxZwsxZntwLe7BrRa2xefwSTCj9W++9PU/qjg",
+      "domain": "widget-mediator.zopim.com",
+      "path": "/",
+      "expires": 1774484149.02912,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "_ga_N938TMF9GB",
-      "value": "GS2.1.s1773870084$o1$g1$t1773870110$j34$l0$h0",
+      "value": "GS2.1.s1773879321$o1$g1$t1773879353$j28$l0$h0",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1808430110.253569,
+      "expires": 1808439353.127469,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_lr_tabs_-zvhuxj%2Ftendaenlinea",
-      "value": "{%22recordingID%22:%226-019d02e5-6561-733f-98d3-249f3ee823e7%22%2C%22sessionID%22:0%2C%22lastActivity%22:1773870112312%2C%22hasActivity%22:true%2C%22confirmed%22:false%2C%22recordingConditionThreshold%22:71.8620357684686%2C%22clearsIdentifiedUser%22:false}",
+      "value": "{%22recordingID%22:%226-019d0372-54c8-7715-a596-2ab0356d972d%22%2C%22sessionID%22:0%2C%22lastActivity%22:1773879354968%2C%22hasActivity%22:true%2C%22confirmed%22:false%2C%22recordingConditionThreshold%22:83.9049940044579%2C%22clearsIdentifiedUser%22:false}",
       "domain": "www.chedraui.com.mx",
       "path": "/",
-      "expires": 1773956512,
+      "expires": 1773965754,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "ttcsid",
-      "value": "1773870084955::stdrq59HYC4p7TZvBN9k.1.1773870112426.0",
+      "value": "1773879321255::dFGB2dXomeULFJuVXyk_.1.1773879355088.0",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1807566112,
+      "expires": 1807575355,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "ttcsid_C8TOJ8DCSQN3SGB7QUV0",
-      "value": "1773870084953::efiISgn6YLuQ5-qcpiae.1.1773870112426.1",
+      "value": "1773879321254::k67ph1vzZxQlhOPq3eut.1.1773879355088.1",
       "domain": ".chedraui.com.mx",
       "path": "/",
-      "expires": 1807566112,
+      "expires": 1807575355,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "CheckoutOrderFormOwnership",
-      "value": "1Df7pSTnOeTw7fcmWMa3JgIqSTzhR386QLYGUH0uulG7nAP2liTTt1skKAtaXj9RPzxJm9Ip8vI%2BhP5O%2FPOTl0neC9lGxxVFiCXmUJhAjJKkxP1KtuheEXJcaRBMM5T2JhJGAKWqVSSzIUApeN%2FM0IEXf94RJdDLjBoRUMffbkVtsPHLab0RXf6uB4%2BPtiqN",
+      "value": "qn3jBKuS3cqnxS54sKc3XO2xXRegE60C1r48sDxPOzYpY1GDx%2Fr42oNcBXHikeVDk60zIF4ze%2BzM33RdDqhsa9PrVYCUgo8JlWX99crRVIE%3D",
       "domain": ".www.chedraui.com.mx",
       "path": "/",
-      "expires": 1789422114.291216,
+      "expires": 1789431357.057857,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Strict"
@@ -705,11 +705,11 @@
         },
         {
           "name": "_uetvid_exp",
-          "value": "Mon, 12 Apr 2027 21:41:45 GMT"
+          "value": "Tue, 13 Apr 2027 00:15:48 GMT"
         },
         {
           "name": "orderform-zustand-storage",
-          "value": "{\"state\":{\"orderForm\":{\"orderFormId\":\"dd0c61b205b8463ca0e2449121bcb4d3\",\"items\":[],\"totalizers\":[],\"marketingData\":{\"coupon\":\"\",\"utmCampaign\":\"\",\"utmMedium\":\"\",\"utmSource\":\"\",\"utmiCampaign\":\"\",\"utmiPart\":\"\",\"utmiPage\":\"\",\"__typename\":\"MarketingData\"},\"value\":0,\"shippingData\":{\"countries\":[],\"availableAddresses\":[{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"alias\":\"Coapa\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7b7e3c47-5f1b-4167-894e-9300394e5de6\",\"geoCoordinates\":[-99.1428912,19.2847556],\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"alias\":\"Interlomas\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"e312a574-c4a8-4fe4-8f83-bbb634542f9e\",\"geoCoordinates\":[-99.26786519999999,19.40322],\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"alias\":\"Mundo E\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"1f1bd4af-5c1d-484b-b9f7-eccb82dd4de1\",\"geoCoordinates\":[-99.2281163,19.5259738],\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"alias\":\"Pedregal\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"a8c6ad03-0403-4082-b5f4-4ee791f37513\",\"geoCoordinates\":[-99.22241509999999,19.3253308],\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"alias\":\"Polanco\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"39aa116e-f8c7-4a06-a27f-047029a11bb3\",\"geoCoordinates\":[-99.1849038,19.433135],\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"alias\":\"Sante fe\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7734d711-b447-4dcf-aacc-93b9514bee45\",\"geoCoordinates\":[-99.2782551,19.3612015],\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"alias\":\"Universidad\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"9ace893b-0323-4623-a077-3328af9ba781\",\"geoCoordinates\":[-99.1645108,19.3751709],\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"isDisposable\":true,\"geoCoordinates\":[-99.1428912,19.2847556],\"__typename\":\"Address\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"isDisposable\":true,\"geoCoordinates\":[-99.26786519999999,19.40322],\"__typename\":\"Address\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"isDisposable\":true,\"geoCoordinates\":[-99.2281163,19.5259738],\"__typename\":\"Address\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"isDisposable\":true,\"geoCoordinates\":[-99.22241509999999,19.3253308],\"__typename\":\"Address\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"isDisposable\":true,\"geoCoordinates\":[-99.1849038,19.433135],\"__typename\":\"Address\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"isDisposable\":true,\"geoCoordinates\":[-99.2782551,19.3612015],\"__typename\":\"Address\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"isDisposable\":true,\"geoCoordinates\":[-99.1645108,19.3751709],\"__typename\":\"Address\"},{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"isDisposable\":true,\"geoCoordinates\":[-98.2396849,19.0380162],\"__typename\":\"Address\"},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9BuM7qWBZ7\",\"isDisposable\":true,\"postalCode\":\"72190\",\"city\":\"Heroica Puebla de Zaragoza\",\"state\":\"PUEBLA\",\"country\":\"MEX\",\"street\":\"Calle 12\",\"number\":\"30\",\"neighborhood\":\"San José Vista Hermosa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-98.2396849,19.0380162]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9XeE8z1ehk\",\"isDisposable\":true,\"postalCode\":\"14388\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calzada México-Xochimilco\",\"number\":\"5149\",\"neighborhood\":\"Guadalupe Coapa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1428912,19.2847556]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9H2tLSfYiG\",\"isDisposable\":true,\"postalCode\":\"52786\",\"city\":\"Naucalpan de Juárez\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Parque de Valencia\",\"number\":\"17\",\"neighborhood\":\"Parques de la Herradura\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.26786519999999,19.40322]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9x6DQ2mHJT\",\"isDisposable\":true,\"postalCode\":\"54025\",\"city\":\"Ciudad de México\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"number\":\"1007\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2281163,19.5259738]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9QDKbMlSvN\",\"isDisposable\":true,\"postalCode\":\"10200\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Cerrada de San Jerónimo\",\"number\":\"117\",\"neighborhood\":\"San Jerónimo Lídice\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.22241509999999,19.3253308]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9HsC4VFrzI\",\"isDisposable\":true,\"postalCode\":\"11560\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Hipólito Taine\",\"number\":\"307\",\"neighborhood\":\"Polanco V Sección\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1849038,19.433135]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9W9vA1G4wq\",\"isDisposable\":true,\"postalCode\":\"05348\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Vasco de Quiroga\",\"number\":\"3900\",\"neighborhood\":\"Contadero\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2782551,19.3612015]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9V2VQ1Nu4T\",\"isDisposable\":true,\"postalCode\":\"03104\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Miguel Laurent\",\"number\":\"624\",\"neighborhood\":\"Colonia del Valle Sur\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1645108,19.3751709]}],\"selectedAddress\":{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},\"deliveryOptions\":[],\"pickupOptions\":[],\"isValid\":false,\"selectedAddresses\":[{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"}]}}},\"version\":0}"
+          "value": "{\"state\":{\"orderForm\":{\"orderFormId\":\"11c7f914d7c747a68b51741d36ae85c8\",\"items\":[],\"totalizers\":[],\"marketingData\":{\"coupon\":\"\",\"utmCampaign\":\"\",\"utmMedium\":\"\",\"utmSource\":\"\",\"utmiCampaign\":\"\",\"utmiPart\":\"\",\"utmiPage\":\"\",\"__typename\":\"MarketingData\"},\"value\":0,\"shippingData\":{\"countries\":[],\"availableAddresses\":[{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"alias\":\"Coapa\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7b7e3c47-5f1b-4167-894e-9300394e5de6\",\"geoCoordinates\":[-99.1428912,19.2847556],\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"alias\":\"Interlomas\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"e312a574-c4a8-4fe4-8f83-bbb634542f9e\",\"geoCoordinates\":[-99.26786519999999,19.40322],\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"alias\":\"Mundo E\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"1f1bd4af-5c1d-484b-b9f7-eccb82dd4de1\",\"geoCoordinates\":[-99.2281163,19.5259738],\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"alias\":\"Pedregal\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"a8c6ad03-0403-4082-b5f4-4ee791f37513\",\"geoCoordinates\":[-99.22241509999999,19.3253308],\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"alias\":\"Polanco\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"39aa116e-f8c7-4a06-a27f-047029a11bb3\",\"geoCoordinates\":[-99.1849038,19.433135],\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"alias\":\"Sante fe\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7734d711-b447-4dcf-aacc-93b9514bee45\",\"geoCoordinates\":[-99.2782551,19.3612015],\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"alias\":\"Universidad\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"9ace893b-0323-4623-a077-3328af9ba781\",\"geoCoordinates\":[-99.1645108,19.3751709],\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"isDisposable\":true,\"geoCoordinates\":[-99.1428912,19.2847556],\"__typename\":\"Address\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"isDisposable\":true,\"geoCoordinates\":[-99.26786519999999,19.40322],\"__typename\":\"Address\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"isDisposable\":true,\"geoCoordinates\":[-99.2281163,19.5259738],\"__typename\":\"Address\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"isDisposable\":true,\"geoCoordinates\":[-99.22241509999999,19.3253308],\"__typename\":\"Address\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"isDisposable\":true,\"geoCoordinates\":[-99.1849038,19.433135],\"__typename\":\"Address\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"isDisposable\":true,\"geoCoordinates\":[-99.2782551,19.3612015],\"__typename\":\"Address\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"isDisposable\":true,\"geoCoordinates\":[-99.1645108,19.3751709],\"__typename\":\"Address\"},{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"isDisposable\":true,\"geoCoordinates\":[-98.2396849,19.0380162],\"__typename\":\"Address\"},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9BuM7qWBZ7\",\"isDisposable\":true,\"postalCode\":\"72190\",\"city\":\"Heroica Puebla de Zaragoza\",\"state\":\"PUEBLA\",\"country\":\"MEX\",\"street\":\"Calle 12\",\"number\":\"30\",\"neighborhood\":\"San José Vista Hermosa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-98.2396849,19.0380162]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9XeE8z1ehk\",\"isDisposable\":true,\"postalCode\":\"14388\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calzada México-Xochimilco\",\"number\":\"5149\",\"neighborhood\":\"Guadalupe Coapa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1428912,19.2847556]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9H2tLSfYiG\",\"isDisposable\":true,\"postalCode\":\"52786\",\"city\":\"Naucalpan de Juárez\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Parque de Valencia\",\"number\":\"17\",\"neighborhood\":\"Parques de la Herradura\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.26786519999999,19.40322]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9x6DQ2mHJT\",\"isDisposable\":true,\"postalCode\":\"54025\",\"city\":\"Ciudad de México\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"number\":\"1007\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2281163,19.5259738]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9QDKbMlSvN\",\"isDisposable\":true,\"postalCode\":\"10200\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Cerrada de San Jerónimo\",\"number\":\"117\",\"neighborhood\":\"San Jerónimo Lídice\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.22241509999999,19.3253308]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9HsC4VFrzI\",\"isDisposable\":true,\"postalCode\":\"11560\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Hipólito Taine\",\"number\":\"307\",\"neighborhood\":\"Polanco V Sección\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1849038,19.433135]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9W9vA1G4wq\",\"isDisposable\":true,\"postalCode\":\"05348\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Vasco de Quiroga\",\"number\":\"3900\",\"neighborhood\":\"Contadero\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2782551,19.3612015]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9V2VQ1Nu4T\",\"isDisposable\":true,\"postalCode\":\"03104\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Miguel Laurent\",\"number\":\"624\",\"neighborhood\":\"Colonia del Valle Sur\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1645108,19.3751709]}],\"selectedAddress\":{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},\"deliveryOptions\":[],\"pickupOptions\":[],\"isValid\":false,\"selectedAddresses\":[{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"}]}}},\"version\":0}"
         },
         {
           "name": "logRocketIdentifySended",
@@ -717,11 +717,11 @@
         },
         {
           "name": "_gcl_ls",
-          "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"creationTimeMs\":1773870083265},\"expires\":1781646083265}}"
+          "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"creationTimeMs\":1773879319706},\"expires\":1781655319706}}"
         },
         {
           "name": "ZD-suid",
-          "value": "{\"id\":\"c6071c500e7346bfbbf49966b87a9139\",\"expiry\":1773871006049,\"tabs\":{\"count\":1,\"expiry\":0}}"
+          "value": "{\"id\":\"71b8385cd1d042f380600998fd014905\",\"expiry\":1773880248740,\"tabs\":{\"count\":1,\"expiry\":0}}"
         },
         {
           "name": "myAddressSelected",
@@ -733,15 +733,15 @@
         },
         {
           "name": "ZD-settings",
-          "value": "[[\"ea4fa75f63fd14897660d2229c0d37faa8d26328\",1773870083]]"
+          "value": "[[\"ea4fa75f63fd14897660d2229c0d37faa8d26328\",1773879320]]"
         },
         {
           "name": "ZD-buid",
-          "value": "d65e38fe0bd04c02bf968f7f17fd3608"
+          "value": "9f0d59d5739447eabbf63bfb4d58abbf"
         },
         {
           "name": "__rtbh.uid",
-          "value": "{\"eventType\":\"uid\",\"id\":\"14199a61-8119-4ad5-8918-17b6eee8cc0d\",\"expiryDate\":\"2027-03-18T21:41:46.087Z\"}"
+          "value": "{\"eventType\":\"uid\",\"id\":\"14199a61-8119-4ad5-8918-17b6eee8cc0d\",\"expiryDate\":\"2027-03-19T00:15:47.654Z\"}"
         },
         {
           "name": "jml_getSimulationInfoSha",
@@ -749,7 +749,7 @@
         },
         {
           "name": "_uetvid",
-          "value": "35fc3e00231311f194a25b7619442b7b"
+          "value": "b74d1630232811f188953beb05f6335e"
         },
         {
           "name": "lastExternalReferrer",
@@ -761,11 +761,11 @@
         },
         {
           "name": "_lr_id_",
-          "value": "{\"userID\":\"2b5bc9c5-d0ee-4768-ae12-78e7aa2bf707\"}"
+          "value": "{\"userID\":\"f4490704-0021-4deb-b939-919faf688b52\"}"
         },
         {
           "name": "__zlcstore",
-          "value": "{\"xZ4SDhJjAVslap6kEHoJmdAPZhz68t61\":{\"web_sdk_last_host\":\"widget-mediator.zopim.com\",\"timestamp\":1773870106561,\"account_status\":\"online\"}}"
+          "value": "{\"xZ4SDhJjAVslap6kEHoJmdAPZhz68t61\":{\"web_sdk_last_host\":\"widget-mediator.zopim.com\",\"timestamp\":1773879349184,\"account_status\":\"online\"}}"
         },
         {
           "name": "jml_updateItemsSha",
@@ -773,7 +773,7 @@
         },
         {
           "name": "__rtbh.lid",
-          "value": "{\"eventType\":\"lid\",\"id\":\"ASUAPQzdOTkjVfssLr4z\",\"expiryDate\":\"2027-03-18T21:41:43.974Z\"}"
+          "value": "{\"eventType\":\"lid\",\"id\":\"Cs2mAYRY99X3NfMq9BV9\",\"expiryDate\":\"2027-03-19T00:15:46.627Z\"}"
         },
         {
           "name": "userInfo",
@@ -785,7 +785,7 @@
         },
         {
           "name": "_uetsid",
-          "value": "35fbfa70231311f18b4271d2ce91e010"
+          "value": "b74ce5a0232811f1b0aa7f2ec522bb07"
         },
         {
           "name": "ZD-store",
@@ -797,7 +797,7 @@
         },
         {
           "name": "lastExternalReferrerTime",
-          "value": "1773870102778"
+          "value": "1773879342951"
         },
         {
           "name": "mdUserAddresses",
@@ -805,7 +805,7 @@
         },
         {
           "name": "vid_rt_webstore",
-          "value": "{\"status\":\"success\",\"refreshAfter\":\"2026-03-19T09:41:41.373Z\"}"
+          "value": "{\"status\":\"success\",\"refreshAfter\":\"2026-03-19T12:15:41.591Z\"}"
         },
         {
           "name": "userAddress",
@@ -813,7 +813,7 @@
         },
         {
           "name": "_uetsid_exp",
-          "value": "Thu, 19 Mar 2026 21:41:45 GMT"
+          "value": "Fri, 20 Mar 2026 00:15:48 GMT"
         },
         {
           "name": "jml_uuid_663d0352743a721a7f0214e1",
@@ -825,7 +825,7 @@
         },
         {
           "name": "analytics:session",
-          "value": "{\"location\":\"https://www.chedraui.com.mx/\",\"referrer\":\"\",\"expires\":1773871910}"
+          "value": "{\"location\":\"https://www.chedraui.com.mx/\",\"referrer\":\"\",\"expires\":1773881153}"
         },
         {
           "name": "acceptCookies",
@@ -833,7 +833,7 @@
         },
         {
           "name": "orderform",
-          "value": "{\"id\":\"dd0c61b205b8463ca0e2449121bcb4d3\",\"items\":[],\"value\":0,\"totalizers\":[],\"marketingData\":{\"coupon\":\"\",\"utmCampaign\":\"\",\"utmMedium\":\"\",\"utmSource\":\"\",\"utmiCampaign\":\"\",\"utmiPart\":\"\",\"utmiPage\":\"\",\"__typename\":\"MarketingData\"},\"canEditData\":true,\"loggedIn\":true,\"paymentData\":{\"paymentSystems\":[],\"payments\":[],\"installmentOptions\":[],\"availableAccounts\":[],\"isValid\":false,\"__typename\":\"PaymentData\"},\"messages\":{\"couponMessages\":[],\"generalMessages\":[],\"__typename\":\"OrderFormMessages\"},\"shipping\":{\"countries\":[],\"availableAddresses\":[{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"alias\":\"Coapa\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7b7e3c47-5f1b-4167-894e-9300394e5de6\",\"geoCoordinates\":[-99.1428912,19.2847556],\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"alias\":\"Interlomas\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"e312a574-c4a8-4fe4-8f83-bbb634542f9e\",\"geoCoordinates\":[-99.26786519999999,19.40322],\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"alias\":\"Mundo E\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"1f1bd4af-5c1d-484b-b9f7-eccb82dd4de1\",\"geoCoordinates\":[-99.2281163,19.5259738],\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"alias\":\"Pedregal\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"a8c6ad03-0403-4082-b5f4-4ee791f37513\",\"geoCoordinates\":[-99.22241509999999,19.3253308],\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"alias\":\"Polanco\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"39aa116e-f8c7-4a06-a27f-047029a11bb3\",\"geoCoordinates\":[-99.1849038,19.433135],\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"alias\":\"Sante fe\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7734d711-b447-4dcf-aacc-93b9514bee45\",\"geoCoordinates\":[-99.2782551,19.3612015],\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"alias\":\"Universidad\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"9ace893b-0323-4623-a077-3328af9ba781\",\"geoCoordinates\":[-99.1645108,19.3751709],\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"isDisposable\":true,\"geoCoordinates\":[-99.1428912,19.2847556],\"__typename\":\"Address\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"isDisposable\":true,\"geoCoordinates\":[-99.26786519999999,19.40322],\"__typename\":\"Address\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"isDisposable\":true,\"geoCoordinates\":[-99.2281163,19.5259738],\"__typename\":\"Address\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"isDisposable\":true,\"geoCoordinates\":[-99.22241509999999,19.3253308],\"__typename\":\"Address\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"isDisposable\":true,\"geoCoordinates\":[-99.1849038,19.433135],\"__typename\":\"Address\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"isDisposable\":true,\"geoCoordinates\":[-99.2782551,19.3612015],\"__typename\":\"Address\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"isDisposable\":true,\"geoCoordinates\":[-99.1645108,19.3751709],\"__typename\":\"Address\"},{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"isDisposable\":true,\"geoCoordinates\":[-98.2396849,19.0380162],\"__typename\":\"Address\"},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9BuM7qWBZ7\",\"isDisposable\":true,\"postalCode\":\"72190\",\"city\":\"Heroica Puebla de Zaragoza\",\"state\":\"PUEBLA\",\"country\":\"MEX\",\"street\":\"Calle 12\",\"number\":\"30\",\"neighborhood\":\"San José Vista Hermosa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-98.2396849,19.0380162]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9XeE8z1ehk\",\"isDisposable\":true,\"postalCode\":\"14388\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calzada México-Xochimilco\",\"number\":\"5149\",\"neighborhood\":\"Guadalupe Coapa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1428912,19.2847556]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9H2tLSfYiG\",\"isDisposable\":true,\"postalCode\":\"52786\",\"city\":\"Naucalpan de Juárez\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Parque de Valencia\",\"number\":\"17\",\"neighborhood\":\"Parques de la Herradura\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.26786519999999,19.40322]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9x6DQ2mHJT\",\"isDisposable\":true,\"postalCode\":\"54025\",\"city\":\"Ciudad de México\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"number\":\"1007\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2281163,19.5259738]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9QDKbMlSvN\",\"isDisposable\":true,\"postalCode\":\"10200\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Cerrada de San Jerónimo\",\"number\":\"117\",\"neighborhood\":\"San Jerónimo Lídice\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.22241509999999,19.3253308]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9HsC4VFrzI\",\"isDisposable\":true,\"postalCode\":\"11560\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Hipólito Taine\",\"number\":\"307\",\"neighborhood\":\"Polanco V Sección\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1849038,19.433135]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9W9vA1G4wq\",\"isDisposable\":true,\"postalCode\":\"05348\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Vasco de Quiroga\",\"number\":\"3900\",\"neighborhood\":\"Contadero\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2782551,19.3612015]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9V2VQ1Nu4T\",\"isDisposable\":true,\"postalCode\":\"03104\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Miguel Laurent\",\"number\":\"624\",\"neighborhood\":\"Colonia del Valle Sur\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1645108,19.3751709]}],\"selectedAddress\":{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},\"deliveryOptions\":[],\"pickupOptions\":[],\"isValid\":false},\"userProfileId\":\"14199a61-8119-4ad5-8918-17b6eee8cc0d\",\"userType\":\"STORE_USER\",\"clientProfileData\":{\"email\":\"513d087e-bea8-4f96-b820-9e00c6536515@mailslurp.biz\",\"firstName\":null,\"lastName\":null,\"document\":null,\"documentType\":null,\"phone\":null,\"isValid\":false,\"isCorporate\":false,\"corporateName\":null,\"tradeName\":null,\"corporateDocument\":null,\"stateInscription\":null,\"__typename\":\"ClientData\"},\"clientPreferencesData\":{\"locale\":\"es-MX\",\"optInNewsletter\":null,\"__typename\":\"ClientPreferencesData\"},\"allowManualPrice\":false,\"customData\":{\"customApps\":[{\"fields\":[],\"id\":\"localizador\",\"major\":1}]},\"__typename\":\"OrderForm\"}"
+          "value": "{\"id\":\"11c7f914d7c747a68b51741d36ae85c8\",\"items\":[],\"value\":0,\"totalizers\":[],\"marketingData\":{\"coupon\":\"\",\"utmCampaign\":\"\",\"utmMedium\":\"\",\"utmSource\":\"\",\"utmiCampaign\":\"\",\"utmiPart\":\"\",\"utmiPage\":\"\",\"__typename\":\"MarketingData\"},\"canEditData\":true,\"loggedIn\":true,\"paymentData\":{\"paymentSystems\":[],\"payments\":[],\"installmentOptions\":[],\"availableAccounts\":[],\"isValid\":false,\"__typename\":\"PaymentData\"},\"messages\":{\"couponMessages\":[],\"generalMessages\":[],\"__typename\":\"OrderFormMessages\"},\"shipping\":{\"countries\":[],\"availableAddresses\":[{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"alias\":\"Coapa\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7b7e3c47-5f1b-4167-894e-9300394e5de6\",\"geoCoordinates\":[-99.1428912,19.2847556],\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"alias\":\"Interlomas\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"e312a574-c4a8-4fe4-8f83-bbb634542f9e\",\"geoCoordinates\":[-99.26786519999999,19.40322],\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"alias\":\"Mundo E\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"1f1bd4af-5c1d-484b-b9f7-eccb82dd4de1\",\"geoCoordinates\":[-99.2281163,19.5259738],\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"alias\":\"Pedregal\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"a8c6ad03-0403-4082-b5f4-4ee791f37513\",\"geoCoordinates\":[-99.22241509999999,19.3253308],\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"alias\":\"Polanco\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"39aa116e-f8c7-4a06-a27f-047029a11bb3\",\"geoCoordinates\":[-99.1849038,19.433135],\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"alias\":\"Sante fe\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"7734d711-b447-4dcf-aacc-93b9514bee45\",\"geoCoordinates\":[-99.2782551,19.3612015],\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"alias\":\"Universidad\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"9ace893b-0323-4623-a077-3328af9ba781\",\"geoCoordinates\":[-99.1645108,19.3751709],\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"__typename\":\"CartAddress\"},{\"addressId\":\"9XeE8z1ehk\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Guadalupe Coapa\",\"number\":\"5149\",\"postalCode\":\"14388\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calzada México-Xochimilco\",\"isDisposable\":true,\"geoCoordinates\":[-99.1428912,19.2847556],\"__typename\":\"Address\"},{\"addressId\":\"9H2tLSfYiG\",\"addressType\":\"residential\",\"city\":\"Naucalpan de Juárez\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Parques de la Herradura\",\"number\":\"17\",\"postalCode\":\"52786\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Parque de Valencia\",\"isDisposable\":true,\"geoCoordinates\":[-99.26786519999999,19.40322],\"__typename\":\"Address\"},{\"addressId\":\"9x6DQ2mHJT\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"number\":\"1007\",\"postalCode\":\"54025\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"ESTADO DE MÉXICO\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"isDisposable\":true,\"geoCoordinates\":[-99.2281163,19.5259738],\"__typename\":\"Address\"},{\"addressId\":\"9QDKbMlSvN\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San Jerónimo Lídice\",\"number\":\"117\",\"postalCode\":\"10200\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Cerrada de San Jerónimo\",\"isDisposable\":true,\"geoCoordinates\":[-99.22241509999999,19.3253308],\"__typename\":\"Address\"},{\"addressId\":\"9HsC4VFrzI\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Polanco V Sección\",\"number\":\"307\",\"postalCode\":\"11560\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Calle Hipólito Taine\",\"isDisposable\":true,\"geoCoordinates\":[-99.1849038,19.433135],\"__typename\":\"Address\"},{\"addressId\":\"9W9vA1G4wq\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Contadero\",\"number\":\"3900\",\"postalCode\":\"05348\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Vasco de Quiroga\",\"isDisposable\":true,\"geoCoordinates\":[-99.2782551,19.3612015],\"__typename\":\"Address\"},{\"addressId\":\"9V2VQ1Nu4T\",\"addressType\":\"residential\",\"city\":\"Ciudad de México\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"Colonia del Valle Sur\",\"number\":\"624\",\"postalCode\":\"03104\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"CIUDAD DE MÉXICO\",\"street\":\"Miguel Laurent\",\"isDisposable\":true,\"geoCoordinates\":[-99.1645108,19.3751709],\"__typename\":\"Address\"},{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"isDisposable\":true,\"geoCoordinates\":[-98.2396849,19.0380162],\"__typename\":\"Address\"},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9BuM7qWBZ7\",\"isDisposable\":true,\"postalCode\":\"72190\",\"city\":\"Heroica Puebla de Zaragoza\",\"state\":\"PUEBLA\",\"country\":\"MEX\",\"street\":\"Calle 12\",\"number\":\"30\",\"neighborhood\":\"San José Vista Hermosa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-98.2396849,19.0380162]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9XeE8z1ehk\",\"isDisposable\":true,\"postalCode\":\"14388\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calzada México-Xochimilco\",\"number\":\"5149\",\"neighborhood\":\"Guadalupe Coapa\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1428912,19.2847556]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9H2tLSfYiG\",\"isDisposable\":true,\"postalCode\":\"52786\",\"city\":\"Naucalpan de Juárez\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Parque de Valencia\",\"number\":\"17\",\"neighborhood\":\"Parques de la Herradura\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.26786519999999,19.40322]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9x6DQ2mHJT\",\"isDisposable\":true,\"postalCode\":\"54025\",\"city\":\"Ciudad de México\",\"state\":\"ESTADO DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Periférico Boulevard Manuel Ávila Camacho\",\"number\":\"1007\",\"neighborhood\":\"Habitacional Jardines de Santa Monica\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2281163,19.5259738]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9QDKbMlSvN\",\"isDisposable\":true,\"postalCode\":\"10200\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Cerrada de San Jerónimo\",\"number\":\"117\",\"neighborhood\":\"San Jerónimo Lídice\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.22241509999999,19.3253308]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9HsC4VFrzI\",\"isDisposable\":true,\"postalCode\":\"11560\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Calle Hipólito Taine\",\"number\":\"307\",\"neighborhood\":\"Polanco V Sección\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1849038,19.433135]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9W9vA1G4wq\",\"isDisposable\":true,\"postalCode\":\"05348\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Vasco de Quiroga\",\"number\":\"3900\",\"neighborhood\":\"Contadero\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.2782551,19.3612015]},{\"addressType\":\"residential\",\"receiverName\":\"Recibe el Comprador\",\"addressId\":\"9V2VQ1Nu4T\",\"isDisposable\":true,\"postalCode\":\"03104\",\"city\":\"Ciudad de México\",\"state\":\"CIUDAD DE MÉXICO\",\"country\":\"MEX\",\"street\":\"Miguel Laurent\",\"number\":\"624\",\"neighborhood\":\"Colonia del Valle Sur\",\"complement\":\"\",\"reference\":null,\"geoCoordinates\":[-99.1645108,19.3751709]}],\"selectedAddress\":{\"addressId\":\"9BuM7qWBZ7\",\"addressType\":\"residential\",\"alias\":\"Angelopolis\",\"city\":\"Heroica Puebla de Zaragoza\",\"complement\":\"\",\"country\":\"MEX\",\"documentId\":\"623264c1-67cc-44f7-9a5d-79138cfa44c4\",\"geoCoordinates\":[-98.2396849,19.0380162],\"neighborhood\":\"San José Vista Hermosa\",\"number\":\"30\",\"postalCode\":\"72190\",\"receiverName\":\"Recibe el Comprador\",\"reference\":null,\"state\":\"PUEBLA\",\"street\":\"Calle 12\",\"__typename\":\"CartAddress\"},\"deliveryOptions\":[],\"pickupOptions\":[],\"isValid\":false},\"userProfileId\":\"14199a61-8119-4ad5-8918-17b6eee8cc0d\",\"userType\":\"STORE_USER\",\"clientProfileData\":{\"email\":\"513d087e-bea8-4f96-b820-9e00c6536515@mailslurp.biz\",\"firstName\":null,\"lastName\":null,\"document\":null,\"documentType\":null,\"phone\":null,\"isValid\":false,\"isCorporate\":false,\"corporateName\":null,\"tradeName\":null,\"corporateDocument\":null,\"stateInscription\":null,\"__typename\":\"ClientData\"},\"clientPreferencesData\":{\"locale\":\"es-MX\",\"optInNewsletter\":null,\"__typename\":\"ClientPreferencesData\"},\"allowManualPrice\":false,\"customData\":{\"customApps\":[{\"fields\":[],\"id\":\"localizador\",\"major\":1}]},\"__typename\":\"OrderForm\"}"
         },
         {
           "name": "storeSelected",
@@ -854,7 +854,7 @@
       "localStorage": [
         {
           "name": "rc::a",
-          "value": "Y3hpMnBuMTdkeXZiaw=="
+          "value": "MXRtZDdneWExa3M5"
         }
       ]
     },
@@ -863,11 +863,11 @@
       "localStorage": [
         {
           "name": "__rtbh.lid",
-          "value": "{\"eventType\":\"lid\",\"id\":\"g0Z4uCQneZ9cfs7IQmXk\",\"expiryDate\":\"2027-03-18T21:41:26.934Z\"}"
+          "value": "{\"eventType\":\"lid\",\"id\":\"9KIYgjaLfodBf5Sk0OSW\",\"expiryDate\":\"2027-03-19T00:15:23.400Z\"}"
         },
         {
           "name": "__rtbh.uid",
-          "value": "{\"eventType\":\"uid\",\"id\":\"unknown\",\"expiryDate\":\"2027-03-18T21:41:26.933Z\"}"
+          "value": "{\"eventType\":\"uid\",\"id\":\"unknown\",\"expiryDate\":\"2027-03-19T00:15:23.399Z\"}"
         }
       ]
     }

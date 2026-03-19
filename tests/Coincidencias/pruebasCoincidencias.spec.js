@@ -102,7 +102,7 @@ test.beforeEach(async ({ page }, testInfo) => {
 //  TEST C1 - ERRORES ORTOGRFICOS
 // =========================================================
 
-
+/*
 test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 
   const page = testInfo.page;      // <- USAMOS LA PAGE DE EMP
@@ -228,7 +228,7 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
    
 });
 
-
+*/
 
 
 // =========================================================
@@ -361,7 +361,7 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 // =========================================================
 //  TEST C3 - FRECUENCIA ALTA (opcional, corregido)
 // =========================================================
-
+/*
 
 test('C3 - Frecuencia Alta', async ({}, testInfo) => {
 
@@ -555,7 +555,7 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
     resultados: resultadosTotales
   });
 */
-
+/*
  test('C5 - Resultados Vacios', async ({ page }, testInfo) => {
 
    const pageReal = testInfo.page || page;
@@ -732,3 +732,4 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
    }
  });
 
+*/

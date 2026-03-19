@@ -41,6 +41,17 @@ function obtenerSucursalPorDireccion(texto) {
   return "Desconocida";
 }
 
+function formatearFechaArchivo(fecha = new Date(), timeZone = 'America/Mexico_City') {
+  // Formato DD_MM_YYYY (sin hora) para nombres de archivo.
+  const fmt = new Intl.DateTimeFormat('es-MX', {
+    timeZone,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  return fmt.format(fecha).replace(/\//g, '_');
+}
+
 
 // ------------------------------------------------------
 //  REPORTE DE SUCURSALES (EXISTENTE)
@@ -271,6 +282,50 @@ async function generarReporteCoincidenciasPDF({
       return "NA";
     };
 
+    const esCombined = resultados && !Array.isArray(resultados) && (Array.isArray(resultados.empathy) || Array.isArray(resultados.legacy));
+    const empathyArrForWin = esCombined && Array.isArray(resultados.empathy) ? resultados.empathy : [];
+    const legacyArrForWin = esCombined && Array.isArray(resultados.legacy) ? resultados.legacy : [];
+
+    const calcularMetricasC1 = (arr) => {
+      const adaptados = (Array.isArray(arr) ? arr : []).map(r => {
+        const coinc = Array.isArray(r.coincidencias) ? r.coincidencias : [];
+        const noCoinc = Array.isArray(r.noCoincidencias) ? r.noCoincidencias : [];
+        const listaDetallada = Array.isArray(r.listaDetallada) && r.listaDetallada.length > 0
+          ? r.listaDetallada
+          : [
+            ...coinc.map(t => ({ texto: String(t), correccion: true, equivalencia: false })),
+            ...noCoinc.map(t => ({ texto: String(t), correccion: false, equivalencia: false }))
+          ];
+        const calificacion = r.calificacion || (r.CC ? "CC" : r.CP ? "CP" : r.SR ? "SR" : r.SN ? "SN" : "");
+        const totalProductos = typeof r.totalProductos === "number" ? r.totalProductos : listaDetallada.length;
+        return { calificacion, totalProductos };
+      });
+      const totalEvaluados = adaptados.length;
+      const totalResultadosEvaluados = adaptados.reduce((acc, x) => acc + (Number(x.totalProductos) || 0), 0);
+      const metricas = {
+        totalEvaluados,
+        CC: adaptados.filter(x => x.calificacion === "CC").length,
+        coberturaExitosa: adaptados.filter(x => (Number(x.totalProductos) || 0) >= 15).length,
+        totalResultadosEvaluados
+      };
+      return metricas;
+    };
+
+    let terminosGanadosEmpathy = null;
+    // Solo tiene sentido comparar "ganados" cuando existe seccion Legacy.
+    if (esCombined && empathyArrForWin.length > 0 && legacyArrForWin.length > 0) {
+      const metricasEmpathyWin = calcularMetricasC1(empathyArrForWin);
+      const metricasLegacyWin = calcularMetricasC1(legacyArrForWin);
+      const ganaPorTerminos =
+        metricasEmpathyWin.coberturaExitosa > metricasLegacyWin.coberturaExitosa ||
+        metricasEmpathyWin.totalResultadosEvaluados > metricasLegacyWin.totalResultadosEvaluados;
+      const ganaPorRelevancia = metricasEmpathyWin.CC > metricasLegacyWin.CC;
+      if (ganaPorTerminos && ganaPorRelevancia) terminosGanadosEmpathy = "Terminos evaluados y Relevancia resultado";
+      else if (ganaPorTerminos) terminosGanadosEmpathy = "Terminos evaluados";
+      else if (ganaPorRelevancia) terminosGanadosEmpathy = "Relevancia resultado";
+      else terminosGanadosEmpathy = "Ninguno";
+    }
+
     const buildSection = (resultadosArr, modoLocal) => {
       const esLegacy = modoLocal === "legacy";
 
@@ -324,6 +379,7 @@ async function generarReporteCoincidenciasPDF({
         SR: resultadosAdaptados.filter(x => x.calificacion === "SR").length,
         SN: resultadosAdaptados.filter(x => x.calificacion === "SN").length
       };
+      const coberturaExitosa = resultadosAdaptados.filter(x => (Number(x.totalProductos) || 0) >= 15).length;
 
       const contenido = [];
       contenido.push(
@@ -340,6 +396,19 @@ async function generarReporteCoincidenciasPDF({
           { text: `SR: ${metricas.SR}`, style: "subtitulo" },
           { text: `SN: ${metricas.SN}`, style: "subtitulo" },
           { text: "\n" }
+        );
+      }
+
+      // Estandarizacion resumen
+      contenido.push(
+        { text: `Cobertura Exitosa: ${coberturaExitosa} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Resultado relevante: ${metricas.CC} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+      );
+
+      // Solo en Empathy (excepto reportes sin legacy): mostrar terminos ganados por Empathy.
+      if (!esLegacy && terminosGanadosEmpathy !== null) {
+        contenido.push(
+          { text: `Terminos ganados por Empathy: ${terminosGanadosEmpathy}`, style: "subtitulo", margin: [0, 0, 0, 10] }
         );
       }
 
@@ -518,7 +587,6 @@ async function generarReporteCoincidenciasPDF({
       return contenido;
     };
 
-    const esCombined = resultados && !Array.isArray(resultados) && (Array.isArray(resultados.empathy) || Array.isArray(resultados.legacy));
     const contenido = [];
 
     if (esCombined) {
@@ -560,8 +628,12 @@ async function generarReporteCoincidenciasPDF({
     const reportDir = path.join(process.cwd(), "reports");
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
-    const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    const pdfPath = path.join(reportDir, `reporteCoincidencias_${nombreTestCase}_${ts}.pdf`);
+    const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
+    let nombreArchivo = `ReporteBusqueda_${nombreTestCase}_${fechaArchivo}.pdf`;
+    if (/C1/i.test(nombreTestCase) || /ErroresOrtograficos/i.test(nombreTestCase)) {
+      nombreArchivo = `ReporteBusqueda_ErroresOrtograficos_${fechaArchivo}.pdf`;
+    }
+    const pdfPath = path.join(reportDir, nombreArchivo);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -617,6 +689,48 @@ async function generarReporteFrecuenciaAltaPDF({
     const printer = new PdfPrinter(fonts);
     printer.vfs = vfsFonts.vfs;
 
+    const MAX_RELEVANCIA = 2;
+
+    const calcularPromPorResultado = (arr) => {
+      const resultadosLocal = Array.isArray(arr) ? arr : [];
+      let totalResultados = 0;
+      let sumaCalificaciones = 0;
+      resultadosLocal.forEach((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        totalResultados += det.length;
+        sumaCalificaciones += det.reduce((acc, d) => acc + (Number(d.calificacion) || 0), 0);
+      });
+      return totalResultados > 0
+        ? Math.round((sumaCalificaciones / totalResultados) * 100) / 100
+        : 0;
+    };
+
+    const calcularGanadoresEmpathy = () => {
+      if (!esResultadosCombinados) return null;
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+      if (emp.length === 0 || leg.length === 0) return null;
+      const coberturaEmp = emp.filter((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        return det.length >= 15;
+      }).length;
+      const coberturaLeg = leg.filter((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        return det.length >= 15;
+      }).length;
+      const totalResEmp = emp.reduce((acc, r) => acc + ((Array.isArray(r.detalles) ? r.detalles.length : 0) || 0), 0);
+      const totalResLeg = leg.reduce((acc, r) => acc + ((Array.isArray(r.detalles) ? r.detalles.length : 0) || 0), 0);
+
+      const ganaPorTerminos = coberturaEmp > coberturaLeg || totalResEmp > totalResLeg;
+      const ganaPorRelevancia = calcularPromPorResultado(emp) > calcularPromPorResultado(leg);
+      if (ganaPorTerminos && ganaPorRelevancia) return "Terminos evaluados y Relevancia resultado";
+      if (ganaPorTerminos) return "Terminos evaluados";
+      if (ganaPorRelevancia) return "Relevancia resultado";
+      return "Ninguno";
+    };
+
+    const terminosGanadosEmpathy = calcularGanadoresEmpathy();
+
     const buildSection = (resultadosArr, modoLocal) => {
       const esLegacyLocal = modoLocal === "legacy";
       const resultadosLocal = Array.isArray(resultadosArr) ? resultadosArr : [];
@@ -638,15 +752,27 @@ async function generarReporteFrecuenciaAltaPDF({
         : 0;
 
       const titulo = esLegacyLocal ? "Frecuencia Alta Legacy" : "Frecuencia Alta Empathy";
+      const coberturaExitosa = resultadosLocal.filter((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        return det.length >= 15;
+      }).length;
+      const resultadoRelevante = resultadosLocal.filter((r) => (Number(r.calificacionPromedio) || 0) === MAX_RELEVANCIA).length;
 
       const contenidoLocal = [];
       contenidoLocal.push(
         { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
         { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-        // Calificacion promedio busqueda: (temporalmente deshabilitado)
-        { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-        { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+        { text: `Relevancia Resultado: ${promPorResultado} sobre ${MAX_RELEVANCIA}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Cobertura Exitosa: ${coberturaExitosa} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Resultado relevante: ${resultadoRelevante} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
       );
+
+      if (!esLegacyLocal && terminosGanadosEmpathy !== null) {
+        contenidoLocal.push(
+          { text: `Terminos ganados por Empathy: ${terminosGanadosEmpathy}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+        );
+      }
 
       const resumenBody = [
         [
@@ -744,8 +870,8 @@ async function generarReporteFrecuenciaAltaPDF({
     const reportDir = path.join(process.cwd(), "reports");
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
-    const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    const pdfPath = path.join(reportDir, `reporteFrecuenciaAlta_${nombreTestCase}_${ts}.pdf`);
+    const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
+    const pdfPath = path.join(reportDir, `ReporteBusqueda_FrecuenciaAlta_${fechaArchivo}.pdf`);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -802,6 +928,48 @@ async function generarReporteLongTailPDF({
     const printer = new PdfPrinter(fonts);
     printer.vfs = vfsFonts.vfs;
 
+    const MAX_RELEVANCIA = 5;
+
+    const calcularPromPorResultado = (arr) => {
+      const resultadosLocal = Array.isArray(arr) ? arr : [];
+      let totalResultados = 0;
+      let sumaCalificaciones = 0;
+      resultadosLocal.forEach((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        totalResultados += det.length;
+        sumaCalificaciones += det.reduce((acc, d) => acc + (Number(d.calificacion) || 0), 0);
+      });
+      return totalResultados > 0
+        ? Math.round((sumaCalificaciones / totalResultados) * 100) / 100
+        : 0;
+    };
+
+    const calcularGanadoresEmpathy = () => {
+      if (!esResultadosCombinados) return null;
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+      if (emp.length === 0 || leg.length === 0) return null;
+      const coberturaEmp = emp.filter((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        return det.length >= 15;
+      }).length;
+      const coberturaLeg = leg.filter((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        return det.length >= 15;
+      }).length;
+      const totalResEmp = emp.reduce((acc, r) => acc + ((Array.isArray(r.detalles) ? r.detalles.length : 0) || 0), 0);
+      const totalResLeg = leg.reduce((acc, r) => acc + ((Array.isArray(r.detalles) ? r.detalles.length : 0) || 0), 0);
+
+      const ganaPorTerminos = coberturaEmp > coberturaLeg || totalResEmp > totalResLeg;
+      const ganaPorRelevancia = calcularPromPorResultado(emp) > calcularPromPorResultado(leg);
+      if (ganaPorTerminos && ganaPorRelevancia) return "Terminos evaluados y Relevancia resultado";
+      if (ganaPorTerminos) return "Terminos evaluados";
+      if (ganaPorRelevancia) return "Relevancia resultado";
+      return "Ninguno";
+    };
+
+    const terminosGanadosEmpathy = calcularGanadoresEmpathy();
+
     const buildSection = (resultadosArr, modoLocal) => {
       const esLegacyLocal = modoLocal === "legacy";
       const resultadosLocal = Array.isArray(resultadosArr) ? resultadosArr : [];
@@ -823,15 +991,27 @@ async function generarReporteLongTailPDF({
         : 0;
 
       const titulo = esLegacyLocal ? "Long Tail Legacy" : "Long Tail Empathy";
+      const coberturaExitosa = resultadosLocal.filter((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        return det.length >= 15;
+      }).length;
+      const resultadoRelevante = resultadosLocal.filter((r) => (Number(r.calificacionPromedio) || 0) === MAX_RELEVANCIA).length;
 
       const contenidoLocal = [];
       contenidoLocal.push(
         { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
         { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-        // Calificacion promedio busqueda: (temporalmente deshabilitado)
-        { text: `Calificacion promedio por resultado: ${promPorResultado}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-        { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+        { text: `Relevancia Resultado: ${promPorResultado} sobre ${MAX_RELEVANCIA}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Cobertura Exitosa: ${coberturaExitosa} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Resultado relevante: ${resultadoRelevante} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
       );
+
+      if (!esLegacyLocal && terminosGanadosEmpathy !== null) {
+        contenidoLocal.push(
+          { text: `Terminos ganados por Empathy: ${terminosGanadosEmpathy}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+        );
+      }
 
       const resumenBody = [
         [
@@ -933,8 +1113,8 @@ async function generarReporteLongTailPDF({
     const reportDir = path.join(process.cwd(), "reports");
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
-    const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    const pdfPath = path.join(reportDir, `reporteLongTail_${nombreTestCase}_${ts}.pdf`);
+    const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
+    const pdfPath = path.join(reportDir, `ReporteBusqueda_LongTail_${fechaArchivo}.pdf`);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -989,12 +1169,21 @@ async function generarReporteResultadosVaciosPDF({
     });
 
     const titulo = esLegacy ? "Resultados Vacios Legacy" : "Resultados Vacios Empathy";
+    const coberturaExitosa = resultados.filter((r) => {
+      const titulos = Array.isArray(r.productosEncontrados) ? r.productosEncontrados : [];
+      const totalResultados = (r.totalResultados !== undefined && r.totalResultados !== null)
+        ? Number(r.totalResultados) || 0
+        : titulos.length;
+      return totalResultados >= 15;
+    }).length;
 
     const contenido = [];
     contenido.push(
       { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
       { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
       { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+      { text: `Cobertura Exitosa: ${coberturaExitosa} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+      { text: `Resultado relevante: ${counts.R} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
       { text: `R: ${counts.R}  P: ${counts.P}  I: ${counts.I}  V: ${counts.V}`, style: "subtitulo", margin: [0, 0, 0, 10] }
     );
 
@@ -1089,8 +1278,8 @@ async function generarReporteResultadosVaciosPDF({
     const reportDir = path.join(process.cwd(), "reports");
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
-    const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    const pdfPath = path.join(reportDir, `reporteResultadosVacios_${nombreTestCase}_${ts}.pdf`);
+    const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
+    const pdfPath = path.join(reportDir, `ReporteBusqueda_ResultadosVacios_${fechaArchivo}.pdf`);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
