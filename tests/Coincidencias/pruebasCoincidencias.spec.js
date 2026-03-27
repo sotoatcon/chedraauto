@@ -15,7 +15,54 @@ const excelerrores = 'Errores Ortográficos';
 const excellong = 'Long Tail';
 const excelfrecuencia = 'Frecuencia Alta';
 const excelsemantico = 'Semánticos';
-const excelvacios = 'Resultados Vacíos';
+const excelvacios = 'Resultados vacíos';
+
+// =========================================================
+//  Helpers (Excel headers con acentos NFC/NFD)
+// =========================================================
+// XLSX puede devolver headers como "Término" (NFD: e + acento combinado) en vez de "Término" (NFC).
+// Para evitar falsos vacíos, normalizamos llaves quitando diacríticos.
+const _normHeader = (s) => String(s || "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .toLowerCase()
+  .trim();
+
+const getCellNormalized = (row, keys) => {
+  // 1) match exacto (rápido)
+  for (const k of keys) {
+    if (row && Object.prototype.hasOwnProperty.call(row, k) && row[k] !== null && row[k] !== undefined) {
+      const v = String(row[k]).trim();
+      if (v.length > 0) return v;
+    }
+  }
+
+  // 2) fallback: match por header normalizado (NFC/NFD, sin acentos, sin espacios extra)
+  const map = new Map();
+  for (const rk of Object.keys(row || {})) {
+    const nk = _normHeader(rk);
+    if (nk && !map.has(nk)) map.set(nk, rk);
+  }
+  for (const k of keys) {
+    const rk = map.get(_normHeader(k));
+    if (rk && row && Object.prototype.hasOwnProperty.call(row, rk) && row[rk] !== null && row[rk] !== undefined) {
+      const v = String(row[rk]).trim();
+      if (v.length > 0) return v;
+    }
+  }
+
+  return "";
+};
+
+// =========================================================
+//  Flags de debug (activar manualmente)
+// =========================================================
+// Poner en true para ejecutar el caso. Por defecto todos en false para evitar comentar codigo.
+const C1 = false;
+const C2 = true;
+const C3 = false;
+const C4 = false;
+const C5 = false;
 
 
 // =========================================================
@@ -102,8 +149,7 @@ test.beforeEach(async ({ page }, testInfo) => {
 //  TEST C1 - ERRORES ORTOGRFICOS
 // =========================================================
 
-/*
-test('C1 - Errores Ortográficos', async ({}, testInfo) => {
+(C1 ? test : test.skip)('C1 - Errores Ortográficos', async ({}, testInfo) => {
 
   const page = testInfo.page;      // <- USAMOS LA PAGE DE EMP
   const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
@@ -121,43 +167,29 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
   const resultadosCombinados = { empathy: [], legacy: [] };
 
   for (const m of modos) {
-    const urlObj = new URL(m.url);
-    if (m.modo === "legacy") {
-      await page.context().addCookies([{
-        name: "VtexWorkspace",
-        value: "master%3A87e55a46-08f4-4377-be23-e91e3bbd4612",
-        domain: urlObj.hostname,
-        path: "/"
-      }]);
-    }
-    if (m.modo === "empathy") {
-      await page.context().addCookies([{
-        name: "VtexWorkspace",
-        value: "wempathyprod",
-        domain: urlObj.hostname,
-        path: "/"
-      }]);
-    }
+    // La cookie VtexWorkspace ya no se usa. Para Legacy forzamos URL sin workspace.
+    const urlModo = m.modo === "legacy" ? "https://www.chedraui.com.mx/" : m.url;
     const resultadosTotales = [];
 
-    await page.goto(m.url);
+    await page.goto(urlModo);
     await page.waitForTimeout(5000);
     await direcciones.SeleccionarRecogerEspecifico();
 
+
     for (const row of data) {
       // Excel headers may come with/without accents depending on reader/encoding.
-      const Termino = row['Término'] ?? row['Termino'] ?? row['Término'];
+      const Termino = getCellNormalized(row, ['Término', 'Termino']);
       if (!Termino) {
         throw new Error(`No se pudo leer la columna "Término" del Excel. Keys disponibles: ${Object.keys(row || {}).join(', ')}`);
       }
 
-      const correccionCell = row['Correccion'] ?? row['Corrección'] ?? '';
+      const correccionCell = getCellNormalized(row, ['Correccion', 'Corrección']);
       const Correccion = String(correccionCell)
         .split(",")
         .map(e => e.trim().toLowerCase())
         .filter(e => e.length > 0);
 
-      const equivalenciaCell = row['Equivalencia'] ?? '';
+      const equivalenciaCell = getCellNormalized(row, ['Equivalencia']);
       const equivalencias = String(equivalenciaCell)
         .split(",")
         .map(e => e.trim().toLowerCase())
@@ -213,7 +245,7 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 
       resultadosTotales.push(registroTermino);
 
-      await page.goto(m.url);
+      await page.goto(urlModo);
       await page.waitForLoadState("domcontentloaded");
       await page.waitForSelector("iframe#launcher", { state: "visible" });
     }
@@ -228,59 +260,36 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
    
 });
 
-*/
+
 
 
 // =========================================================
 //  TEST C2 - LONG TAIL (opcional, corregido tambien)
 // =========================================================
  
- test('C2 - Long Tail', async ({ page }, testInfo) => {
- 
+  (C2 ? test : test.skip)('C2 - Long Tail', async ({ page }, testInfo) => {
+  
    const pageReal = testInfo.page || page;
    const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
    const data = getExcelData(excelurl, excellong);
  
-   const getCell = (row, keys) => {
-     for (const k of keys) {
-       if (row && Object.prototype.hasOwnProperty.call(row, k) && row[k] !== null && row[k] !== undefined) {
-         const v = String(row[k]).trim();
-         if (v.length > 0) return v;
-       }
-     }
-     return '';
-   };
- 
-    const modos = [
-      { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
-      { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
-    ];
+   const getCell = (row, keys) => getCellNormalized(row, keys);
+  
+     const modos = [
+       { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
+       { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
+     ];
 
     // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
     const resultadosCombinados = { empathy: [], legacy: [] };
   
-    for (const m of modos) {
-     const urlObj = new URL(m.url);
-     if (m.modo === 'legacy') {
-       await pageReal.context().addCookies([{
-         name: 'VtexWorkspace',
-         value: 'master%3A87e55a46-08f4-4377-be23-e91e3bbd4612',
-         domain: urlObj.hostname,
-         path: '/'
-       }]);
-     }
-     if (m.modo === 'empathy') {
-       await pageReal.context().addCookies([{
-         name: 'VtexWorkspace',
-         value: 'wempathyprod',
-         domain: urlObj.hostname,
-         path: '/'
-       }]);
-     }
+  for (const m of modos) {
+     // La cookie VtexWorkspace ya no se usa. Para Legacy forzamos URL sin workspace.
+     const urlModo = m.modo === 'legacy' ? 'https://www.chedraui.com.mx/' : m.url;
  
      const resultadosTotales = [];
  
-     await pageReal.goto(m.url);
+     await pageReal.goto(urlModo);
      await pageReal.waitForTimeout(5000);
      if (direcciones && typeof direcciones.SeleccionarRecogerEspecifico === 'function') {
        await direcciones.SeleccionarRecogerEspecifico();
@@ -341,7 +350,7 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
          calificacionPromedio: evaluacion.calificacionPromedio
        });
  
-       await pageReal.goto(m.url);
+       await pageReal.goto(urlModo);
        await pageReal.waitForLoadState('domcontentloaded');
        await pageReal.waitForSelector('iframe#launcher', { state: 'visible' });
      }
@@ -361,22 +370,16 @@ test('C1 - Errores Ortográficos', async ({}, testInfo) => {
 // =========================================================
 //  TEST C3 - FRECUENCIA ALTA (opcional, corregido)
 // =========================================================
-/*
 
-test('C3 - Frecuencia Alta', async ({}, testInfo) => {
+
+(C3 ? test : test.skip)('C3 - Frecuencia Alta', async ({}, testInfo) => {
 
   const page = testInfo.page;
   const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
   const data = getExcelData(excelurl, excelfrecuencia);
 
   const getCell = (row, keys) => {
-    for (const k of keys) {
-      if (row && Object.prototype.hasOwnProperty.call(row, k) && row[k] !== null && row[k] !== undefined) {
-        const v = String(row[k]).trim();
-        if (v.length > 0) return v;
-      }
-    }
-    return '';
+    return getCellNormalized(row, keys);
   };
 
   const modos = [
@@ -388,27 +391,12 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
   const resultadosCombinados = { empathy: [], legacy: [] };
 
   for (const m of modos) {
-    const urlObj = new URL(m.url);
-    if (m.modo === 'legacy') {
-      await page.context().addCookies([{
-        name: 'VtexWorkspace',
-        value: 'master%3A87e55a46-08f4-4377-be23-e91e3bbd4612',
-        domain: urlObj.hostname,
-        path: '/'
-      }]);
-    }
-    if (m.modo === 'empathy') {
-      await page.context().addCookies([{
-        name: 'VtexWorkspace',
-        value: 'wempathyprod',
-        domain: urlObj.hostname,
-        path: '/'
-      }]);
-    }
+    // La cookie VtexWorkspace ya no se usa. Para Legacy forzamos URL sin workspace.
+    const urlModo = m.modo === 'legacy' ? 'https://www.chedraui.com.mx/' : m.url;
 
     const resultadosTotales = [];
 
-    await page.goto(m.url);
+    await page.goto(urlModo);
     await page.waitForTimeout(5000);
     if (direcciones && typeof direcciones.SeleccionarRecogerEspecifico === 'function') {
       await direcciones.SeleccionarRecogerEspecifico();
@@ -461,11 +449,12 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
         );
       }
 
-      const evaluacion = carritoUtils.evaluarFrecuenciaAltaEquivalencias(
-        productosEncontrados,
-        equivalencia,
-        relacionados
-      );
+       const evaluacion = carritoUtils.evaluarFrecuenciaAltaEquivalencias(
+         productosEncontrados,
+         Termino,
+         equivalencia,
+         relacionados
+       );
 
       resultadosTotales.push({
         termino: Termino,
@@ -478,7 +467,7 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
       });
 
       // Reset como C1: navegar a home limpia estado y reduce flakiness.
-      await page.goto(m.url);
+      await page.goto(urlModo);
       await page.waitForLoadState('domcontentloaded');
       await page.waitForSelector('iframe#launcher', { state: 'visible' });
     }
@@ -495,8 +484,8 @@ test('C3 - Frecuencia Alta', async ({}, testInfo) => {
 // =========================================================
 //  TEST C4 - SEMANTICO (opcional, corregido)
 // =========================================================
-/*
-test('C4 - Semántico', async ({ page }, testInfo) => {
+
+(C4 ? test : test.skip)('C4 - Semántico', async ({ page }, testInfo) => {
 
   const { headerPage, productosPage, carritoUtils } = testInfo;
   const data = getExcelData(excelurl, excelsemantico);
@@ -554,10 +543,13 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
     nombreTestCase: "C4_Semantico",
     resultados: resultadosTotales
   });
-*/
-/*
- test('C5 - Resultados Vacios', async ({ page }, testInfo) => {
 
+   
+ });
+ 
+ 
+  (C5 ? test : test.skip)('C5 - Resultados Vacios', async ({ page }, testInfo) => {
+ 
    const pageReal = testInfo.page || page;
    const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
 
@@ -650,27 +642,12 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
    ];
 
    for (const m of modos) {
-     const urlObj = new URL(m.url);
-     if (m.modo === 'legacy') {
-       await pageReal.context().addCookies([{
-         name: 'VtexWorkspace',
-         value: 'master%3A87e55a46-08f4-4377-be23-e91e3bbd4612',
-         domain: urlObj.hostname,
-         path: '/'
-       }]);
-     }
-     if (m.modo === 'empathy') {
-       await pageReal.context().addCookies([{
-         name: 'VtexWorkspace',
-         value: 'wempathyprod',
-         domain: urlObj.hostname,
-         path: '/'
-       }]);
-     }
+     // La cookie VtexWorkspace ya no se usa. Para Legacy forzamos URL sin workspace.
+     const urlModo = m.modo === 'legacy' ? 'https://www.chedraui.com.mx/' : m.url;
 
      const resultadosTotales = [];
 
-     await pageReal.goto(m.url);
+     await pageReal.goto(urlModo);
      await pageReal.waitForTimeout(5000);
      if (direcciones && typeof direcciones.SeleccionarRecogerEspecifico === 'function') {
        await direcciones.SeleccionarRecogerEspecifico();
@@ -719,7 +696,7 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
          calificacion: evalTerm.calificacion
        });
 
-       await pageReal.goto(m.url);
+       await pageReal.goto(urlModo);
        await pageReal.waitForLoadState('domcontentloaded');
        await pageReal.waitForSelector('iframe#launcher', { state: 'visible' });
      }
@@ -731,5 +708,3 @@ test('C4 - Semántico', async ({ page }, testInfo) => {
      });
    }
  });
-
-*/

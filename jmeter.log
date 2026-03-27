@@ -1,0 +1,196 @@
+2026-03-24 12:35:32,660 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2026-03-24 12:35:32,692 INFO o.a.j.JMeter: Loading user properties from: C:\Users\atcon\Desktop\Jmeter\bin\user.properties
+2026-03-24 12:35:32,692 INFO o.a.j.JMeter: Loading system properties from: C:\Users\atcon\Desktop\Jmeter\bin\system.properties
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: Version 5.6.3
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: java.version=17.0.12
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: os.name=Windows 11
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: os.arch=amd64
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: os.version=10.0
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: file.encoding=Cp1252
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: java.awt.headless=null
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: Max memory     =1073741824
+2026-03-24 12:35:32,708 INFO o.a.j.JMeter: Available Processors =12
+2026-03-24 12:35:32,724 INFO o.a.j.JMeter: Default Locale=English (EN)
+2026-03-24 12:35:32,724 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2026-03-24 12:35:32,724 INFO o.a.j.JMeter: JMeterHome=C:\Users\atcon\Desktop\Jmeter
+2026-03-24 12:35:32,724 INFO o.a.j.JMeter: user.dir  =C:\Users\atcon\Desktop\Playwright\playwright-piloto2
+2026-03-24 12:35:32,724 INFO o.a.j.JMeter: PWD       =C:\Users\atcon\Desktop\Playwright\playwright-piloto2
+2026-03-24 12:35:32,724 INFO o.a.j.JMeter: IP: 192.168.0.155 Name: Atcon FullName: Atcon
+2026-03-24 12:35:32,740 INFO o.a.j.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties
+2026-03-24 12:35:32,961 INFO o.a.j.JMeterGuiLauncher: Setting LAF to: com.github.weisj.darklaf.DarkLaf:com.github.weisj.darklaf.theme.DarculaTheme
+2026-03-24 12:36:03,743 INFO o.a.j.s.FileServer: Default base='C:\Users\atcon\Desktop\Playwright\playwright-piloto2'
+2026-03-24 12:36:03,743 INFO o.a.j.g.a.Load: Loading file: C:\Users\atcon\Desktop\Playwright\playwright-piloto2\jmeter\plans\Chedraui_Browse_Search_Cart.jmx
+2026-03-24 12:36:03,743 INFO o.a.j.s.FileServer: Set new base='C:\Users\atcon\Desktop\Playwright\playwright-piloto2\jmeter\plans'
+2026-03-24 12:36:04,020 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2026-03-24 12:36:04,047 INFO o.a.j.s.SaveService: Using SaveService properties version 5.0
+2026-03-24 12:36:04,047 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2026-03-24 12:36:04,047 INFO o.a.j.s.SaveService: Loading file: C:\Users\atcon\Desktop\Playwright\playwright-piloto2\jmeter\plans\Chedraui_Browse_Search_Cart.jmx
+2026-03-24 12:36:04,075 INFO o.a.j.p.h.c.CookieManager: Settings: Delete null: true Check: true Allow variable: true Save: false Prefix: COOKIE_
+2026-03-24 12:36:04,080 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-03-24 12:36:04,080 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-03-24 12:36:04,080 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-03-24 12:36:04,080 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-03-24 12:36:04,080 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2026-03-24 12:36:04,080 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2026-03-24 12:36:04,992 INFO o.a.j.s.FileServer: Set new base='C:\Users\atcon\Desktop\Playwright\playwright-piloto2\jmeter\plans'
+2026-03-24 12:36:58,782 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2026-03-24 12:36:58,784 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-03-24 12:36:58,784 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-03-24 12:36:58,786 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2026-03-24 12:36:58,786 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2026-03-24 12:36:58,814 ERROR o.a.j.e.StandardJMeterEngine: Error occurred compiling the tree:
+java.lang.RuntimeException: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:37) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:168) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.PreCompiler.addNode(PreCompiler.java:88) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jorphan.collections.HashTree.traverse(HashTree.java:1011) ~[jorphan.jar:5.6.3]
+	at org.apache.jmeter.engine.StandardJMeterEngine.run(StandardJMeterEngine.java:413) [ApacheJMeter_core.jar:5.6.3]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.base/java.lang.Thread.run(Thread.java:842) [?:?]
+Caused by: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.functions.AbstractFunction.checkParameterCount(AbstractFunction.java:98) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.functions.Property2.setParameters(Property2.java:92) ~[ApacheJMeter_functions.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.makeFunction(FunctionParser.java:131) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.compileString(FunctionParser.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.CompoundVariable.setParameters(CompoundVariable.java:184) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ReplaceStringWithFunctions.transformValue(ReplaceStringWithFunctions.java:44) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:35) ~[ApacheJMeter_core.jar:5.6.3]
+	... 13 more
+2026-03-24 12:36:58,825 ERROR o.a.j.u.JMeterUtils: Error occurred compiling the tree: - see log file
+java.lang.RuntimeException: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:37) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:168) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.PreCompiler.addNode(PreCompiler.java:88) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jorphan.collections.HashTree.traverse(HashTree.java:1011) ~[jorphan.jar:5.6.3]
+	at org.apache.jmeter.engine.StandardJMeterEngine.run(StandardJMeterEngine.java:413) [ApacheJMeter_core.jar:5.6.3]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.base/java.lang.Thread.run(Thread.java:842) [?:?]
+Caused by: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.functions.AbstractFunction.checkParameterCount(AbstractFunction.java:98) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.functions.Property2.setParameters(Property2.java:92) ~[ApacheJMeter_functions.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.makeFunction(FunctionParser.java:131) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.compileString(FunctionParser.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.CompoundVariable.setParameters(CompoundVariable.java:184) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ReplaceStringWithFunctions.transformValue(ReplaceStringWithFunctions.java:44) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:35) ~[ApacheJMeter_core.jar:5.6.3]
+	... 13 more
+2026-03-24 12:37:03,854 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2026-03-24 12:37:03,854 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-03-24 12:37:03,854 ERROR o.a.j.e.StandardJMeterEngine: Error occurred compiling the tree:
+java.lang.RuntimeException: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:37) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:168) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.PreCompiler.addNode(PreCompiler.java:88) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jorphan.collections.HashTree.traverse(HashTree.java:1011) ~[jorphan.jar:5.6.3]
+	at org.apache.jmeter.engine.StandardJMeterEngine.run(StandardJMeterEngine.java:413) [ApacheJMeter_core.jar:5.6.3]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.base/java.lang.Thread.run(Thread.java:842) [?:?]
+Caused by: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.functions.AbstractFunction.checkParameterCount(AbstractFunction.java:98) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.functions.Property2.setParameters(Property2.java:92) ~[ApacheJMeter_functions.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.makeFunction(FunctionParser.java:131) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.compileString(FunctionParser.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.CompoundVariable.setParameters(CompoundVariable.java:184) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ReplaceStringWithFunctions.transformValue(ReplaceStringWithFunctions.java:44) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:35) ~[ApacheJMeter_core.jar:5.6.3]
+	... 13 more
+2026-03-24 12:37:03,854 ERROR o.a.j.u.JMeterUtils: Error occurred compiling the tree: - see log file
+java.lang.RuntimeException: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:37) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:168) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.PreCompiler.addNode(PreCompiler.java:88) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jorphan.collections.HashTree.traverse(HashTree.java:1011) ~[jorphan.jar:5.6.3]
+	at org.apache.jmeter.engine.StandardJMeterEngine.run(StandardJMeterEngine.java:413) [ApacheJMeter_core.jar:5.6.3]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.base/java.lang.Thread.run(Thread.java:842) [?:?]
+Caused by: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.functions.AbstractFunction.checkParameterCount(AbstractFunction.java:98) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.functions.Property2.setParameters(Property2.java:92) ~[ApacheJMeter_functions.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.makeFunction(FunctionParser.java:131) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.compileString(FunctionParser.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.CompoundVariable.setParameters(CompoundVariable.java:184) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ReplaceStringWithFunctions.transformValue(ReplaceStringWithFunctions.java:44) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:35) ~[ApacheJMeter_core.jar:5.6.3]
+	... 13 more
+2026-03-24 12:37:11,705 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2026-03-24 12:37:11,705 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-03-24 12:37:11,723 ERROR o.a.j.e.StandardJMeterEngine: Error occurred compiling the tree:
+java.lang.RuntimeException: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:37) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:168) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.PreCompiler.addNode(PreCompiler.java:88) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jorphan.collections.HashTree.traverse(HashTree.java:1011) ~[jorphan.jar:5.6.3]
+	at org.apache.jmeter.engine.StandardJMeterEngine.run(StandardJMeterEngine.java:413) [ApacheJMeter_core.jar:5.6.3]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.base/java.lang.Thread.run(Thread.java:842) [?:?]
+Caused by: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.functions.AbstractFunction.checkParameterCount(AbstractFunction.java:98) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.functions.Property2.setParameters(Property2.java:92) ~[ApacheJMeter_functions.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.makeFunction(FunctionParser.java:131) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.compileString(FunctionParser.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.CompoundVariable.setParameters(CompoundVariable.java:184) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ReplaceStringWithFunctions.transformValue(ReplaceStringWithFunctions.java:44) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:35) ~[ApacheJMeter_core.jar:5.6.3]
+	... 13 more
+2026-03-24 12:37:11,723 ERROR o.a.j.u.JMeterUtils: Error occurred compiling the tree: - see log file
+java.lang.RuntimeException: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:37) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:168) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:176) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueReplacer.replaceValues(ValueReplacer.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.PreCompiler.addNode(PreCompiler.java:88) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jorphan.collections.HashTree.traverse(HashTree.java:1011) ~[jorphan.jar:5.6.3]
+	at org.apache.jmeter.engine.StandardJMeterEngine.run(StandardJMeterEngine.java:413) [ApacheJMeter_core.jar:5.6.3]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.base/java.lang.Thread.run(Thread.java:842) [?:?]
+Caused by: org.apache.jmeter.functions.InvalidVariableException: __P called with wrong number of parameters. Actual: 3. Expected: >= 1 and <= 2
+	at org.apache.jmeter.functions.AbstractFunction.checkParameterCount(AbstractFunction.java:98) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.functions.Property2.setParameters(Property2.java:92) ~[ApacheJMeter_functions.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.makeFunction(FunctionParser.java:131) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.FunctionParser.compileString(FunctionParser.java:79) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.CompoundVariable.setParameters(CompoundVariable.java:184) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ReplaceStringWithFunctions.transformValue(ReplaceStringWithFunctions.java:44) ~[ApacheJMeter_core.jar:5.6.3]
+	at org.apache.jmeter.engine.util.ValueTransformer.transform(ValueTransformer.java:35) ~[ApacheJMeter_core.jar:5.6.3]
+	... 13 more

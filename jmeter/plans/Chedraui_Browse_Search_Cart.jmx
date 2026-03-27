@@ -1,0 +1,831 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Chedraui - Browse/Search/Cart (Template)">
+      <stringProp name="TestPlan.comments">Plantilla base. Configura PROTOCOL/HOST por variables (-J...).</stringProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="PROTOCOL" elementType="Argument">
+            <stringProp name="Argument.name">PROTOCOL</stringProp>
+            <stringProp name="Argument.value">${__P(PROTOCOL,https)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="HOST" elementType="Argument">
+            <stringProp name="Argument.name">HOST</stringProp>
+            <stringProp name="Argument.value">${__P(HOST,www.chedraui.com.mx)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="WORKSPACE" elementType="Argument">
+            <stringProp name="Argument.name">WORKSPACE</stringProp>
+            <stringProp name="Argument.value">${__P(WORKSPACE,master)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="LOCALE" elementType="Argument">
+            <stringProp name="Argument.name">LOCALE</stringProp>
+            <stringProp name="Argument.value">${__P(LOCALE,es-MX)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SC" elementType="Argument">
+            <stringProp name="Argument.name">SC</stringProp>
+            <stringProp name="Argument.value">${__P(SC,1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="MAX_01_MS" elementType="Argument">
+            <stringProp name="Argument.name">MAX_01_MS</stringProp>
+            <stringProp name="Argument.value">${__P(MAX_01_MS,4000)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="MAX_02_MS" elementType="Argument">
+            <stringProp name="Argument.name">MAX_02_MS</stringProp>
+            <stringProp name="Argument.value">${__P(MAX_02_MS,3500)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="MAX_03_MS" elementType="Argument">
+            <stringProp name="Argument.name">MAX_03_MS</stringProp>
+            <stringProp name="Argument.value">${__P(MAX_03_MS,7000)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="MAX_04_MS" elementType="Argument">
+            <stringProp name="Argument.name">MAX_04_MS</stringProp>
+            <stringProp name="Argument.value">${__P(MAX_04_MS,12000)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="COUNTRY" elementType="Argument">
+            <stringProp name="Argument.name">COUNTRY</stringProp>
+            <stringProp name="Argument.value">${__P(COUNTRY,MEX)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GEO_COORDS" elementType="Argument">
+            <stringProp name="Argument.name">GEO_COORDS</stringProp>
+            <stringProp name="Argument.value">${__P(GEO_COORDS,-99.1881168\,19.4304375)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ADDRESS_ID" elementType="Argument">
+            <stringProp name="Argument.name">ADDRESS_ID</stringProp>
+            <stringProp name="Argument.value">${__P(ADDRESS_ID,ADDR1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="POSTAL_CODE" elementType="Argument">
+            <stringProp name="Argument.name">POSTAL_CODE</stringProp>
+            <stringProp name="Argument.value">${__P(POSTAL_CODE,11560)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="CITY" elementType="Argument">
+            <stringProp name="Argument.name">CITY</stringProp>
+            <stringProp name="Argument.value">${__P(CITY,Ciudad de Mexico)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="STATE" elementType="Argument">
+            <stringProp name="Argument.name">STATE</stringProp>
+            <stringProp name="Argument.value">${__P(STATE,Ciudad de Mexico)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="STREET" elementType="Argument">
+            <stringProp name="Argument.name">STREET</stringProp>
+            <stringProp name="Argument.value">${__P(STREET,Polanco)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="NUMBER" elementType="Argument">
+            <stringProp name="Argument.name">NUMBER</stringProp>
+            <stringProp name="Argument.value">${__P(NUMBER,120-702)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="NEIGHBORHOOD" elementType="Argument">
+            <stringProp name="Argument.name">NEIGHBORHOOD</stringProp>
+            <stringProp name="Argument.value">${__P(NEIGHBORHOOD,Polanco V Seccion)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="COMPLEMENT" elementType="Argument">
+            <stringProp name="Argument.name">COMPLEMENT</stringProp>
+            <stringProp name="Argument.value">${__P(COMPLEMENT,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="RECEIVER_NAME" elementType="Argument">
+            <stringProp name="Argument.name">RECEIVER_NAME</stringProp>
+            <stringProp name="Argument.value">${__P(RECEIVER_NAME,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DELIVERY_CHANNEL" elementType="Argument">
+            <stringProp name="Argument.name">DELIVERY_CHANNEL</stringProp>
+            <stringProp name="Argument.value">${__P(DELIVERY_CHANNEL,delivery)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SLA_ID" elementType="Argument">
+            <stringProp name="Argument.name">SLA_ID</stringProp>
+            <stringProp name="Argument.value">${__P(SLA_ID,ENTREGA DOMICILIO - CHEDRAUI SELECTO POLANCO)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="CLIENT_EMAIL" elementType="Argument">
+            <stringProp name="Argument.name">CLIENT_EMAIL</stringProp>
+            <stringProp name="Argument.value">${__P(CLIENT_EMAIL,test@example.com)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="CLIENT_FIRST_NAME" elementType="Argument">
+            <stringProp name="Argument.name">CLIENT_FIRST_NAME</stringProp>
+            <stringProp name="Argument.value">${__P(CLIENT_FIRST_NAME,Test)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="CLIENT_LAST_NAME" elementType="Argument">
+            <stringProp name="Argument.name">CLIENT_LAST_NAME</stringProp>
+            <stringProp name="Argument.value">${__P(CLIENT_LAST_NAME,User)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SEARCH_TERM" elementType="Argument">
+            <stringProp name="Argument.name">SEARCH_TERM</stringProp>
+            <stringProp name="Argument.value">${__P(SEARCH_TERM,tomate)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SEARCH_PATH" elementType="Argument">
+            <stringProp name="Argument.name">SEARCH_PATH</stringProp>
+            <stringProp name="Argument.value">${__P(SEARCH_PATH,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SKU_1" elementType="Argument">
+            <stringProp name="Argument.name">SKU_1</stringProp>
+            <stringProp name="Argument.value">${__P(SKU_1,3102861)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SELLER_1" elementType="Argument">
+            <stringProp name="Argument.name">SELLER_1</stringProp>
+            <stringProp name="Argument.value">${__P(SELLER_1,chedrauimx0232)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="QTY_1" elementType="Argument">
+            <stringProp name="Argument.name">QTY_1</stringProp>
+            <stringProp name="Argument.value">${__P(QTY_1,1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="QTY_1_UPDATE" elementType="Argument">
+            <stringProp name="Argument.name">QTY_1_UPDATE</stringProp>
+            <stringProp name="Argument.value">${__P(QTY_1_UPDATE,2)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ORDER_ITEM_INDEX" elementType="Argument">
+            <stringProp name="Argument.name">ORDER_ITEM_INDEX</stringProp>
+            <stringProp name="Argument.value">${__P(ORDER_ITEM_INDEX,0)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+        <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+        <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario">
+          <collectionProp name="Arguments.arguments"/>
+        </elementProp>
+        <stringProp name="HTTPSampler.implementation"></stringProp>
+      </ConfigTestElement>
+      <hashTree/>
+      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Default Headers" enabled="true">
+        <collectionProp name="HeaderManager.headers">
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">accept</stringProp>
+            <stringProp name="Header.value">application/json, text/plain, */*</stringProp>
+          </elementProp>
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">accept-language</stringProp>
+            <stringProp name="Header.value">es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7</stringProp>
+          </elementProp>
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">user-agent</stringProp>
+            <stringProp name="Header.value">Mozilla/5.0 (Windows NT 10.0; Win64; x64)</stringProp>
+          </elementProp>
+        </collectionProp>
+      </HeaderManager>
+      <hashTree/>
+      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+        <collectionProp name="CookieManager.cookies"/>
+        <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
+      </CookieManager>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG - Browse/Search/Cart">
+        <stringProp name="ThreadGroup.num_threads">${__P(THREADS,50)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(RAMP,10)}</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">${__P(LOOPS,1)}</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="01 - Session/OrderForm" enabled="true">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /api/sessions" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/sessions</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&quot;public&quot;:{&quot;country&quot;:{&quot;value&quot;:&quot;${COUNTRY}&quot;},&quot;regionId&quot;:{&quot;value&quot;:null},&quot;geoCoordinates&quot;:{&quot;value&quot;:&quot;${GEO_COORDS}&quot;}}}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Start timer (Block 01)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+vars.put(&quot;T01_START_MS&quot;, String.valueOf(System.currentTimeMillis()))
+              </stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers - JSON" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/segments" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/segments</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/checkout/pub/orderForm (create/recover)" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/checkout/pub/orderForm/</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="refreshOutdatedData" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">refreshOutdatedData</stringProp>
+                  <stringProp name="Argument.value">true</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert time (Block 01)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+def start = (vars.get(&quot;T01_START_MS&quot;) ?: &quot;0&quot;) as long
+def maxMs = (vars.get(&quot;MAX_01_MS&quot;) ?: &quot;4000&quot;) as long
+def elapsed = System.currentTimeMillis() - start
+if (start &gt; 0 &amp;&amp; elapsed &gt; maxMs) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&quot;Block 01 exceeded: &quot; + elapsed + &quot;ms &gt; &quot; + maxMs + &quot;ms&quot;)
+}
+vars.remove(&quot;T01_START_MS&quot;)
+              </stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract orderFormId" enabled="true">
+              <stringProp name="JSONPostProcessor.referenceNames">orderFormId</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.orderFormId</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="02 - Search (PLP runtime JSON)" enabled="true">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Set SEARCH_PATH default from SEARCH_TERM" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">
+def sp = vars.get(&apos;SEARCH_PATH&apos;)
+if (sp == null || sp.trim().isEmpty()) {
+  def st = vars.get(&apos;SEARCH_TERM&apos;) ?: &apos;&apos;
+  vars.put(&apos;SEARCH_PATH&apos;, st)
+}
+            </stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /{term}?_q={term}&amp;map=ft" enabled="true">
+            <stringProp name="HTTPSampler.path">/${SEARCH_PATH}</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="_q" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">_q</stringProp>
+                  <stringProp name="Argument.value">${SEARCH_TERM}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                </elementProp>
+                <elementProp name="map" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">map</stringProp>
+                  <stringProp name="Argument.value">ft</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Start timer (Block 02)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+vars.put(&quot;T02_START_MS&quot;, String.valueOf(System.currentTimeMillis()))
+              </stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert time (Block 02)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+def start = (vars.get(&quot;T02_START_MS&quot;) ?: &quot;0&quot;) as long
+def maxMs = (vars.get(&quot;MAX_02_MS&quot;) ?: &quot;3500&quot;) as long
+def elapsed = System.currentTimeMillis() - start
+if (start &gt; 0 &amp;&amp; elapsed &gt; maxMs) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&quot;Block 02 exceeded: &quot; + elapsed + &quot;ms &gt; &quot; + maxMs + &quot;ms&quot;)
+}
+vars.remove(&quot;T02_START_MS&quot;)
+              </stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="03 - Cart (GraphQL add/update items)" enabled="true">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Build persistedQuery variables (base64)" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">
+import groovy.json.JsonOutput
+import java.util.Base64
+
+def sku = (vars.get(&apos;SKU_1&apos;) ?: &apos;0&apos;) as Integer
+def seller = vars.get(&apos;SELLER_1&apos;) ?: &apos;&apos;
+def qty = (vars.get(&apos;QTY_1&apos;) ?: &apos;1&apos;) as Integer
+def idx = (vars.get(&apos;ORDER_ITEM_INDEX&apos;) ?: &apos;0&apos;) as Integer
+def qtyUpdate = (vars.get(&apos;QTY_1_UPDATE&apos;) ?: &apos;2&apos;) as Integer
+
+def addVars = [items: [[id: sku, index: 0, quantity: qty, seller: seller, options: []]]]
+def updVars = [orderItems: [[index: idx, quantity: qtyUpdate]], splitItem: false]
+
+vars.put(&apos;ADD_TO_CART_VARS_B64&apos;, Base64.encoder.encodeToString(JsonOutput.toJson(addVars).getBytes(&apos;UTF-8&apos;)))
+vars.put(&apos;UPDATE_ITEMS_VARS_B64&apos;, Base64.encoder.encodeToString(JsonOutput.toJson(updVars).getBytes(&apos;UTF-8&apos;)))
+            </stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST GraphQL addToCart" enabled="true">
+            <stringProp name="HTTPSampler.path">/_v/private/graphql/v1</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&quot;operationName&quot;:&quot;addToCart&quot;,&quot;variables&quot;:{},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;a63161354718146c4282079551df81aaa8fa3d59584520cf5ea1c278fac0db33&quot;,&quot;sender&quot;:&quot;vtex.checkout-resources@0.x&quot;,&quot;provider&quot;:&quot;vtex.checkout-graphql@0.x&quot;},&quot;variables&quot;:&quot;${ADD_TO_CART_VARS_B64}&quot;}}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Start timer (Block 03)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+vars.put(&quot;T03_START_MS&quot;, String.valueOf(System.currentTimeMillis()))
+              </stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers - GraphQL JSON" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST GraphQL updateItems (qty)" enabled="true">
+            <stringProp name="HTTPSampler.path">/_v/private/graphql/v1</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&quot;operationName&quot;:&quot;updateItems&quot;,&quot;variables&quot;:{},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;e202bb0a918da7748421a2d2eae48a4a05aad7251fee3a1f868426f2d4ef4fc6&quot;,&quot;sender&quot;:&quot;vtex.checkout-resources@0.x&quot;,&quot;provider&quot;:&quot;vtex.checkout-graphql@0.x&quot;},&quot;variables&quot;:&quot;${UPDATE_ITEMS_VARS_B64}&quot;}}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers - GraphQL JSON" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/checkout/pub/orderForm/${orderFormId}" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/checkout/pub/orderForm/${orderFormId}</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="refreshOutdatedData" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">refreshOutdatedData</stringProp>
+                  <stringProp name="Argument.value">true</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert time (Block 03)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+def start = (vars.get(&quot;T03_START_MS&quot;) ?: &quot;0&quot;) as long
+def maxMs = (vars.get(&quot;MAX_03_MS&quot;) ?: &quot;7000&quot;) as long
+def elapsed = System.currentTimeMillis() - start
+if (start &gt; 0 &amp;&amp; elapsed &gt; maxMs) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&quot;Block 03 exceeded: &quot; + elapsed + &quot;ms &gt; &quot; + maxMs + &quot;ms&quot;)
+}
+vars.remove(&quot;T03_START_MS&quot;)
+              </stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="04 - Checkout (Shipping + Payment options)" enabled="true">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Build checkout payloads (clientProfile/shipping/simulation)" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">
+import groovy.json.JsonOutput
+
+def orderFormId = vars.get(&apos;orderFormId&apos;) ?: &apos;&apos;
+def addrId = vars.get(&apos;ADDRESS_ID&apos;) ?: &apos;ADDR1&apos;
+def sku1 = (vars.get(&apos;SKU_1&apos;) ?: &apos;&apos;).toString()
+def postal = vars.get(&apos;POSTAL_CODE&apos;) ?: &apos;&apos;
+def city = vars.get(&apos;CITY&apos;) ?: &apos;&apos;
+def state = vars.get(&apos;STATE&apos;) ?: &apos;&apos;
+def country = vars.get(&apos;COUNTRY&apos;) ?: &apos;MEX&apos;
+def street = vars.get(&apos;STREET&apos;) ?: &apos;&apos;
+def number = vars.get(&apos;NUMBER&apos;) ?: &apos;&apos;
+def neighborhood = vars.get(&apos;NEIGHBORHOOD&apos;) ?: &apos;&apos;
+def complement = vars.get(&apos;COMPLEMENT&apos;) ?: &apos;&apos;
+def receiverName = vars.get(&apos;RECEIVER_NAME&apos;)
+def deliveryChannel = vars.get(&apos;DELIVERY_CHANNEL&apos;) ?: &apos;delivery&apos;
+def slaId = vars.get(&apos;SLA_ID&apos;) ?: &apos;&apos;
+
+def coordsStr = vars.get(&apos;GEO_COORDS&apos;) ?: &apos;&apos;
+def parts = coordsStr.split(&apos;,&apos;)*.trim()
+def lon = parts.size() &gt; 0 ? (parts[0] as Double) : 0.0
+def lat = parts.size() &gt; 1 ? (parts[1] as Double) : 0.0
+
+def address = [
+  addressType: &apos;residential&apos;,
+  receiverName: receiverName,
+  addressId: addrId,
+  isDisposable: true,
+  postalCode: postal,
+  city: city,
+  state: state,
+  country: country,
+  street: street,
+  number: number,
+  neighborhood: neighborhood,
+  complement: complement,
+  reference: null,
+  geoCoordinates: [lon, lat],
+]
+
+// Attachments/shippingData uses `selectedSla` and `itemId` (observed in HAR).
+def logisticsInfoAttachment = [[
+  addressId: addrId,
+  itemId: sku1,
+  itemIndex: 0,
+  selectedSla: slaId,
+  deliveryWindow: null,
+]]
+
+def shippingDataAttachment = [
+  address: address,
+  logisticsInfo: logisticsInfoAttachment,
+  selectedAddresses: [address],
+]
+
+// simulation uses `selectedSLAId` and `selectedDeliveryChannel` (observed in HAR).
+def logisticsInfoSimulation = [[
+  addressId: addrId,
+  itemIndex: 0,
+  selectedDeliveryChannel: deliveryChannel,
+  selectedSLAId: slaId,
+]]
+
+def clientProfile = [
+  email: (vars.get(&apos;CLIENT_EMAIL&apos;) ?: &apos;&apos;),
+  firstName: (vars.get(&apos;CLIENT_FIRST_NAME&apos;) ?: &apos;&apos;),
+  lastName: (vars.get(&apos;CLIENT_LAST_NAME&apos;) ?: &apos;&apos;),
+  document: null,
+  documentType: null,
+  phone: null,
+]
+
+def simulation = [
+  shippingData: [
+    logisticsInfo: logisticsInfoSimulation,
+    selectedAddresses: [address],
+  ],
+  allowedOutdatedData: [&apos;paymentData&apos;],
+  orderFormId: orderFormId,
+]
+
+vars.put(&apos;CLIENT_PROFILE_JSON&apos;, JsonOutput.toJson(clientProfile))
+vars.put(&apos;SHIPPING_DATA_ATTACHMENT_JSON&apos;, JsonOutput.toJson(shippingDataAttachment))
+vars.put(&apos;SIMULATION_JSON&apos;, JsonOutput.toJson(simulation))
+            </stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /attachments/clientProfileData" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/checkout/pub/orderForm/${orderFormId}/attachments/clientProfileData</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${CLIENT_PROFILE_JSON}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Start timer (Block 04)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+vars.put(&quot;T04_START_MS&quot;, String.valueOf(System.currentTimeMillis()))
+              </stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers - JSON" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /attachments/shippingData" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/checkout/pub/orderForm/${orderFormId}/attachments/shippingData</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${SHIPPING_DATA_ATTACHMENT_JSON}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers - JSON" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /orderForms/simulation?sc=${SC}&amp;rnbBehavior=0" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/checkout/pub/orderForms/simulation?sc=${SC}&amp;rnbBehavior=0</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${SIMULATION_JSON}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers - JSON" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/checkout/pub/orderForm/${orderFormId} (validate payment options)" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/checkout/pub/orderForm/${orderFormId}</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="refreshOutdatedData" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">refreshOutdatedData</stringProp>
+                  <stringProp name="Argument.value">true</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert paymentData exists" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-1540873520">paymentData</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message">paymentData not present; checkout may require login or different shipping payload.</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">2</intProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert time (Block 04)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+def start = (vars.get(&quot;T04_START_MS&quot;) ?: &quot;0&quot;) as long
+def maxMs = (vars.get(&quot;MAX_04_MS&quot;) ?: &quot;12000&quot;) as long
+def elapsed = System.currentTimeMillis() - start
+if (start &gt; 0 &amp;&amp; elapsed &gt; maxMs) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&quot;Block 04 exceeded: &quot; + elapsed + &quot;ms &gt; &quot; + maxMs + &quot;ms&quot;)
+}
+vars.remove(&quot;T04_START_MS&quot;)
+              </stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Ver Árbol de Resultados">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Reporte resumen">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

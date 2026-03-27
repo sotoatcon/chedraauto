@@ -19,7 +19,9 @@ const sucursales = {
 };
 
 const RecogerEnDirecciones = {
-  "Texmelucan": "AV. XICOTÉNCATL KM. 1 CARRET. SAN MARTÍN TEXMELUCAN-TLAX. S/N",
+//  "Texmelucan": "AV. XICOTÉNCATL KM. 1 CARRET. SAN MARTÍN TEXMELUCAN-TLAX. S/N",
+  "Polanco": "calle socrates 112 polanco",
+
 };
 
 const correos = [
@@ -55,8 +57,8 @@ const config = {
 
   mailslurp: {
     apiKey: "d1840d194ec422cbe0664c8985d1afe8cec89868d0882c9586aa8f146533ce65",
-    inboxId: "513d087e-bea8-4f96-b820-9e00c6536515",
-    emailAddress: "513d087e-bea8-4f96-b820-9e00c6536515@mailslurp.biz",
+    inboxId: "67b501d8-1b35-4cbc-8b9e-9d99bf96ea8c",
+    emailAddress: "67b501d8-1b35-4cbc-8b9e-9d99bf96ea8c@mailslurp.biz",
   },
 
   emails: {

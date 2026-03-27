@@ -381,6 +381,39 @@ async function generarReporteCoincidenciasPDF({
       };
       const coberturaExitosa = resultadosAdaptados.filter(x => (Number(x.totalProductos) || 0) >= 15).length;
 
+      // Para Legacy: calcular porcentajes globales por resultado (Correcto/Equivalente/Incorrecto).
+      let legacyPct = null;
+      if (esLegacy) {
+        let totalResultados = 0;
+        let correctos = 0;
+        let equivalentes = 0;
+        let incorrectos = 0;
+
+        resultadosAdaptados.forEach(t => {
+          const lista = Array.isArray(t.listaDetallada) ? t.listaDetallada : [];
+          totalResultados += lista.length;
+          lista.forEach(item => {
+            const corr = !!(item && item.correccion);
+            const eq = !!(item && item.equivalencia);
+            if (corr) correctos += 1;
+            else if (eq) equivalentes += 1;
+            else incorrectos += 1;
+          });
+        });
+
+        const pct = (n) => {
+          if (!totalResultados) return 0;
+          return Math.round((n / totalResultados) * 10000) / 100;
+        };
+
+        legacyPct = {
+          totalResultados,
+          correcto: pct(correctos),
+          equivalente: pct(equivalentes),
+          incorrecto: pct(incorrectos)
+        };
+      }
+
       const contenido = [];
       contenido.push(
         { text: esLegacy ? "Reporte Errores Ortograficos Legacy" : "Reporte Errores Ortograficos Empathy", style: "titulo", margin: [0, 0, 0, 10] },
@@ -400,10 +433,19 @@ async function generarReporteCoincidenciasPDF({
       }
 
       // Estandarizacion resumen
-      contenido.push(
-        { text: `Cobertura Exitosa: ${coberturaExitosa} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-        { text: `Resultado relevante: ${metricas.CC} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
-      );
+      if (!esLegacy) {
+        contenido.push(
+          { text: `Cobertura Exitosa: ${coberturaExitosa} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+          { text: `Resultado relevante: ${metricas.CC} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+        );
+      } else {
+        contenido.push(
+          { text: `Cobertura Exitosa: ${coberturaExitosa} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+          { text: `% Correcto: ${legacyPct ? legacyPct.correcto : 0}%`, style: "subtitulo", margin: [0, 0, 0, 2] },
+          { text: `% Equivalente: ${legacyPct ? legacyPct.equivalente : 0}%`, style: "subtitulo", margin: [0, 0, 0, 2] },
+          { text: `% Incorrecto: ${legacyPct ? legacyPct.incorrecto : 0}%`, style: "subtitulo", margin: [0, 0, 0, 10] }
+        );
+      }
 
       // Solo en Empathy (excepto reportes sin legacy): mostrar terminos ganados por Empathy.
       if (!esLegacy && terminosGanadosEmpathy !== null) {
@@ -951,11 +993,11 @@ async function generarReporteLongTailPDF({
       if (emp.length === 0 || leg.length === 0) return null;
       const coberturaEmp = emp.filter((r) => {
         const det = Array.isArray(r.detalles) ? r.detalles : [];
-        return det.length >= 15;
+        return det.length >= 10;
       }).length;
       const coberturaLeg = leg.filter((r) => {
         const det = Array.isArray(r.detalles) ? r.detalles : [];
-        return det.length >= 15;
+        return det.length >= 10;
       }).length;
       const totalResEmp = emp.reduce((acc, r) => acc + ((Array.isArray(r.detalles) ? r.detalles.length : 0) || 0), 0);
       const totalResLeg = leg.reduce((acc, r) => acc + ((Array.isArray(r.detalles) ? r.detalles.length : 0) || 0), 0);
@@ -993,9 +1035,14 @@ async function generarReporteLongTailPDF({
       const titulo = esLegacyLocal ? "Long Tail Legacy" : "Long Tail Empathy";
       const coberturaExitosa = resultadosLocal.filter((r) => {
         const det = Array.isArray(r.detalles) ? r.detalles : [];
-        return det.length >= 15;
+        return det.length >= 10;
       }).length;
-      const resultadoRelevante = resultadosLocal.filter((r) => (Number(r.calificacionPromedio) || 0) === MAX_RELEVANCIA).length;
+      // Long Tail: "Resultado relevante" se mide por el primer resultado del termino (no por el promedio).
+      const resultadoRelevante = resultadosLocal.filter((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        const first = det.length > 0 ? det[0] : null;
+        return (Number(first && first.calificacion) || 0) === MAX_RELEVANCIA;
+      }).length;
 
       const contenidoLocal = [];
       contenidoLocal.push(
@@ -1042,9 +1089,10 @@ async function generarReporteLongTailPDF({
       for (let i = 0; i < resultadosLocal.length; i++) {
         const r = resultadosLocal[i];
         const det = Array.isArray(r.detalles) ? r.detalles : [];
+        const terminoTexto = String(r.termino || r.Termino || "");
 
         contenidoLocal.push(
-          { text: `Termino: \"${String(r.termino || "")}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
+          { text: `Termino: \"${terminoTexto}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
           { text: `Calificacion Promedio: ${String(Number(r.calificacionPromedio) || 0)}`, style: "texto" },
           { text: `Categoria: ${String(r.categoria || "")}`, style: "texto" },
           { text: `Marca: ${String(r.marca || "")}`, style: "texto" },
@@ -1265,11 +1313,11 @@ async function generarReporteResultadosVaciosPDF({
     const docDefinition = {
       content: contenido,
       styles: {
-        titulo: { fontSize: 18, bold: true, color: "#ff8800", margin: [0, 0, 0, 10] },
-        subtitulo: { fontSize: 12, italics: true, color: "#555", margin: [0, 0, 0, 10] },
-        texto: { fontSize: 10, margin: [0, 2, 0, 2] },
-        textoResumen: { fontSize: 9, margin: [0, 1, 0, 1] },
-        encabezadoNaranja: { fontSize: 12, bold: true, color: "#ff8800", margin: [0, 6, 0, 4] }
+        titulo: { fontSize: 16, bold: true, color: "#ff8800", margin: [0, 0, 0, 10] },
+        subtitulo: { fontSize: 11, italics: true, color: "#555", margin: [0, 0, 0, 10] },
+        texto: { fontSize: 9, margin: [0, 2, 0, 2] },
+        textoResumen: { fontSize: 8, margin: [0, 1, 0, 1] },
+        encabezadoNaranja: { fontSize: 11, bold: true, color: "#ff8800", margin: [0, 6, 0, 4] }
       },
       defaultStyle: { font: "Roboto" },
       pageMargins: [40, 60, 40, 60]

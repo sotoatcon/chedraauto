@@ -455,7 +455,8 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
   await locator.first().waitFor({ state: "visible", timeout: 2500 }).catch(() => {});
 
   const countRaw = await locator.count().catch(() => 0);
-  const count = Math.min(countRaw, maxResultados);
+  const limite = modo === "legacy" ? maxResultados : Math.min(maxResultados, 20);
+  const count = Math.min(countRaw, limite);
 
   for (let i = 0; i < count; i++) {
     try {
@@ -541,9 +542,10 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
     };
   }
 
-  evaluarFrecuenciaAltaEquivalencias(productosEncontrados, equivalencia, relacionados) {
+  evaluarFrecuenciaAltaEquivalencias(productosEncontrados, termino, equivalencia, relacionados) {
     const eqTokens = this._splitTokens(equivalencia);
     const relTokens = this._splitTokens(relacionados);
+    const terminoLower = String(termino || "").trim().toLowerCase();
 
     const detalles = [];
     const lista = Array.isArray(productosEncontrados) ? productosEncontrados : [];
@@ -556,9 +558,11 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
 
     for (const titulo of lista) {
       const t = String(titulo || "");
-      const eq = this._contieneAlguno(t, eqTokens);
+      // Regla: 2 puntos si contiene al menos 1 equivalencia, o si coincide con el termino buscado.
+      const tLower = t.toLowerCase();
+      const eq = this._contieneAlguno(tLower, eqTokens) || (terminoLower.length > 0 && tLower.includes(terminoLower));
       // Solo evaluamos relacionados si equivalencia es false.
-      const rel = !eq && this._contieneAlguno(t, relTokens);
+      const rel = !eq && this._contieneAlguno(tLower, relTokens);
 
       const cal = eq ? 2 : (rel ? 1 : 0);
 
@@ -1015,8 +1019,21 @@ async crearDatosPago(row) {
       count = 0;
     }
 
-    console.log("=== DEBUG resultados encontrados ===");
-    console.log("Cantidad de productos:", count);
+    const countDetectado = count;
+    const limiteEvaluacion = modo === "legacy" ? count : Math.min(count, 20);
+
+    // Para Empathy solo evaluamos hasta 20 items (aunque existan mas en pantalla).
+    if (limiteEvaluacion !== countDetectado) {
+      console.log("=== DEBUG resultados encontrados ===");
+      console.log("Cantidad de productos detectados:", countDetectado);
+      console.log("Cantidad de productos a evaluar:", limiteEvaluacion);
+    } else {
+      console.log("=== DEBUG resultados encontrados ===");
+      console.log("Cantidad de productos:", limiteEvaluacion);
+    }
+
+    // Usamos el count ya limitado para el resto del flujo (loop / totalProductos / etc).
+    count = limiteEvaluacion;
 
     let CC = false;
     let CP = false;
@@ -1074,6 +1091,7 @@ async crearDatosPago(row) {
 
     const totalProductos = count;
     const allCorreccion = totalProductos > 0 && ccProductos === totalProductos;
+    const anyCorreccion = ccProductos > 0;
     const anyEquivalencia = cpProductos > 0;
     let calificacion = "";
 
@@ -1087,6 +1105,9 @@ async crearDatosPago(row) {
         if (allCorreccion) {
           CC = true;
           calificacion = "CC";
+        } else if (!allCorreccion && anyCorreccion) {
+          CP = true;
+          calificacion = "CP";
         } else if (!allCorreccion && anyEquivalencia) {
           CP = true;
           calificacion = "CP";
