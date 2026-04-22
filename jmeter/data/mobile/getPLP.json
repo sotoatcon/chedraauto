@@ -1,0 +1,1 @@
+{"query":"${PLP_QUERY}","collection":"${PLP_COLLECTION}","sort":"${PLP_SORT}","facet":"${PLP_FACET}","page":${PLP_PAGE},"geoCoordinates":[${GEO_LON},${GEO_LAT}],"seller":"${SELLER}","count":${PLP_COUNT}}

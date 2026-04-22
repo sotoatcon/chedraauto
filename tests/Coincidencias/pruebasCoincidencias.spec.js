@@ -121,6 +121,14 @@ test.beforeEach(async ({ page }, testInfo) => {
   //  EMP -- LOGIN COMPLETO
   // ============================
   if (config.isEMP) {
+    // Playwright creates a fresh `page` fixture per test when `({ page })` is present.
+    // In EMP mode we reuse `empPage`, so we close the unused page to avoid opening an extra window.
+    try {
+      if (page && !page.isClosed()) {
+        await page.close();
+      }
+    } catch {}
+
     testInfo.page = empPage;
     testInfo.headerPage = empHeaderPage;
     testInfo.productosPage = empProductosPage;

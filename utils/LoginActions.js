@@ -31,8 +31,9 @@ async function loginConCorreo(page, headerPage, loginPage) {
       timeout: 60000
     });
       await loginvtex.humanType(loginvtex.emailInput, config.emails.validUser);
+      const otpRequestMs = Date.now();
       await loginvtex.safeClick(loginvtex.nextButton);
-      await obtenerCodigoVtexDesdeOutlook(page,config);
+      await obtenerCodigoVtexDesdeOutlook(page, config, { notBeforeMs: otpRequestMs });
 
     }
     else if (config.isEMP) {
@@ -43,8 +44,9 @@ async function loginConCorreo(page, headerPage, loginPage) {
       });
 
       await loginvtex.humanType(loginvtex.emailInput, config.emails.validUser);
+      const otpRequestMs = Date.now();
       await loginvtex.safeClick(loginvtex.nextButton);
-      const code = await obtenerCodigoVtexDesdeOutlook(page, config);
+      const code = await obtenerCodigoVtexDesdeOutlook(page, config, { notBeforeMs: otpRequestMs });
 
       if (!/^\d{6}$/.test(code)) {
         throw new Error(`Código OTP inválido recibido: ${code}`);
@@ -144,7 +146,7 @@ async function loginConCorreo(page, headerPage, loginPage) {
   }
 }
 
-async function obtenerCodigoVtexDesdeOutlook(page, config) {
+async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
   console.log("➡️ Iniciando navegador STEALTH real Playwright...");
 
   const { chromium } = require('playwright');
@@ -183,14 +185,49 @@ async function obtenerCodigoVtexDesdeOutlook(page, config) {
 
   console.log("➡️ Esperando bandeja...");
   await stealthPage.waitForSelector('div[role="main"]', { timeout: 30000 });
+  // Evita esperas largas que dan la sensacion de "se quedo".
+  try { stealthPage.setDefaultTimeout(5000); } catch {}
+
+  // Outlook (web) puede separar correos en pestanas (p.ej. "Prioritarios" y "Otros").
+  // Antes de recargar, intentamos revisar "Otros" por si el correo llego ahi.
+  async function _tryClickTab(nameRegex) {
+    try {
+      const tabByRole = stealthPage.getByRole('tab', { name: nameRegex }).first();
+      const visRole = await tabByRole.isVisible({ timeout: 800 }).catch(() => false);
+      if (visRole) {
+        await tabByRole.click({ timeout: 1500 }).catch(() => {});
+        await stealthPage.waitForTimeout(400);
+        return true;
+      }
+
+      // Fallback acotado: buscar solo dentro del tablist (evita escanear miles de <div>).
+      const tabFallback = stealthPage
+        .locator('[role="tablist"] [role="tab"], [role="tablist"] button')
+        .filter({ hasText: nameRegex })
+        .first();
+      await tabFallback.click({ timeout: 1500 }).catch(() => {});
+      // Si no existia o no fue clickeable, el catch lo absorbe.
+      await stealthPage.waitForTimeout(400);
+      // Confirmamos si al menos era visible (click pudo fallar por overlay).
+      const visFb = await tabFallback.isVisible({ timeout: 800 }).catch(() => false);
+      return visFb;
+    } catch {}
+    return false;
+  }
 
   console.log("➡️ Comenzando monitoreo VTEX...");
+  console.log("VTEX: iniciando escaneo (inbox y Otros)...");
 
   // Función para leer el último correo
   async function leerUltimoCorreo() {
     const correos = stealthPage.locator('div[role="option"]');
     const ultimo = correos.first();
-    const texto = await ultimo.innerText().catch(() => "");
+
+    // Evita quedar colgado si Outlook aun no termina de renderizar la lista.
+    const visible = await ultimo.isVisible({ timeout: 1500 }).catch(() => false);
+    if (!visible) return { nodo: null, texto: "" };
+
+    const texto = await ultimo.innerText({ timeout: 1500 }).catch(() => "");
     return { nodo: ultimo, texto };
   }
 
@@ -199,7 +236,188 @@ async function obtenerCodigoVtexDesdeOutlook(page, config) {
     return match ? match[1] : null;
   }
 
+  async function revisarOtrosPorCodigo(codigoPrevio) {
+    // Ir a "Otros"/"Other" si existe.
+    const fueAOtros = await _tryClickTab(/Otros|Other/i);
+    if (!fueAOtros) return null;
+
+    const { texto } = await leerUltimoCorreo();
+    const codigo = extraerCodigo(texto);
+    const esNuevo = codigo && (!codigoPrevio || codigo !== codigoPrevio);
+
+    // Regresar a la pestana normal si existe (Prioritarios/Focused).
+    await _tryClickTab(/Prioritarios|Focused/i);
+
+    return esNuevo ? codigo : null;
+  }
+
   // 1️⃣ Esperar a que llegue un correo que empiece con "Your access code is:"
+  // Nuevo flujo: evita tomar un codigo viejo que ya estaba en la bandeja.
+  // Regla: ignorar codigos "baseline" (los que estaban al iniciar) y, si es posible, validar que el correo sea reciente.
+  const startMs = Date.now();
+  // Momento a partir del cual aceptamos el OTP (idealmente: cuando se solicito en VTEX).
+  // Si no se provee, usamos startMs.
+  const notBeforeMs = (opts && typeof opts.notBeforeMs === 'number' && !Number.isNaN(opts.notBeforeMs))
+    ? opts.notBeforeMs
+    : startMs;
+  // Tolerancia por redondeos / render en Outlook (ms).
+  const skewMs = (opts && typeof opts.skewMs === 'number' && !Number.isNaN(opts.skewMs))
+    ? opts.skewMs
+    : 5000;
+  const baselineCodes = new Set();
+
+  async function _tryParseTimestampMsFromItem(item) {
+    try {
+      const dt = await item.locator('time').first().getAttribute('datetime', { timeout: 1200 }).catch(() => null);
+      if (dt) {
+        const ms = Date.parse(dt);
+        if (!Number.isNaN(ms)) return ms;
+      }
+    } catch {}
+
+    const candidates = [];
+    try { candidates.push(await item.getAttribute('aria-label', { timeout: 1200 }).catch(() => null)); } catch {}
+    try { candidates.push(await item.getAttribute('title', { timeout: 1200 }).catch(() => null)); } catch {}
+
+    for (const s of candidates) {
+      if (!s) continue;
+      const iso = String(s).match(/\d{4}-\d{2}-\d{2}T[0-9:.+-]+/);
+      if (iso) {
+        const ms = Date.parse(iso[0]);
+        if (!Number.isNaN(ms)) return ms;
+      }
+
+      const mdy = String(s).match(/\d{1,2}\/\d{1,2}\/\d{2,4}[^0-9]*\d{1,2}:\d{2}(\s*(AM|PM))?/i);
+      if (mdy) {
+        const ms = Date.parse(mdy[0]);
+        if (!Number.isNaN(ms)) return ms;
+      }
+    }
+
+    // Ultimo intento: en algunos layouts, el item muestra solo la hora (ej. "12:34" o "12:34 PM").
+    // Asumimos que es del dia de hoy y lo comparamos vs startMs.
+    try {
+      const raw = await item.innerText({ timeout: 1200 }).catch(() => null);
+      if (raw) {
+        const m = String(raw).match(/\b(\d{1,2}):(\d{2})\s*(AM|PM)?\b/i);
+        if (m) {
+          let hh = parseInt(m[1], 10);
+          const mm = parseInt(m[2], 10);
+          const ampm = (m[3] || "").toUpperCase();
+          if (ampm === "PM" && hh < 12) hh += 12;
+          if (ampm === "AM" && hh === 12) hh = 0;
+          const d = new Date(notBeforeMs);
+          d.setHours(hh, mm, 0, 0);
+          let ms = d.getTime();
+          // Si quedo "en el futuro" por rollover de dia, restamos 24h.
+          if (ms > startMs + 60 * 60 * 1000) ms -= 24 * 60 * 60 * 1000;
+          return ms;
+        }
+      }
+    } catch {}
+
+    return null;
+  }
+
+  async function _leerCodigoYMetaEnTabActual() {
+    const { nodo, texto } = await leerUltimoCorreo();
+    const codigo = extraerCodigo(texto);
+    const tsMs = nodo ? await _tryParseTimestampMsFromItem(nodo) : null;
+    return { codigo, tsMs };
+  }
+
+  async function _leerCodigoYMetaEnOtros() {
+    const fueAOtros = await _tryClickTab(/Otros|Other/i);
+    if (!fueAOtros) return { codigo: null, tsMs: null };
+
+    const meta = await _leerCodigoYMetaEnTabActual();
+    await _tryClickTab(/Prioritarios|Focused/i);
+    return meta;
+  }
+
+  const esReciente = (tsMs) => {
+    if (typeof tsMs !== 'number' || Number.isNaN(tsMs)) return false;
+    // Validamos que el correo sea posterior (o muy cercano) al momento en que se solicito el OTP.
+    // Esto evita tomar el primer correo de un intento anterior aunque sea "reciente".
+    return tsMs >= (notBeforeMs - skewMs);
+  };
+
+  // Capturamos baseline (lo que ya estaba en pantalla) para no tomar codigos antiguos.
+  // Solo marcamos como baseline si NO parece reciente. Si el OTP nuevo ya llego, debe poder usarse.
+  console.log("VTEX: leyendo baseline...");
+  let baseMain = { codigo: null, tsMs: null };
+  try { baseMain = await _leerCodigoYMetaEnTabActual(); } catch {}
+  if (baseMain.codigo && !esReciente(baseMain.tsMs)) baselineCodes.add(baseMain.codigo);
+  let baseOther = { codigo: null, tsMs: null };
+  try { baseOther = await _leerCodigoYMetaEnOtros(); } catch {}
+  if (baseOther.codigo && !esReciente(baseOther.tsMs)) baselineCodes.add(baseOther.codigo);
+  console.log("VTEX: baseline listo. Iniciando espera de OTP...");
+
+  while (true) {
+    const main = await _leerCodigoYMetaEnTabActual().catch(() => ({ codigo: null, tsMs: null }));
+    if (main && main.codigo) {
+      if (esReciente(main.tsMs)) {
+        console.log("Codigo VTEX detectado:", main.codigo);
+        await browser.close();
+        return main.codigo;
+      }
+      if (typeof main.tsMs === 'number' && !Number.isNaN(main.tsMs)) {
+        console.log("VTEX: codigo ignorado por timestamp viejo (main): " + main.codigo);
+      }
+
+      // Sin timestamp: primero sembramos baseline, luego solo aceptamos si cambia.
+      if (main.tsMs === null || main.tsMs === undefined) {
+        if (baselineCodes.size === 0) {
+          baselineCodes.add(main.codigo);
+          console.log("VTEX: baseline(seed main, no timestamp): " + main.codigo);
+        } else if (!baselineCodes.has(main.codigo)) {
+          console.log("Codigo VTEX detectado (main, sin timestamp):", main.codigo);
+          await browser.close();
+          return main.codigo;
+        }
+      } else {
+        // Timestamp viejo: lo marcamos como baseline y esperamos uno nuevo.
+        if (!baselineCodes.has(main.codigo)) baselineCodes.add(main.codigo);
+      }
+    }
+
+    const other = await _leerCodigoYMetaEnOtros().catch(() => ({ codigo: null, tsMs: null }));
+    if (other && other.codigo) {
+      if (esReciente(other.tsMs)) {
+        console.log("Codigo VTEX detectado en pestana Otros:", other.codigo);
+        await browser.close();
+        return other.codigo;
+      }
+      if (typeof other.tsMs === 'number' && !Number.isNaN(other.tsMs)) {
+        console.log("VTEX: codigo ignorado por timestamp viejo (Otros): " + other.codigo);
+      }
+
+      if (other.tsMs === null || other.tsMs === undefined) {
+        if (baselineCodes.size === 0) {
+          baselineCodes.add(other.codigo);
+          console.log("VTEX: baseline(seed other, no timestamp): " + other.codigo);
+        } else if (!baselineCodes.has(other.codigo)) {
+          console.log("Codigo VTEX detectado (Otros, sin timestamp):", other.codigo);
+          await browser.close();
+          return other.codigo;
+        }
+      } else {
+        if (!baselineCodes.has(other.codigo)) baselineCodes.add(other.codigo);
+      }
+    }
+
+    // Debug ligero para confirmar que el loop esta vivo aunque no haya correos aun.
+    // (Evita pensar que se "queda esperando" cuando en realidad esta ciclando.)
+    try {
+      const n = await stealthPage.locator('div[role="option"]').count().catch(() => 0);
+      console.log("Esperando nuevo codigo... refrescando... (items=" + n + ")");
+    } catch {
+      console.log("Esperando nuevo codigo... refrescando...");
+    }
+    await stealthPage.reload({ waitUntil: "domcontentloaded" });
+    await stealthPage.waitForTimeout(2000);
+  }
+
   let codigoActual = null;
 
   while (true) {
@@ -214,6 +432,21 @@ async function obtenerCodigoVtexDesdeOutlook(page, config) {
     }
 
     console.log("⏳ No hay correo VTEX aún... refrescando...");
+    const codigoEnOtros = await revisarOtrosPorCodigo(codigoActual);
+    if (codigoEnOtros) {
+      // En el primer ciclo, codigoActual aun es null: tomamos el codigo y seguimos al ciclo 2.
+      if (!codigoActual) {
+        console.log("Codigo VTEX detectado en pestana Otros:", codigoEnOtros);
+        codigoActual = codigoEnOtros;
+        break;
+      }
+
+      // En el segundo ciclo ya existe codigoActual: este es un codigo nuevo.
+      console.log("Nuevo codigo VTEX detectado en pestana Otros:", codigoEnOtros);
+      await browser.close();
+      return codigoEnOtros;
+    }
+
     await stealthPage.reload({ waitUntil: "domcontentloaded" });
     await stealthPage.waitForTimeout(2000);
   }
@@ -230,6 +463,21 @@ async function obtenerCodigoVtexDesdeOutlook(page, config) {
     }
 
     console.log("⏳ Aún no llega un nuevo código... refrescando...");
+    const codigoEnOtros = await revisarOtrosPorCodigo(codigoActual);
+    if (codigoEnOtros) {
+      // En el primer ciclo, codigoActual aun es null: tomamos el codigo y seguimos al ciclo 2.
+      if (!codigoActual) {
+        console.log("Codigo VTEX detectado en pestana Otros:", codigoEnOtros);
+        codigoActual = codigoEnOtros;
+        break;
+      }
+
+      // En el segundo ciclo ya existe codigoActual: este es un codigo nuevo.
+      console.log("Nuevo codigo VTEX detectado en pestana Otros:", codigoEnOtros);
+      await browser.close();
+      return codigoEnOtros;
+    }
+
     await stealthPage.reload({ waitUntil: "domcontentloaded" });
     await stealthPage.waitForTimeout(2000);
   }

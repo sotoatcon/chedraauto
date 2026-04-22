@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Chedraui - Mobile (Android) Navegacion + PLP/PDP + Carrito + Checkout v1">
+      <stringProp name="TestPlan.comments">v1 (2026-04-15): Plan base para simular el flujo MOBILE (Android) usando el gateway https://chedapimng-prod.azure-api.net/backend-app/. Diferencias vs WEB: PLP/PDP/Carrito/Shipping se realizan via endpoints backend-app (ChedrauiAPI) y autenticacion via Auth0 si aplica. Este plan deja plantillas para request bodies (GetPLP/GetPDP/Add/Shipping) para afinarlas con el request real de la app.</stringProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="MOBILE_PROTOCOL" elementType="Argument">
+            <stringProp name="Argument.name">MOBILE_PROTOCOL</stringProp>
+            <stringProp name="Argument.value">${__P(MOBILE_PROTOCOL,https)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="MOBILE_HOST" elementType="Argument">
+            <stringProp name="Argument.name">MOBILE_HOST</stringProp>
+            <stringProp name="Argument.value">${__P(MOBILE_HOST,chedapimng-prod.azure-api.net)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="MOBILE_BASE_PATH" elementType="Argument">
+            <stringProp name="Argument.name">MOBILE_BASE_PATH</stringProp>
+            <stringProp name="Argument.value">${__P(MOBILE_BASE_PATH,/backend-app)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="BACKEND_LOGIN" elementType="Argument">
+            <stringProp name="Argument.name">BACKEND_LOGIN</stringProp>
+            <stringProp name="Argument.value">${__P(BACKEND_LOGIN,3BO6f9Otzuffiqmo)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SELLER" elementType="Argument">
+            <stringProp name="Argument.name">SELLER</stringProp>
+            <stringProp name="Argument.value">${__P(SELLER,chedrauimx0232)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="USER_ID" elementType="Argument">
+            <stringProp name="Argument.name">USER_ID</stringProp>
+            <stringProp name="Argument.value">${__P(USER_ID,anonymous)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ADDRESS_ALIAS" elementType="Argument">
+            <stringProp name="Argument.name">ADDRESS_ALIAS</stringProp>
+            <stringProp name="Argument.value">${__P(ADDRESS_ALIAS,MOBILE)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ADDRESS_NAME" elementType="Argument">
+            <stringProp name="Argument.name">ADDRESS_NAME</stringProp>
+            <stringProp name="Argument.value">${__P(ADDRESS_NAME,MOBILE)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SHIP_ITEM_INDEX" elementType="Argument">
+            <stringProp name="Argument.name">SHIP_ITEM_INDEX</stringProp>
+            <stringProp name="Argument.value">${__P(SHIP_ITEM_INDEX,0)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SHIP_ITEM_ID" elementType="Argument">
+            <stringProp name="Argument.name">SHIP_ITEM_ID</stringProp>
+            <stringProp name="Argument.value">${__P(SHIP_ITEM_ID,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DELIVERY_START_UTC" elementType="Argument">
+            <stringProp name="Argument.name">DELIVERY_START_UTC</stringProp>
+            <stringProp name="Argument.value">${__P(DELIVERY_START_UTC,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DELIVERY_END_UTC" elementType="Argument">
+            <stringProp name="Argument.name">DELIVERY_END_UTC</stringProp>
+            <stringProp name="Argument.value">${__P(DELIVERY_END_UTC,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GEO_COORDS" elementType="Argument">
+            <stringProp name="Argument.name">GEO_COORDS</stringProp>
+            <stringProp name="Argument.value">${__P(GEO_COORDS,-99.17599709999999\,19.4281046)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ORDERFORM_ID" elementType="Argument">
+            <stringProp name="Argument.name">ORDERFORM_ID</stringProp>
+            <stringProp name="Argument.value">${__P(ORDERFORM_ID,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DATA_DIR" elementType="Argument">
+            <stringProp name="Argument.name">DATA_DIR</stringProp>
+            <stringProp name="Argument.value">${__P(DATA_DIR,C:\\Users\\atcon\\Desktop\\Playwright\\playwright-piloto2\\jmeter\\data)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="LOCATIONS_CSV" elementType="Argument">
+            <stringProp name="Argument.name">LOCATIONS_CSV</stringProp>
+            <stringProp name="Argument.value">${__P(LOCATIONS_CSV,C:\\Users\\atcon\\Desktop\\Playwright\\playwright-piloto2\\jmeter\\data\\locations.csv)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="CART_CATEGORY_CSV" elementType="Argument">
+            <stringProp name="Argument.name">CART_CATEGORY_CSV</stringProp>
+            <stringProp name="Argument.value">${__P(CART_CATEGORY_CSV,C:\\Users\\atcon\\Desktop\\Playwright\\playwright-piloto2\\jmeter\\data\\cart_category_items.csv)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ADD_ITEMS_COUNT" elementType="Argument">
+            <stringProp name="Argument.name">ADD_ITEMS_COUNT</stringProp>
+            <stringProp name="Argument.value">${__P(ADD_ITEMS_COUNT,5)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PDP_FIRST_N" elementType="Argument">
+            <stringProp name="Argument.name">PDP_FIRST_N</stringProp>
+            <stringProp name="Argument.value">${__P(PDP_FIRST_N,2)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PLP_QUERY" elementType="Argument">
+            <stringProp name="Argument.name">PLP_QUERY</stringProp>
+            <stringProp name="Argument.value">${__P(PLP_QUERY,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PLP_COLLECTION" elementType="Argument">
+            <stringProp name="Argument.name">PLP_COLLECTION</stringProp>
+            <stringProp name="Argument.value">${__P(PLP_COLLECTION,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PLP_SORT" elementType="Argument">
+            <stringProp name="Argument.name">PLP_SORT</stringProp>
+            <stringProp name="Argument.value">${__P(PLP_SORT,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PLP_FACET" elementType="Argument">
+            <stringProp name="Argument.name">PLP_FACET</stringProp>
+            <stringProp name="Argument.value">${__P(PLP_FACET,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PLP_PAGE" elementType="Argument">
+            <stringProp name="Argument.name">PLP_PAGE</stringProp>
+            <stringProp name="Argument.value">${__P(PLP_PAGE,1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PLP_COUNT" elementType="Argument">
+            <stringProp name="Argument.name">PLP_COUNT</stringProp>
+            <stringProp name="Argument.value">${__P(PLP_COUNT,24)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PLP_REQUEST_FILE" elementType="Argument">
+            <stringProp name="Argument.name">PLP_REQUEST_FILE</stringProp>
+            <stringProp name="Argument.value">${__P(PLP_REQUEST_FILE,C:\\Users\\atcon\\Desktop\\Playwright\\playwright-piloto2\\jmeter\\data\\mobile\\getPLP.json)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PDP_REQUEST_FILE" elementType="Argument">
+            <stringProp name="Argument.name">PDP_REQUEST_FILE</stringProp>
+            <stringProp name="Argument.value">${__P(PDP_REQUEST_FILE,C:\\Users\\atcon\\Desktop\\Playwright\\playwright-piloto2\\jmeter\\data\\mobile\\getPDP.json)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ADD_REQUEST_FILE" elementType="Argument">
+            <stringProp name="Argument.name">ADD_REQUEST_FILE</stringProp>
+            <stringProp name="Argument.value">${__P(ADD_REQUEST_FILE,C:\\Users\\atcon\\Desktop\\Playwright\\playwright-piloto2\\jmeter\\data\\mobile\\addProductOrderForm.json)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SHIPPING_REQUEST_FILE" elementType="Argument">
+            <stringProp name="Argument.name">SHIPPING_REQUEST_FILE</stringProp>
+            <stringProp name="Argument.value">${__P(SHIPPING_REQUEST_FILE,C:\\Users\\atcon\\Desktop\\Playwright\\playwright-piloto2\\jmeter\\data\\mobile\\updateShippingOrderForm.json)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults - Mobile">
+        <stringProp name="HTTPSampler.domain">${MOBILE_HOST}</stringProp>
+        <stringProp name="HTTPSampler.protocol">${MOBILE_PROTOCOL}</stringProp>
+        <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario">
+          <collectionProp name="Arguments.arguments"/>
+        </elementProp>
+        <stringProp name="HTTPSampler.implementation"></stringProp>
+      </ConfigTestElement>
+      <hashTree/>
+      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers - Mobile JSON" enabled="true">
+        <collectionProp name="HeaderManager.headers">
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">accept</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
+          </elementProp>
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">content-type</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
+          </elementProp>
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">backendLogin</stringProp>
+            <stringProp name="Header.value">${__groovy(props.get(&apos;BACKEND_LOGIN&apos;) ?: vars.get(&apos;BACKEND_LOGIN&apos;) ?: &apos;&apos;)}</stringProp>
+          </elementProp>
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">user-agent</stringProp>
+            <stringProp name="Header.value">ChedrauiAndroid/JMeter</stringProp>
+          </elementProp>
+        </collectionProp>
+      </HeaderManager>
+      <hashTree/>
+      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+        <collectionProp name="CookieManager.cookies"/>
+        <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
+      </CookieManager>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG - Mobile (Android) - Simulacion Usuarios" enabled="true">
+        <stringProp name="ThreadGroup.num_threads">${__P(THREADS,1)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(RAMP,1)}</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">${__P(LOOPS,1)}</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV - Locations" enabled="true">
+          <stringProp name="filename">${LOCATIONS_CSV}</stringProp>
+          <stringProp name="fileEncoding"></stringProp>
+          <stringProp name="variableNames">SESSION_PROFILE,COUNTRY,GEO_COORDS,SESSION_REGION_ID,ADDRESS_ID,POSTAL_CODE,CITY,STATE,STREET,NUMBER,NEIGHBORHOOD,COMPLEMENT,RECEIVER_NAME,ADDRESS_TYPE,DELIVERY_CHANNEL,SLA_ID</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="quotedData">true</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">shareMode.all</stringProp>
+          <boolProp name="ignoreFirstLine">false</boolProp>
+        </CSVDataSet>
+        <hashTree/>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="01 - Bootstrap OrderForm (getCheckoutOrderForm)" enabled="true">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Build payload - getCheckoutOrderForm" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import groovy.json.JsonOutput
+
+def orderFormId = (vars.get(&apos;ORDERFORM_ID&apos;) ?: &apos;&apos;).toString().trim()
+def seller = (vars.get(&apos;SELLER&apos;) ?: &apos;&apos;).toString().trim()
+def geo = (vars.get(&apos;GEO_COORDS&apos;) ?: &apos;&apos;).toString().trim()
+
+def parts = geo.split(&apos;,&apos;)*.trim()
+def lon = parts.size() &gt; 0 ? Double.parseDouble(parts[0]) : -99.17599709999999d
+def lat = parts.size() &gt; 1 ? Double.parseDouble(parts[1]) : 19.4281046d
+vars.put(&apos;GEO_LON&apos;, String.valueOf(lon))
+vars.put(&apos;GEO_LAT&apos;, String.valueOf(lat))
+
+def payload = [
+  orderFormId: orderFormId,
+  geoCoordinates: [lon, lat],
+  seller: seller,
+]
+
+vars.put(&apos;MOBILE_GET_CHECKOUT_ORDERFORM_JSON&apos;, JsonOutput.toJson(payload))</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /backend-app/getCheckoutOrderForm" enabled="true">
+            <stringProp name="HTTPSampler.path">${MOBILE_BASE_PATH}/getCheckoutOrderForm</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${MOBILE_GET_CHECKOUT_ORDERFORM_JSON}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Extract orderFormId (best-effort)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import groovy.json.JsonSlurper
+
+def body = prev.getResponseDataAsString()
+if (!body) return
+
+def json
+try { json = new JsonSlurper().parseText(body) } catch (Throwable ignored) { return }
+
+def idRegex = ~/^[0-9a-fA-F]{32}$/
+def found = null
+
+def walk
+walk = { obj -&gt;
+  if (found != null) return
+  if (obj instanceof Map) {
+    obj.each { k, v -&gt;
+      if (found != null) return
+      if (k?.toString()?.equalsIgnoreCase(&apos;orderFormId&apos;) &amp;&amp; v != null) {
+        def s = v.toString().trim()
+        if (s ==~ idRegex || s.equalsIgnoreCase(&apos;default-order-form&apos;)) {
+          found = s
+          return
+        }
+      }
+      walk(v)
+    }
+  } else if (obj instanceof List) {
+    obj.each { walk(it) }
+  }
+}
+
+walk(json)
+
+if (found != null) {
+  vars.put(&apos;orderFormId&apos;, found)
+} else {
+  def fallback = (vars.get(&apos;ORDERFORM_ID&apos;) ?: &apos;&apos;).toString().trim()
+  if (!fallback.isEmpty()) {
+    vars.put(&apos;orderFormId&apos;, fallback)
+  }
+}</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Extract SHIP_ITEM_ID (best-effort)" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import groovy.json.JsonSlurper
+
+def body = prev.getResponseDataAsString()
+if (!body) return
+
+def json
+try { json = new JsonSlurper().parseText(body) } catch (Throwable ignored) { return }
+
+def firstItemId = null
+
+def findItems
+findItems = { obj -&gt;
+  if (firstItemId != null) return
+  if (obj instanceof Map) {
+    obj.each { k, v -&gt;
+      if (firstItemId != null) return
+      if (k?.toString()?.equalsIgnoreCase(&apos;items&apos;) &amp;&amp; (v instanceof List) &amp;&amp; !v.isEmpty()) {
+        def first = v[0]
+        if (first instanceof Map) {
+          def candidates = [&apos;id&apos;,&apos;itemId&apos;,&apos;skuId&apos;,&apos;uniqueId&apos;,&apos;productId&apos;]
+          for (def c : candidates) {
+            def val = first[c]
+            if (val != null &amp;&amp; val.toString().trim()) {
+              firstItemId = val.toString().trim()
+              return
+            }
+          }
+        }
+      }
+      findItems(v)
+    }
+  } else if (obj instanceof List) {
+    obj.each { findItems(it) }
+  }
+}
+
+findItems(json)
+
+if (firstItemId != null) {
+  vars.put(&apos;SHIP_ITEM_ID&apos;, firstItemId)
+}</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="02 - (Opcional) PLP Mobile (getPLP)" enabled="false">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /backend-app/getPLP (template)" enabled="true">
+            <stringProp name="HTTPSampler.path">${MOBILE_BASE_PATH}/getPLP</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${__FileToString(${PLP_REQUEST_FILE},,)}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop_Add_Items" enabled="true">
+          <stringProp name="LoopController.loops">${ADD_ITEMS_COUNT}</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </LoopController>
+        <hashTree>
+          <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV - SKUs (5 items)" enabled="true">
+            <stringProp name="filename">${CART_CATEGORY_CSV}</stringProp>
+            <stringProp name="fileEncoding"></stringProp>
+            <stringProp name="variableNames">SKU_ID</stringProp>
+            <stringProp name="delimiter">,</stringProp>
+            <boolProp name="quotedData">false</boolProp>
+            <boolProp name="recycle">true</boolProp>
+            <boolProp name="stopThread">false</boolProp>
+            <stringProp name="shareMode">shareMode.all</stringProp>
+            <boolProp name="ignoreFirstLine">false</boolProp>
+          </CSVDataSet>
+          <hashTree/>
+          <IfController guiclass="IfControllerPanel" testclass="IfController" testname="IF - PDP for first ${PDP_FIRST_N}" enabled="true">
+            <stringProp name="IfController.condition">${__groovy((vars.get(&apos;__jm__Loop_Add_Items__idx&apos;) as int) &lt; (vars.get(&apos;PDP_FIRST_N&apos;) as int))}</stringProp>
+            <boolProp name="IfController.evaluateAll">false</boolProp>
+            <boolProp name="IfController.useExpression">false</boolProp>
+          </IfController>
+          <hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /backend-app/getPDP" enabled="true">
+              <stringProp name="HTTPSampler.path">${MOBILE_BASE_PATH}/getPDP</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.value">${__FileToString(${PDP_REQUEST_FILE},,)}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /backend-app/addProductOrderForm" enabled="true">
+            <stringProp name="HTTPSampler.path">${MOBILE_BASE_PATH}/addProductOrderForm</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${__FileToString(${ADD_REQUEST_FILE},,)}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="03 - GetCheckoutOrderForm (after add)" enabled="true">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /backend-app/getCheckoutOrderForm" enabled="true">
+            <stringProp name="HTTPSampler.path">${MOBILE_BASE_PATH}/getCheckoutOrderForm</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${MOBILE_GET_CHECKOUT_ORDERFORM_JSON}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="04 - UpdateShippingOrderForm (template)" enabled="false">
+          <boolProp name="TransactionController.parent">true</boolProp>
+          <boolProp name="TransactionController.includeTimers">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /backend-app/updateShippingOrderForm" enabled="true">
+            <stringProp name="HTTPSampler.path">${MOBILE_BASE_PATH}/updateShippingOrderForm</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">${__FileToString(${SHIPPING_REQUEST_FILE},,)}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Ver Arbol de Resultados" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>true</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>true</responseHeaders>
+              <requestHeaders>true</requestHeaders>
+              <responseDataOnError>true</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Reporte resumen" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
