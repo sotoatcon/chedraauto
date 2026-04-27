@@ -1345,10 +1345,220 @@ async function generarReporteResultadosVaciosPDF({
   }
 }
 
+// ------------------------------------------------------
+//  REPORTE C6: BUSQUEDA POR CONTEXTO
+// ------------------------------------------------------
+async function generarReporteBusquedaContextoPDF({
+  nombreTestCase = "C6_BusquedaPorContexto",
+  fechaEjecucion = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" }),
+  resultados = [],
+  modo = "empathy"
+}) {
+  const esResultadosCombinados =
+    resultados &&
+    typeof resultados === "object" &&
+    !Array.isArray(resultados) &&
+    (Array.isArray(resultados.empathy) || Array.isArray(resultados.legacy));
+
+  try {
+    if (esResultadosCombinados) {
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+      if (emp.length === 0 && leg.length === 0) {
+        throw new Error("El generador recibio un arreglo vacio.");
+      }
+    } else if (!Array.isArray(resultados) || resultados.length === 0) {
+      throw new Error("El generador recibio un arreglo vacio.");
+    }
+
+    const fonts = {
+      Roboto: {
+        normal: "Helvetica",
+        bold: "Helvetica-Bold",
+        italics: "Helvetica-Oblique",
+        bolditalics: "Helvetica-BoldOblique"
+      }
+    };
+
+    const printer = new PdfPrinter(fonts);
+    printer.vfs = vfsFonts.vfs;
+
+    const buildSection = (arr, modoLocal) => {
+      const resultadosLocal = Array.isArray(arr) ? arr : [];
+      const esLegacyLocal = modoLocal === "legacy";
+      const titulo = esLegacyLocal ? "Busqueda por Contexto Legacy" : "Busqueda por Contexto Empathy";
+
+      const terminosBuscados = resultadosLocal.length;
+      let resultadosObtenidos = 0;
+      let resultadosCorrectos = 0;
+      let resultadosIncorrectos = 0;
+      let totalArticulos = 0;
+      let sumaMsHastaPrimer = 0;
+
+      resultadosLocal.forEach((r) => {
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+        const total = Number(r.resultadosEncontrados);
+        const correctos = Number(r.resultadosCorrectos);
+        const incorrectos = Number(r.resultadosIncorrectos);
+        const totalArts = Number(r.totalArticulos);
+        const msPrimero = Number(r.msHastaPrimerResultado);
+
+        resultadosObtenidos += Number.isFinite(total) ? total : det.length;
+        resultadosCorrectos += Number.isFinite(correctos)
+          ? correctos
+          : det.reduce((acc, d) => acc + (d && d.correcto ? 1 : 0), 0);
+        resultadosIncorrectos += Number.isFinite(incorrectos)
+          ? incorrectos
+          : Math.max(0, det.length - det.reduce((acc, d) => acc + (d && d.correcto ? 1 : 0), 0));
+
+        totalArticulos += Number.isFinite(totalArts) ? totalArts : 0;
+        sumaMsHastaPrimer += Number.isFinite(msPrimero) ? msPrimero : 0;
+      });
+
+      const pctCorrecto = resultadosObtenidos > 0
+        ? Math.round((resultadosCorrectos / resultadosObtenidos) * 10000) / 100
+        : 0;
+
+      const tiempoBusquedaPorResultado = totalArticulos > 0
+        ? Math.round((sumaMsHastaPrimer / totalArticulos) * 100) / 100
+        : 0;
+
+      const contenidoLocal = [];
+      contenidoLocal.push(
+        { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
+        { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Terminos buscados: ${terminosBuscados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Resultados obtenidos: ${resultadosObtenidos}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Resultados correctos: ${resultadosCorrectos}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Resultados incorrectos: ${resultadosIncorrectos}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Porcentaje Correcto = ${pctCorrecto}%`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Tiempo busqueda por resultado = ${tiempoBusquedaPorResultado} ms`, style: "subtitulo", margin: [0, 0, 0, 10] }
+      );
+
+      const resumenBody = [
+        [
+          { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Resultados", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Correctos", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Incorrectos", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
+        ]
+      ];
+
+      resultadosLocal.forEach((r) => {
+        resumenBody.push([
+          { text: String(r.termino || ""), style: "textoResumen", alignment: "left" },
+          { text: String(Number(r.resultadosEncontrados) || 0), style: "textoResumen", alignment: "center" },
+          { text: String(Number(r.resultadosCorrectos) || 0), style: "textoResumen", alignment: "center" },
+          { text: String(Number(r.resultadosIncorrectos) || 0), style: "textoResumen", alignment: "center" }
+        ]);
+      });
+
+      contenidoLocal.push({ text: "Resumen de terminos", style: "subtitulo", margin: [0, 10, 0, 8] });
+      contenidoLocal.push({
+        table: { widths: ["55%", "15%", "15%", "15%"], body: resumenBody },
+        layout: "lightHorizontalLines"
+      });
+
+      contenidoLocal.push({ text: "", pageBreak: "after" });
+
+      for (let i = 0; i < resultadosLocal.length; i++) {
+        const r = resultadosLocal[i];
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+
+        const terminoTexto = String(r.termino || "");
+        const equivalenciasTexto = String(r.equivalencia || "");
+
+        contenidoLocal.push(
+          { text: `Termino: \"${terminoTexto}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
+          { text: `Equivalencias: ${equivalenciasTexto}`, style: "texto" },
+          { text: `Resultados: ${String(Number(r.resultadosEncontrados) || det.length)}`, style: "texto" },
+          { text: `Resultados correctos: ${String(Number(r.resultadosCorrectos) || 0)}`, style: "texto" },
+          { text: `Resultados incorrectos: ${String(Number(r.resultadosIncorrectos) || 0)}`, style: "texto", margin: [0, 0, 0, 10] }
+        );
+
+        if (det.length === 0) {
+          contenidoLocal.push({ text: "Sin resultados para evaluar.", style: "texto" });
+        } else {
+          const tablaBody = [
+            [
+              { text: "Producto encontrado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" },
+              { text: "Resultado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" }
+            ]
+          ];
+
+          det.forEach((d) => {
+            tablaBody.push([
+              { text: String(d.titulo || ""), style: "texto", alignment: "left" },
+              { text: String(d.resultado || (d.correcto ? "Correcto" : "Incorrecto")), style: "texto", alignment: "center" }
+            ]);
+          });
+
+          contenidoLocal.push({
+            table: { widths: ["85%", "15%"], body: tablaBody },
+            layout: "lightHorizontalLines"
+          });
+        }
+
+        if (i < resultadosLocal.length - 1) {
+          contenidoLocal.push({ text: "", pageBreak: "after" });
+        }
+      }
+
+      return contenidoLocal;
+    };
+
+    const contenido = [];
+    if (esResultadosCombinados) {
+      const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+      const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+
+      if (emp.length > 0) contenido.push(...buildSection(emp, "empathy"));
+      if (emp.length > 0 && leg.length > 0) contenido.push({ text: "", pageBreak: "after" });
+      if (leg.length > 0) contenido.push(...buildSection(leg, "legacy"));
+    } else {
+      contenido.push(...buildSection(resultados, modo));
+    }
+
+    const docDefinition = {
+      content: contenido,
+      styles: {
+        titulo: { fontSize: 18, bold: true, color: "#ff8800", margin: [0, 0, 0, 10] },
+        subtitulo: { fontSize: 12, italics: true, color: "#555", margin: [0, 0, 0, 10] },
+        texto: { fontSize: 10, margin: [0, 2, 0, 2] },
+        textoResumen: { fontSize: 9, margin: [0, 1, 0, 1] },
+        encabezadoNaranja: { fontSize: 12, bold: true, color: "#ff8800", margin: [0, 6, 0, 4] }
+      },
+      defaultStyle: { font: "Roboto" },
+      pageMargins: [40, 60, 40, 60]
+    };
+
+    const reportDir = path.join(process.cwd(), "reports");
+    if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+
+    const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
+    const pdfPath = path.join(reportDir, `ReporteBusqueda_BusquedaPorContexto_${fechaArchivo}.pdf`);
+    if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
+    const stream = fs.createWriteStream(pdfPath);
+    pdfDoc.pipe(stream);
+    pdfDoc.end();
+
+    return new Promise((resolve, reject) => {
+      stream.on("finish", () => resolve(pdfPath));
+      stream.on("error", reject);
+    });
+  } catch (err) {
+    console.error("Error al generar PDF Busqueda por Contexto:", err);
+    throw err;
+  }
+}
+
 module.exports = {
   generarReportePDF,
   generarReporteCoincidenciasPDF,
   generarReporteFrecuenciaAltaPDF,
   generarReporteLongTailPDF,
-  generarReporteResultadosVaciosPDF
+  generarReporteResultadosVaciosPDF,
+  generarReporteBusquedaContextoPDF
 };

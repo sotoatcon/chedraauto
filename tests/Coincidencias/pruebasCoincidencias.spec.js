@@ -7,7 +7,7 @@ const { getExcelData } = require('../../utils/excelReader');
 const config = require('../../utils/Environment');
 const { loginConCorreo } = require('../../utils/LoginActions');
 const DirectionsPage = require('../../pages/DirectionsPage');
-const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generarReporteLongTailPDF, generarReporteResultadosVaciosPDF } = require('../../utils/creadorpdf');
+const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generarReporteLongTailPDF, generarReporteResultadosVaciosPDF, generarReporteBusquedaContextoPDF } = require('../../utils/creadorpdf');
 
 // Archivos Excel
 const excelurl = '.\\data\\ChedrahuiQA_Lexico.xlsx';
@@ -16,6 +16,7 @@ const excellong = 'Long Tail';
 const excelfrecuencia = 'Frecuencia Alta';
 const excelsemantico = 'Semánticos';
 const excelvacios = 'Resultados vacíos';
+const excelcontexto = 'Contexto';
 
 // =========================================================
 //  Helpers (Excel headers con acentos NFC/NFD)
@@ -55,14 +56,223 @@ const getCellNormalized = (row, keys) => {
 };
 
 // =========================================================
+//  Helpers C6 - Contexto (Empathy: alternativas dentro de shadow root)
+// =========================================================
+const _normText = (s) => String(s || "")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const _splitCommaTokens = (s) => String(s || "")
+  .split(",")
+  .map((x) => _normText(x))
+  .filter((x) => x.length > 0);
+
+const evaluarContextoTitulos = (titulos, equivalenciasTokens) => {
+  const detalles = [];
+  const lista = Array.isArray(titulos) ? titulos : [];
+  const toks = Array.isArray(equivalenciasTokens) ? equivalenciasTokens : [];
+
+  for (const titulo of lista) {
+    const t = _normText(titulo);
+    let correcto = false;
+    for (const tok of toks) {
+      if (tok && t.includes(tok)) {
+        correcto = true;
+        break;
+      }
+    }
+    detalles.push({
+      titulo: String(titulo || ""),
+      correcto,
+      resultado: correcto ? "Correcto" : "Incorrecto"
+    });
+  }
+
+  const resultadosEncontrados = detalles.length;
+  const resultadosCorrectos = detalles.reduce((acc, d) => acc + (d.correcto ? 1 : 0), 0);
+  const resultadosIncorrectos = resultadosEncontrados - resultadosCorrectos;
+
+  return { detalles, resultadosEncontrados, resultadosCorrectos, resultadosIncorrectos };
+};
+
+async function leerAlternativasContextoEmpathy(page, max = 20, waits = {}) {
+  const searching = /Buscando alternativas/i;
+  const expected = /Encontramos algunas alternativas/i;
+
+  const waitSearchingMs = (waits && typeof waits.waitSearchingMs === 'number') ? waits.waitSearchingMs : 5000;
+  const waitAlternativesMs = (waits && typeof waits.waitAlternativesMs === 'number') ? waits.waitAlternativesMs : 5000;
+  const pollMs = (waits && typeof waits.pollMs === 'number') ? waits.pollMs : 250;
+
+  const _leerTituloDirecto = async () => {
+    const noRes = page.locator('[data-test="no-results-title"]').first();
+    const visible = await noRes.isVisible({ timeout: 700 }).catch(() => false);
+    if (!visible) return null;
+    const titleText = await noRes.innerText().catch(() => "");
+    return { titleText: String(titleText || "").trim() };
+  };
+
+  const _leerTituloTeleport = async () => {
+    const hosts = await page.locator('.x-base-teleport--onlychild').elementHandles().catch(() => []);
+    for (const h of hosts) {
+      const data = await h.evaluate((el) => {
+        const root = el && el.shadowRoot;
+        if (!root) return null;
+        const titleEl = root.querySelector('[data-test="no-results-title"]');
+        if (!titleEl) return null;
+        const titleText = (titleEl.textContent || "").trim();
+        return { titleText };
+      }).catch(() => null);
+      if (data && data.titleText) return { titleText: String(data.titleText || "").trim() };
+    }
+    return null;
+  };
+
+  const _leerTituloAny = async () => {
+    const d = await _leerTituloDirecto().catch(() => null);
+    if (d && d.titleText) return d;
+    return await _leerTituloTeleport().catch(() => null);
+  };
+
+  const _leerTitulosDirecto = async () => {
+    const titlesLoc = page.locator('.x-ai-carousel-suggestion-results [data-test="result-title"]');
+    const count = await titlesLoc.count().catch(() => 0);
+    const limit = Math.min(count, max);
+    const titulos = [];
+    for (let i = 0; i < limit; i++) {
+      const txt = await titlesLoc.nth(i).innerText().catch(() => "");
+      if (txt && txt.trim()) titulos.push(txt.trim());
+    }
+    return titulos;
+  };
+
+  const _leerTitulosTeleport = async () => {
+    const hosts = await page.locator('.x-base-teleport--onlychild').elementHandles().catch(() => []);
+    for (const h of hosts) {
+      const data = await h.evaluate((el, maxLocal) => {
+        const root = el && el.shadowRoot;
+        if (!root) return null;
+        const titles = Array.from(root.querySelectorAll('.x-ai-carousel-suggestion-results [data-test="result-title"]'))
+          .map((n) => (n.textContent || "").trim())
+          .filter(Boolean)
+          .slice(0, maxLocal);
+        return { titles };
+      }, max).catch(() => null);
+      if (data && Array.isArray(data.titles)) return data.titles;
+    }
+    return [];
+  };
+
+  const _leerTitulosAny = async () => {
+    // Preferimos directo (Playwright suele atravesar shadow DOM abierto).
+    const direct = await _leerTitulosDirecto().catch(() => []);
+    if (Array.isArray(direct) && direct.length > 0) return direct;
+    return await _leerTitulosTeleport().catch(() => []);
+  };
+
+  // Etapa 1: esperar "Buscando alternativas..." (max 5s).
+  // Si ya aparece el mensaje final, podemos avanzar directo.
+  let vioSearching = false;
+  const t0 = Date.now();
+  while (Date.now() - t0 < waitSearchingMs) {
+    const t = await _leerTituloAny().catch(() => null);
+    const titleText = String((t && t.titleText) || "");
+    if (expected.test(titleText)) {
+      const titulos = await _leerTitulosAny();
+      return { tieneAlternativas: true, titleText: titleText.trim(), titulos };
+    }
+    if (searching.test(titleText)) {
+      vioSearching = true;
+      break;
+    }
+    await page.waitForTimeout(pollMs);
+  }
+
+  if (!vioSearching) {
+    return { tieneAlternativas: false, titleText: "", titulos: [] };
+  }
+
+  // Etapa 2: esperar "Encontramos algunas alternativas!" (max 5s).
+  const t1 = Date.now();
+  while (Date.now() - t1 < waitAlternativesMs) {
+    const t = await _leerTituloAny().catch(() => null);
+    const titleText = String((t && t.titleText) || "");
+    if (expected.test(titleText)) {
+      const titulos = await _leerTitulosAny();
+      return { tieneAlternativas: true, titleText: titleText.trim(), titulos };
+    }
+    await page.waitForTimeout(pollMs);
+  }
+
+  return { tieneAlternativas: false, titleText: "", titulos: [] };
+}
+
+async function escribirYEnviarBusquedaC6(page, headerPage, termino, modo) {
+  const producto = String(termino || "");
+  if (!producto) return false;
+
+  if (modo === "legacy") {
+    try {
+      const input = page.locator(headerPage.buscandoInput);
+      await input.waitFor({ state: "visible", timeout: 6000 });
+      await input.focus();
+      await input.fill("");
+      await headerPage.humanType(headerPage.buscandoInput, producto);
+      await page.keyboard.press("Enter");
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Empathy
+  try {
+    const input = page.getByPlaceholder(/que estas buscando|qu\u00e9 est\u00e1s buscando/i).first();
+    await input.waitFor({ state: "visible", timeout: 6000 });
+    await input.focus();
+    await input.fill("");
+    for (const ch of producto) {
+      await input.type(ch, { delay: 15 });
+    }
+    await page.keyboard.press("Enter");
+    return true;
+  } catch {}
+
+  // Fallback por shadowRoot/evaluate, acotado al buscador.
+  try {
+    const host = page
+      .locator('vtex-search-2-x-searchBarContainer, [class*="searchBar"], [data-testid*="search"]')
+      .first();
+    await host.evaluate((el, value) => {
+      const root = el.shadowRoot;
+      if (!root) throw new Error("No se encontro shadowRoot en buscador.");
+      const input = root.querySelector('input[data-test="search-input"], input[type="search"], input');
+      if (!input) throw new Error("No se encontro input de busqueda dentro de shadowRoot");
+      input.focus();
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.value = value;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    }, producto);
+    return true;
+  } catch {}
+
+  return false;
+}
+
+// =========================================================
 //  Flags de debug (activar manualmente)
 // =========================================================
 // Poner en true para ejecutar el caso. Por defecto todos en false para evitar comentar codigo.
 const C1 = false;
-const C2 = true;
+const C2 = false;
 const C3 = false;
 const C4 = false;
 const C5 = false;
+const C6 = true;
 
 
 // =========================================================
@@ -716,3 +926,142 @@ test.beforeEach(async ({ page }, testInfo) => {
      });
    }
  });
+
+// Contexto //
+// Busquedas soportadas por AI mediante una idea (Empathy muestra alternativas en carrusel).
+// Contexto //
+
+(C6 ? test : test.skip)('C6 - Busqueda por Contexto', async ({ page }, testInfo) => {
+  const pageReal = testInfo.page || page;
+  const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
+
+  // C6 puede tardar mas por el procesamiento de "alternativas" del buscador.
+  // Ajuste local del timeout del test para no afectar otros casos.
+  try { testInfo.setTimeout(20 * 60 * 1000); } catch {}
+
+  // Si el nombre de la hoja cambia a version sin acento, intentamos ambos.
+  let data = [];
+  try {
+    data = getExcelData(excelurl, excelcontexto);
+  } catch (e) {
+    data = getExcelData(excelurl, 'Contexto');
+  }
+
+  const modos = [
+    { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
+    { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
+  ];
+
+  // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
+  const resultadosCombinados = { empathy: [], legacy: [] };
+
+  for (const m of modos) {
+    // Para Legacy forzamos URL sin workspace.
+    const urlModo = m.modo === 'legacy' ? 'https://www.chedraui.com.mx/' : m.url;
+    const resultadosTotales = [];
+
+    await pageReal.goto(urlModo);
+    await pageReal.waitForTimeout(5000);
+    if (direcciones && typeof direcciones.SeleccionarRecogerEspecifico === 'function') {
+      await direcciones.SeleccionarRecogerEspecifico();
+    }
+
+    for (const row of data) {
+      const Termino = getCellNormalized(row, ['Término', 'Termino']);
+      const EquivalenciaRaw = getCellNormalized(row, ['Equivalencia']);
+      const equivalenciasTokens = _splitCommaTokens(EquivalenciaRaw);
+
+      console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
+
+      // Medicion C6: tiempo desde teclear/enter hasta ver el primer articulo.
+      // Nota: el conteo total de articulos NO se limita a 20 (solo la evaluacion).
+      await pageReal.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 }).catch(() => {});
+      const tStart = Date.now();
+      const escritoOk = await escribirYEnviarBusquedaC6(pageReal, headerPage, Termino, m.modo);
+
+      let titulos = [];
+      let tieneAlternativas = false;
+      let noResultsTitle = "";
+      let totalArticulos = 0;
+      let msHastaPrimerResultado = 0;
+      let tiempoBusquedaPorResultadoMs = 0;
+
+      if (m.modo === 'empathy') {
+        // Si no pudimos escribir/ejecutar la busqueda, no hay nada que esperar.
+        if (!escritoOk) {
+          tieneAlternativas = false;
+          noResultsTitle = "";
+          titulos = [];
+        } else {
+        // Regla: solo aplica si aparece el mensaje de alternativas.
+        // Si NO aparece, consideramos 0 resultados (opcion A).
+        const ctx = await leerAlternativasContextoEmpathy(pageReal, 20, {
+          waitSearchingMs: 15000,
+          waitAlternativesMs: 15000,
+          pollMs: 250
+        });
+        tieneAlternativas = !!ctx.tieneAlternativas;
+        noResultsTitle = String(ctx.titleText || "");
+        titulos = tieneAlternativas ? (Array.isArray(ctx.titulos) ? ctx.titulos : []) : [];
+
+        if (tieneAlternativas) {
+          totalArticulos = await pageReal
+            .locator('.x-ai-carousel-suggestion-results [data-test="result-title"]')
+            .count()
+            .catch(() => 0);
+          if (totalArticulos <= 0) totalArticulos = titulos.length;
+          if (totalArticulos > 0) msHastaPrimerResultado = Date.now() - tStart;
+        }
+        }
+      } else {
+        // Legacy: grid normal.
+        const legacyLocator = pageReal.locator('//*[@id="gallery-layout-container"]//*[contains(@class,"global__card--name") and contains(@class,"t-small")] >> visible=true');
+        const vioPrimero = escritoOk
+          ? await legacyLocator.first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false)
+          : false;
+        if (vioPrimero) {
+          msHastaPrimerResultado = Date.now() - tStart;
+          totalArticulos = await legacyLocator.count().catch(() => 0);
+          titulos = await carritoUtils.obtenerProductosEncontrados(pageReal, productosPage, m.modo, 20);
+          if (totalArticulos <= 0) totalArticulos = titulos.length;
+        } else {
+          titulos = [];
+          totalArticulos = 0;
+          msHastaPrimerResultado = 0;
+        }
+      }
+
+      const evalTerm = evaluarContextoTitulos(titulos, equivalenciasTokens);
+      if (totalArticulos > 0) {
+        tiempoBusquedaPorResultadoMs = Math.round((msHastaPrimerResultado / totalArticulos) * 100) / 100;
+      }
+
+      resultadosTotales.push({
+        termino: Termino,
+        equivalencia: EquivalenciaRaw,
+        equivalenciasTokens,
+        tieneAlternativas,
+        noResultsTitle,
+        resultadosEncontrados: evalTerm.resultadosEncontrados,
+        resultadosCorrectos: evalTerm.resultadosCorrectos,
+        resultadosIncorrectos: evalTerm.resultadosIncorrectos,
+        totalArticulos,
+        msHastaPrimerResultado,
+        tiempoBusquedaPorResultadoMs,
+        detalles: evalTerm.detalles
+      });
+
+      // Reset: volver a home limpia estado y reduce flakiness.
+      await pageReal.goto(urlModo);
+      await pageReal.waitForLoadState('domcontentloaded');
+      await pageReal.waitForSelector('iframe#launcher', { state: 'visible' });
+    }
+
+    resultadosCombinados[m.modo] = resultadosTotales;
+  }
+
+  await generarReporteBusquedaContextoPDF({
+    nombreTestCase: 'C6_BusquedaPorContexto',
+    resultados: resultadosCombinados
+  });
+});

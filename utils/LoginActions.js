@@ -266,12 +266,12 @@ async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
     : 5000;
   const baselineCodes = new Set();
 
-  async function _tryParseTimestampMsFromItem(item) {
+  async function _tryParseTimestampFromItem(item) {
     try {
       const dt = await item.locator('time').first().getAttribute('datetime', { timeout: 1200 }).catch(() => null);
       if (dt) {
         const ms = Date.parse(dt);
-        if (!Number.isNaN(ms)) return ms;
+        if (!Number.isNaN(ms)) return { ms, precision: 'exact' };
       }
     } catch {}
 
@@ -284,13 +284,13 @@ async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
       const iso = String(s).match(/\d{4}-\d{2}-\d{2}T[0-9:.+-]+/);
       if (iso) {
         const ms = Date.parse(iso[0]);
-        if (!Number.isNaN(ms)) return ms;
+        if (!Number.isNaN(ms)) return { ms, precision: 'exact' };
       }
 
       const mdy = String(s).match(/\d{1,2}\/\d{1,2}\/\d{2,4}[^0-9]*\d{1,2}:\d{2}(\s*(AM|PM))?/i);
       if (mdy) {
         const ms = Date.parse(mdy[0]);
-        if (!Number.isNaN(ms)) return ms;
+        if (!Number.isNaN(ms)) return { ms, precision: 'exact' };
       }
     }
 
@@ -311,34 +311,47 @@ async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
           let ms = d.getTime();
           // Si quedo "en el futuro" por rollover de dia, restamos 24h.
           if (ms > startMs + 60 * 60 * 1000) ms -= 24 * 60 * 60 * 1000;
-          return ms;
+          // En Outlook a veces solo vemos HH:MM (sin segundos). Tratamos esto como precision por minuto.
+          return { ms, precision: 'minute' };
         }
       }
     } catch {}
 
-    return null;
+    return { ms: null, precision: null };
   }
 
   async function _leerCodigoYMetaEnTabActual() {
     const { nodo, texto } = await leerUltimoCorreo();
     const codigo = extraerCodigo(texto);
-    const tsMs = nodo ? await _tryParseTimestampMsFromItem(nodo) : null;
-    return { codigo, tsMs };
+    const ts = nodo ? await _tryParseTimestampFromItem(nodo) : { ms: null, precision: null };
+    const tsMs = ts ? ts.ms : null;
+    const tsPrecision = ts ? ts.precision : null;
+    return { codigo, tsMs, tsPrecision };
   }
 
   async function _leerCodigoYMetaEnOtros() {
     const fueAOtros = await _tryClickTab(/Otros|Other/i);
-    if (!fueAOtros) return { codigo: null, tsMs: null };
+    if (!fueAOtros) return { codigo: null, tsMs: null, tsPrecision: null };
 
     const meta = await _leerCodigoYMetaEnTabActual();
     await _tryClickTab(/Prioritarios|Focused/i);
     return meta;
   }
 
-  const esReciente = (tsMs) => {
+  const _floorToMinuteMs = (ms) => {
+    const d = new Date(ms);
+    d.setSeconds(0, 0);
+    return d.getTime();
+  };
+
+  const esReciente = (tsMs, tsPrecision) => {
     if (typeof tsMs !== 'number' || Number.isNaN(tsMs)) return false;
-    // Validamos que el correo sea posterior (o muy cercano) al momento en que se solicito el OTP.
-    // Esto evita tomar el primer correo de un intento anterior aunque sea "reciente".
+    // Si el timestamp solo tiene HH:MM, comparamos por minuto para evitar falsos "viejo" dentro del mismo minuto.
+    if (tsPrecision === 'minute') {
+      const threshold = _floorToMinuteMs(notBeforeMs);
+      return tsMs >= threshold;
+    }
+    // Timestamp con mayor precision.
     return tsMs >= (notBeforeMs - skewMs);
   };
 
@@ -347,16 +360,16 @@ async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
   console.log("VTEX: leyendo baseline...");
   let baseMain = { codigo: null, tsMs: null };
   try { baseMain = await _leerCodigoYMetaEnTabActual(); } catch {}
-  if (baseMain.codigo && !esReciente(baseMain.tsMs)) baselineCodes.add(baseMain.codigo);
+  if (baseMain.codigo && !esReciente(baseMain.tsMs, baseMain.tsPrecision)) baselineCodes.add(baseMain.codigo);
   let baseOther = { codigo: null, tsMs: null };
   try { baseOther = await _leerCodigoYMetaEnOtros(); } catch {}
-  if (baseOther.codigo && !esReciente(baseOther.tsMs)) baselineCodes.add(baseOther.codigo);
+  if (baseOther.codigo && !esReciente(baseOther.tsMs, baseOther.tsPrecision)) baselineCodes.add(baseOther.codigo);
   console.log("VTEX: baseline listo. Iniciando espera de OTP...");
 
   while (true) {
-    const main = await _leerCodigoYMetaEnTabActual().catch(() => ({ codigo: null, tsMs: null }));
+    const main = await _leerCodigoYMetaEnTabActual().catch(() => ({ codigo: null, tsMs: null, tsPrecision: null }));
     if (main && main.codigo) {
-      if (esReciente(main.tsMs)) {
+      if (esReciente(main.tsMs, main.tsPrecision)) {
         console.log("Codigo VTEX detectado:", main.codigo);
         await browser.close();
         return main.codigo;
@@ -381,9 +394,9 @@ async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
       }
     }
 
-    const other = await _leerCodigoYMetaEnOtros().catch(() => ({ codigo: null, tsMs: null }));
+    const other = await _leerCodigoYMetaEnOtros().catch(() => ({ codigo: null, tsMs: null, tsPrecision: null }));
     if (other && other.codigo) {
-      if (esReciente(other.tsMs)) {
+      if (esReciente(other.tsMs, other.tsPrecision)) {
         console.log("Codigo VTEX detectado en pestana Otros:", other.codigo);
         await browser.close();
         return other.codigo;
