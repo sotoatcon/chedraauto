@@ -1,4 +1,6 @@
 ﻿const { test } = require('@playwright/test');
+const fs = require('fs');
+const path = require('path');
 const HeaderPage = require('../../pages/HeaderPage');
 const ProductosEncontradosPage = require('../../pages/ProductosEncontradosPage'); 
 const NavegacionActions = require('../../utils/NavegacionActions');
@@ -7,7 +9,7 @@ const { getExcelData } = require('../../utils/excelReader');
 const config = require('../../utils/Environment');
 const { loginConCorreo } = require('../../utils/LoginActions');
 const DirectionsPage = require('../../pages/DirectionsPage');
-const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generarReporteLongTailPDF, generarReporteResultadosVaciosPDF, generarReporteBusquedaContextoPDF } = require('../../utils/creadorpdf');
+const { generarReporteCoincidenciasPDF, generarReporteFrecuenciaAltaPDF, generarReporteLongTailPDF, generarReporteResultadosVaciosPDF, generarReporteBusquedaContextoPDF, generarReporteHotSale2026PDF } = require('../../utils/creadorpdf');
 
 // Archivos Excel
 const excelurl = '.\\data\\ChedrahuiQA_Lexico.xlsx';
@@ -17,6 +19,7 @@ const excelfrecuencia = 'Frecuencia Alta';
 const excelsemantico = 'Semánticos';
 const excelvacios = 'Resultados vacíos';
 const excelcontexto = 'Contexto';
+const excelhotsale = '.\\data\\HotSale 2026.xlsx';
 
 // =========================================================
 //  Helpers (Excel headers con acentos NFC/NFD)
@@ -54,6 +57,90 @@ const getCellNormalized = (row, keys) => {
 
   return "";
 };
+
+// Si OnlyEmpathy esta activo, filtramos los modos para evitar ejecutar Legacy.
+const filtrarModosPorConfig = (modos) => {
+  const lista = Array.isArray(modos) ? modos : [];
+  if (config && config.OnlyEmpathy) return lista.filter((m) => m && m.modo === "empathy");
+  return lista;
+};
+
+const getEmpathyUrl = () => config.isEMP ? config.urls.EMPATHY : config.urls.PRODEMPATHY;
+const REPORT_CACHE_DIR = path.join(process.cwd(), 'reports', 'cache');
+
+const getReportCachePath = (nombreTestCase) => path.join(REPORT_CACHE_DIR, `${nombreTestCase}_latest.json`);
+
+const guardarReporteCrudo = (nombreTestCase, payload) => {
+  if (!fs.existsSync(REPORT_CACHE_DIR)) fs.mkdirSync(REPORT_CACHE_DIR, { recursive: true });
+  const filePath = getReportCachePath(nombreTestCase);
+  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+  console.log(`Reporte crudo guardado: ${filePath}`);
+};
+
+const leerReporteCrudo = (nombreTestCase) => {
+  const filePath = getReportCachePath(nombreTestCase);
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`No existe JSON crudo para ${nombreTestCase}: ${filePath}`);
+  }
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+};
+
+const reconstruirC1DesdeReporteCrudo = (raw, carritoUtils) => {
+  const resultados = { empathy: [], legacy: [] };
+  for (const modo of ['empathy', 'legacy']) {
+    const lista = raw && raw.resultados && Array.isArray(raw.resultados[modo]) ? raw.resultados[modo] : [];
+    resultados[modo] = lista.map((item) => {
+      const evaluacion = carritoUtils.evaluarBusquedaErroresOrtograficosDesdeSnapshot(item, modo);
+      return {
+        termino: item.termino,
+        equivalencias: item.equivalencias || [],
+        correccion: evaluacion.correccion,
+        correccionEsperada: item.correccionEsperada || [],
+        corregido: evaluacion.corregido,
+        CC: evaluacion.CC,
+        CP: evaluacion.CP,
+        SR: evaluacion.SR,
+        SN: evaluacion.SN,
+        hayResultados: evaluacion.totalProductos > 0,
+        coincidencias: evaluacion.coincidencias,
+        noCoincidencias: evaluacion.noCoincidencias,
+        listaDetallada: evaluacion.listaDetallada,
+        calificacion: evaluacion.calificacion,
+        totalProductos: evaluacion.totalProductos,
+        ccProductos: evaluacion.ccProductos,
+        cpProductos: evaluacion.cpProductos
+      };
+    });
+  }
+  return resultados;
+};
+
+const reconstruirC3DesdeReporteCrudo = (raw, carritoUtils) => {
+  const resultados = { empathy: [], legacy: [] };
+  for (const modo of ['empathy', 'legacy']) {
+    const lista = raw && raw.resultados && Array.isArray(raw.resultados[modo]) ? raw.resultados[modo] : [];
+    resultados[modo] = lista.map((item) => {
+      const productosEncontrados = Array.isArray(item.productos) ? item.productos : [];
+      const evaluacion = carritoUtils.evaluarFrecuenciaAltaEquivalencias(
+        productosEncontrados,
+        item.termino,
+        item.equivalencia,
+        item.relacionados
+      );
+      return {
+        termino: item.termino,
+        equivalencia: item.equivalencia || "",
+        relacionados: item.relacionados || "",
+        hayResultados: productosEncontrados.length > 0,
+        productosEncontrados,
+        detalles: evaluacion.detalles,
+        calificacionPromedio: evaluacion.calificacionPromedio
+      };
+    });
+  }
+  return resultados;
+};
+
 
 // =========================================================
 //  Helpers C6 - Contexto (Empathy: alternativas dentro de shadow root)
@@ -269,10 +356,86 @@ async function escribirYEnviarBusquedaC6(page, headerPage, termino, modo) {
 // Poner en true para ejecutar el caso. Por defecto todos en false para evitar comentar codigo.
 const C1 = false;
 const C2 = false;
-const C3 = false;
+const C3 = true;
 const C4 = false;
 const C5 = false;
-const C6 = true;
+const C6 = false;
+const C7 = false;
+
+// =========================================================
+//  Helpers C7 - HotSale 2026
+// =========================================================
+const HOTSALE_TABS = [
+  "Mas Buscados",
+  "Mayor Conversión",
+  "Menor Conversión",
+  "Mayor CTR",
+  "Menor CTR"
+];
+
+async function ejecutarHotSaleTab(page, headerPage, productosPage, carritoUtils, direcciones, sheetName) {
+  const data = getExcelData(excelhotsale, sheetName);
+
+  // HotSale 2026: solo Legacy (sin Empathy).
+  const modos = [
+    { label: "legacy", url: config.urls.PROD, modo: "legacy" }
+  ];
+
+  // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
+  const resultadosCombinados = { empathy: [], legacy: [] };
+
+  for (const m of modos) {
+    const urlModo = m.modo === "legacy" ? "https://www.chedraui.com.mx/" : m.url;
+    const resultadosTotales = [];
+
+    await page.goto(urlModo);
+    await page.waitForTimeout(5000);
+    await direcciones.SeleccionarRecogerEspecifico();
+
+    for (const row of data) {
+      const Termino = getCellNormalized(row, ["Término", "Termino"]);
+      if (!Termino) continue;
+
+      const equivalentesRaw = getCellNormalized(row, ["Equivalentes"]);
+      const equivalentesTokens = _splitCommaTokens(equivalentesRaw);
+
+      console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
+
+      const ok = await carritoUtils.buscarProducto(page, headerPage, productosPage, Termino, m.modo);
+      const titulos = ok
+        ? await carritoUtils.obtenerProductosEncontrados(page, productosPage, m.modo, 20)
+        : [];
+
+      const evalTerm = evaluarContextoTitulos(titulos, equivalentesTokens);
+      const resultadosEncontrados = evalTerm.resultadosEncontrados;
+      const resultadosCorrectos = evalTerm.resultadosCorrectos;
+      const porcentajeCorrecto = resultadosEncontrados > 0
+        ? Math.round(((resultadosCorrectos / resultadosEncontrados) * 100) * 100) / 100
+        : 0;
+
+      resultadosTotales.push({
+        termino: Termino,
+        equivalentes: equivalentesRaw,
+        equivalentesTokens,
+        resultadosEncontrados,
+        resultadosCorrectos,
+        porcentajeCorrecto,
+        detalles: evalTerm.detalles
+      });
+
+      await page.goto(urlModo);
+      await page.waitForLoadState("domcontentloaded");
+      await page.waitForSelector("iframe#launcher", { state: "visible" });
+    }
+
+    resultadosCombinados[m.modo] = resultadosTotales;
+  }
+
+  await generarReporteHotSale2026PDF({
+    sheetName,
+    resultados: resultadosCombinados
+  });
+}
 
 
 // =========================================================
@@ -296,6 +459,7 @@ let empResumenCarrito;
 let empDirecciones;
 
 test.beforeAll(async ({ browser }) => {
+  if (config.OnlyReport) return;
   if (!config.isEMP) return;
 
   console.log(" EMP MODE -- ejecutando login completo (beforeAll)...");
@@ -326,6 +490,8 @@ test.afterAll(async () => {
 });
 
 test.beforeEach(async ({ page }, testInfo) => {
+
+  if (config.OnlyReport) return;
 
   // ============================
   //  EMP -- LOGIN COMPLETO
@@ -367,27 +533,40 @@ test.beforeEach(async ({ page }, testInfo) => {
 //  TEST C1 - ERRORES ORTOGRFICOS
 // =========================================================
 
-(C1 ? test : test.skip)('C1 - Errores Ortográficos', async ({}, testInfo) => {
+(C1 ? test : test.skip)('C1 - Errores Ortogr?ficos', async ({}, testInfo) => {
+
+  console.log('Ingresando a C1');
+
+  if (config.OnlyReport) {
+    const carritoUtilsReporte = new NavegacionActions();
+    const raw = leerReporteCrudo('C1_ErroresOrtograficos');
+    const resultadosDesdeJson = reconstruirC1DesdeReporteCrudo(raw, carritoUtilsReporte);
+    await generarReporteCoincidenciasPDF({
+      nombreTestCase: 'C1_ErroresOrtograficos',
+      resultados: resultadosDesdeJson
+    });
+    return;
+  }
 
   const page = testInfo.page;      // <- USAMOS LA PAGE DE EMP
   const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
 
-  console.log('Ingresando a C1');
-
   const data = getExcelData(excelurl, excelerrores);
 
-  const modos = [
-    { label: "empathy", url: config.urls.PRODEMPATHY, modo: "empathy" },
+  const modos = filtrarModosPorConfig([
+    { label: "empathy", url: getEmpathyUrl(), modo: "empathy" },
     { label: "legacy", url: config.urls.PROD, modo: "legacy" }
-  ];
+  ]);
 
   // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
   const resultadosCombinados = { empathy: [], legacy: [] };
+  const reporteCrudo = { reporte: 'C1_ErroresOrtograficos', resultados: { empathy: [], legacy: [] } };
 
   for (const m of modos) {
     // La cookie VtexWorkspace ya no se usa. Para Legacy forzamos URL sin workspace.
     const urlModo = m.modo === "legacy" ? "https://www.chedraui.com.mx/" : m.url;
     const resultadosTotales = [];
+    const resultadosCrudos = [];
 
     await page.goto(urlModo);
     await page.waitForTimeout(5000);
@@ -402,16 +581,10 @@ test.beforeEach(async ({ page }, testInfo) => {
       }
 
       const correccionCell = getCellNormalized(row, ['Correccion', 'Corrección']);
-      const Correccion = String(correccionCell)
-        .split(",")
-        .map(e => e.trim().toLowerCase())
-        .filter(e => e.length > 0);
+      const Correccion = _splitCommaTokens(correccionCell);
 
       const equivalenciaCell = getCellNormalized(row, ['Equivalencia']);
-      const equivalencias = String(equivalenciaCell)
-        .split(",")
-        .map(e => e.trim().toLowerCase())
-        .filter(e => e.length > 0);
+      const equivalencias = _splitCommaTokens(equivalenciaCell);
       console.log(`\n=== Buscando (${m.label}): ${Termino} ===`);
 
       const hayResultados = await carritoUtils.buscarProducto(
@@ -419,7 +592,6 @@ test.beforeEach(async ({ page }, testInfo) => {
         headerPage,
         productosPage,
         Termino,
-        null,
         m.modo
       );
 
@@ -462,6 +634,15 @@ test.beforeEach(async ({ page }, testInfo) => {
       registroTermino.cpProductos = evaluacion.cpProductos;
 
       resultadosTotales.push(registroTermino);
+      resultadosCrudos.push({
+        termino: Termino,
+        correccionEsperada: Correccion,
+        equivalencias,
+        correccionMostrada: evaluacion.correccion || '',
+        productos: Array.isArray(evaluacion.listaDetallada)
+          ? evaluacion.listaDetallada.map(x => x && x.texto ? x.texto : '').filter(x => x && x !== '[NO LEIDO]')
+          : []
+      });
 
       await page.goto(urlModo);
       await page.waitForLoadState("domcontentloaded");
@@ -469,7 +650,10 @@ test.beforeEach(async ({ page }, testInfo) => {
     }
 
     resultadosCombinados[m.modo] = resultadosTotales;
+    reporteCrudo.resultados[m.modo] = resultadosCrudos;
   }
+
+  guardarReporteCrudo('C1_ErroresOrtograficos', reporteCrudo);
 
   await generarReporteCoincidenciasPDF({
     nombreTestCase: "C1_ErroresOrtograficos",
@@ -493,10 +677,10 @@ test.beforeEach(async ({ page }, testInfo) => {
  
    const getCell = (row, keys) => getCellNormalized(row, keys);
   
-     const modos = [
-       { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
+     const modos = filtrarModosPorConfig([
+       { label: 'empathy', url: getEmpathyUrl(), modo: 'empathy' },
        { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
-     ];
+     ]);
 
     // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
     const resultadosCombinados = { empathy: [], legacy: [] };
@@ -544,7 +728,7 @@ test.beforeEach(async ({ page }, testInfo) => {
        }
  
        const productosEncontrados = hayResultados
-         ? await carritoUtils.obtenerProductosEncontrados(pageReal, productosPage, m.modo)
+         ? await carritoUtils.obtenerProductosEncontrados(pageReal, productosPage, m.modo, 20)
          : [];
  
        const evaluacion = carritoUtils.evaluarLongTail(
@@ -592,6 +776,17 @@ test.beforeEach(async ({ page }, testInfo) => {
 
 (C3 ? test : test.skip)('C3 - Frecuencia Alta', async ({}, testInfo) => {
 
+  if (config.OnlyReport) {
+    const carritoUtilsReporte = new NavegacionActions();
+    const raw = leerReporteCrudo('C3_FrecuenciaAlta');
+    const resultadosDesdeJson = reconstruirC3DesdeReporteCrudo(raw, carritoUtilsReporte);
+    await generarReporteFrecuenciaAltaPDF({
+      nombreTestCase: 'C3_FrecuenciaAlta',
+      resultados: resultadosDesdeJson
+    });
+    return;
+  }
+
   const page = testInfo.page;
   const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
   const data = getExcelData(excelurl, excelfrecuencia);
@@ -600,19 +795,21 @@ test.beforeEach(async ({ page }, testInfo) => {
     return getCellNormalized(row, keys);
   };
 
-  const modos = [
-    { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
+  const modos = filtrarModosPorConfig([
+    { label: 'empathy', url: getEmpathyUrl(), modo: 'empathy' },
     { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
-  ];
+  ]);
 
   // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
   const resultadosCombinados = { empathy: [], legacy: [] };
+  const reporteCrudo = { reporte: 'C3_FrecuenciaAlta', resultados: { empathy: [], legacy: [] } };
 
   for (const m of modos) {
     // La cookie VtexWorkspace ya no se usa. Para Legacy forzamos URL sin workspace.
     const urlModo = m.modo === 'legacy' ? 'https://www.chedraui.com.mx/' : m.url;
 
     const resultadosTotales = [];
+    const resultadosCrudos = [];
 
     await page.goto(urlModo);
     await page.waitForTimeout(5000);
@@ -663,7 +860,8 @@ test.beforeEach(async ({ page }, testInfo) => {
         productosEncontrados = await carritoUtils.obtenerProductosEncontrados(
           page,
           productosPage,
-          m.modo
+          m.modo,
+          20
         );
       }
 
@@ -683,6 +881,12 @@ test.beforeEach(async ({ page }, testInfo) => {
         detalles: evaluacion.detalles,
         calificacionPromedio: evaluacion.calificacionPromedio
       });
+      resultadosCrudos.push({
+        termino: Termino,
+        equivalencia,
+        relacionados,
+        productos: productosEncontrados
+      });
 
       // Reset como C1: navegar a home limpia estado y reduce flakiness.
       await page.goto(urlModo);
@@ -691,7 +895,10 @@ test.beforeEach(async ({ page }, testInfo) => {
     }
 
     resultadosCombinados[m.modo] = resultadosTotales;
+    reporteCrudo.resultados[m.modo] = resultadosCrudos;
   }
+
+  guardarReporteCrudo('C3_FrecuenciaAlta', reporteCrudo);
 
   await generarReporteFrecuenciaAltaPDF({
     nombreTestCase: "C3_FrecuenciaAlta",
@@ -712,10 +919,8 @@ test.beforeEach(async ({ page }, testInfo) => {
 
   for (const row of data) {
 
-    const Termino = row['T\\u00e9rmino'];
-    const equivalencias = row['Equivalencia']
-      .split(',')
-      .map(e => e.trim().toLowerCase()).filter(e => e.length > 0);
+    const Termino = getCellNormalized(row, ['Término', 'Termino']);
+    const equivalencias = _splitCommaTokens(getCellNormalized(row, ['Equivalencia']));
 
     console.log(`\n=== Buscando: ${Termino} ===`);
 
@@ -789,7 +994,7 @@ test.beforeEach(async ({ page }, testInfo) => {
      return '';
    };
 
-   const normalizeKey = (k) => String(k || '').trim().toLowerCase();
+   const normalizeKey = (k) => _normHeader(k);
 
    // Override getCell for C5 only: tolera headers con espacios al final o variaciones de mayusculas.
    const getCellNormalized = (row, keys) => {
@@ -813,25 +1018,40 @@ test.beforeEach(async ({ page }, testInfo) => {
    const splitTokens = (value) => {
      return String(value || '')
        .split(',')
-       .map((t) => t.trim().toLowerCase())
+       .map((t) => _normText(t))
        .filter((t) => t.length > 0);
    };
 
-   const contieneAlguno = (texto, tokens) => {
-     const t = String(texto || '').toLowerCase();
+   const splitGrupos = (value) => {
+     return String(value || '')
+       .split('|')
+       .map((grupo) => splitTokens(grupo))
+       .filter((tokens) => tokens.length > 0);
+   };
+
+   const contieneGrupo = (texto, tokens) => {
+     const t = _normText(texto);
      for (const tok of tokens) {
-       if (tok && t.includes(tok)) return true;
+       if (!tok || !t.includes(tok)) return false;
+     }
+     return tokens.length > 0;
+   };
+
+   const contieneAlgunoGrupo = (texto, grupos) => {
+     const lista = Array.isArray(grupos) ? grupos : [];
+     for (const tokens of lista) {
+       if (contieneGrupo(texto, tokens)) return true;
      }
      return false;
    };
 
-   const clasificarResultado = (titulo, relevTokens, parcialTokens) => {
-     if (contieneAlguno(titulo, relevTokens)) return 'Relevante';
-     if (contieneAlguno(titulo, parcialTokens)) return 'Parcialmente';
+   const clasificarResultado = (titulo, relevGrupos, parcialGrupos) => {
+     if (contieneAlgunoGrupo(titulo, relevGrupos)) return 'Relevante';
+     if (contieneAlgunoGrupo(titulo, parcialGrupos)) return 'Parcialmente';
      return 'Irrelevante';
    };
 
-   const evaluarTermino = (titulos, relevTokens, parcialTokens) => {
+   const evaluarTermino = (titulos, relevGrupos, parcialGrupos) => {
      const lista = Array.isArray(titulos) ? titulos : [];
      if (lista.length === 0) {
        return {
@@ -842,7 +1062,7 @@ test.beforeEach(async ({ page }, testInfo) => {
 
      const detalles = lista.map((t) => ({
        titulo: String(t || ''),
-       calificacion: clasificarResultado(t, relevTokens, parcialTokens)
+       calificacion: clasificarResultado(t, relevGrupos, parcialGrupos)
      }));
 
      const tieneR = detalles.some((d) => d.calificacion === 'Relevante');
@@ -856,7 +1076,7 @@ test.beforeEach(async ({ page }, testInfo) => {
    };
 
    const modos = [
-     { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' }
+     { label: 'empathy', url: getEmpathyUrl(), modo: 'empathy' }
    ];
 
    for (const m of modos) {
@@ -876,8 +1096,8 @@ test.beforeEach(async ({ page }, testInfo) => {
        const Relevancia = getCellNormalized(row, ['Relevancia']);
        const Parcial = getCellNormalized(row, ['Parcialmente Relevantes', 'Parcialmente Relevante']);
 
-       const relevTokens = splitTokens(Relevancia);
-       const parcialTokens = splitTokens(Parcial);
+       const relevGrupos = splitGrupos(Relevancia);
+       const parcialGrupos = splitGrupos(Parcial);
 
        console.log("\n=== Buscando (" + m.label + "): " + Termino + " ===");
 
@@ -897,10 +1117,10 @@ test.beforeEach(async ({ page }, testInfo) => {
        }
 
        const titulos = hayResultados
-         ? await carritoUtils.obtenerProductosEncontrados(pageReal, productosPage, m.modo)
+         ? (await carritoUtils.obtenerProductosEncontrados(pageReal, productosPage, m.modo, 20)).slice(0, 20)
          : [];
 
-       const evalTerm = evaluarTermino(titulos, relevTokens, parcialTokens);
+       const evalTerm = evaluarTermino(titulos, relevGrupos, parcialGrupos);
        const totalResultados = Array.isArray(titulos) ? titulos.length : 0;
 
        resultadosTotales.push({
@@ -947,10 +1167,10 @@ test.beforeEach(async ({ page }, testInfo) => {
     data = getExcelData(excelurl, 'Contexto');
   }
 
-  const modos = [
-    { label: 'empathy', url: config.urls.PRODEMPATHY, modo: 'empathy' },
+  const modos = filtrarModosPorConfig([
+    { label: 'empathy', url: getEmpathyUrl(), modo: 'empathy' },
     { label: 'legacy', url: config.urls.PROD, modo: 'legacy' }
-  ];
+  ]);
 
   // Guardamos ambos modos y al final generamos 1 solo PDF (Empathy primero, luego Legacy).
   const resultadosCombinados = { empathy: [], legacy: [] };
@@ -1015,7 +1235,7 @@ test.beforeEach(async ({ page }, testInfo) => {
         }
       } else {
         // Legacy: grid normal.
-        const legacyLocator = pageReal.locator('//*[@id="gallery-layout-container"]//*[contains(@class,"global__card--name") and contains(@class,"t-small")] >> visible=true');
+        const legacyLocator = carritoUtils._legacyProductCards(pageReal);
         const vioPrimero = escritoOk
           ? await legacyLocator.first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false)
           : false;
@@ -1065,3 +1285,18 @@ test.beforeEach(async ({ page }, testInfo) => {
     resultados: resultadosCombinados
   });
 });
+
+// =========================================================
+//  TEST C7 - HOTSALE 2026 (5 tabs)
+// =========================================================
+for (const tabName of HOTSALE_TABS) {
+  (C7 ? test : test.skip)(`C7 - HotSale 2026 - ${tabName}`, async ({}, testInfo) => {
+    // Ajuste local del timeout del test para no afectar otros casos.
+    try { testInfo.setTimeout(60 * 60 * 1000); } catch {}
+
+    const page = testInfo.page;
+    const { headerPage, productosPage, carritoUtils, direcciones } = testInfo;
+
+    await ejecutarHotSaleTab(page, headerPage, productosPage, carritoUtils, direcciones, tabName);
+  });
+}

@@ -1,6 +1,124 @@
 const { expect } = require('@playwright/test');
 
 class NavegacionActions {
+  _normalizarComparacion(valor) {
+    return String(valor || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  _legacyProductCards(page) {
+    return page.locator('xpath=//*[@id="gallery-layout-container"]/div/section[.//article]');
+  }
+
+  _empathyProductCards(page) {
+    // Empathy ha alternado entre el buscador viejo (data-wysiwyg/result-title)
+    // y el render VTEX nuevo; mantenemos ambos para evitar falsos negativos.
+    return page.locator([
+      'article[data-wysiwyg="result"]:visible',
+      '[data-wysiwyg="result"]:visible',
+      'article[class*="vtex-product-summary-2-x-element"]:visible'
+    ].join(', '));
+  }
+
+  async _hayLegacySinResultados(page, productos) {
+    const selectores = [
+      productos && productos.sinresultadosLabel,
+      '//*[contains(@class,"search-result-not-found")]',
+      '//*[contains(normalize-space(.),"Oh, no!") or contains(normalize-space(.),"No encontramos")]'
+    ].filter(Boolean);
+
+    for (const selector of selectores) {
+      const visible = await page
+        .locator(selector)
+        .first()
+        .isVisible({ timeout: 500 })
+        .catch(() => false);
+      if (visible) return true;
+    }
+
+    return false;
+  }
+
+  _extraerTituloLegacyDesdeTexto(textoCard) {
+    const lineas = String(textoCard || "")
+      .split(/\r?\n/)
+      .map((linea) => linea.trim())
+      .filter((linea) => linea.length > 0);
+
+    const titulo = [];
+    for (const linea of lineas) {
+      const normalizada = linea.toLowerCase();
+      if (/^\$/.test(linea)) continue;
+      if (/^\d+\s*(pz|pieza|piezas|kg|g|gr|ml|l|lt|litro|litros)\b/i.test(linea)) break;
+      if (/^(agregar|agotado|venta por pieza|envio gratis|envío gratis)$/i.test(linea)) break;
+      if (/^\d+\s*%$/.test(linea) || /^\d+x\$/.test(normalizada)) break;
+      titulo.push(linea);
+    }
+
+    return titulo.join(" ").trim();
+  }
+
+  async _leerTituloLegacyCard(card) {
+    const tituloDirecto = await card
+      .locator('xpath=.//*[contains(@class,"global__card--name") and contains(@class,"t-small")]')
+      .first()
+      .innerText()
+      .catch(() => "");
+
+    if (tituloDirecto && tituloDirecto.trim()) return tituloDirecto.trim();
+
+    const textoCard = await card.innerText().catch(() => "");
+    return this._extraerTituloLegacyDesdeTexto(textoCard);
+  }
+
+  async _leerTituloEmpathyCard(card) {
+    const tituloWysiwyg = await card.getAttribute("data-wysiwyg-title").catch(() => "");
+    if (tituloWysiwyg && tituloWysiwyg.trim()) return tituloWysiwyg.trim();
+
+    const selectoresTitulo = [
+      '[data-test="result-title"]',
+      'span[class*="vtex-product-summary-2-x-brandName"]',
+      'span[class*="vtex-product-summary-2-x-productBrand"]',
+      'h3[class*="vtex-product-summary-2-x-productNameContainer"]'
+    ];
+
+    for (const selector of selectoresTitulo) {
+      const titulo = await card
+        .locator(selector)
+        .first()
+        .innerText()
+        .catch(() => "");
+      if (titulo && titulo.trim()) return titulo.trim();
+    }
+
+    const ariaLabel = await card
+      .locator('[aria-label*="Nombre del producto"], [aria-label*="Imagen del producto"], a[aria-label]')
+      .first()
+      .getAttribute("aria-label")
+      .catch(() => "");
+
+    if (ariaLabel && ariaLabel.trim()) {
+      return ariaLabel
+        .replace(/^Nombre del producto/i, "")
+        .replace(/^Imagen del producto/i, "")
+        .trim();
+    }
+
+    const alt = await card
+      .locator("img[alt]")
+      .first()
+      .getAttribute("alt")
+      .catch(() => "");
+
+    if (alt && alt.trim()) return alt.trim();
+
+    const textoCard = await card.innerText().catch(() => "");
+    return this._extraerTituloLegacyDesdeTexto(textoCard);
+  }
     
   async avanzarCarrito(page, resumencarritos) {
     const currentUrl = page.url();
@@ -44,7 +162,21 @@ class NavegacionActions {
     await headerPage.humanType(headerPage.buscandoInput, producto);
     await page.waitForTimeout(500);  
 
-    const sugerido = await page.locator(productos.autocompletarbusqueda).first();
+    // Nuevo flujo: agregar directamente desde el popup de autocompletar (si existe).
+    const botonAgregarAutocomplete = page.locator(productos.autocompletarAgregarButton).first();
+    const sugerido = page.locator(productos.autocompletarbusqueda).first();
+
+    const visibleAutocompleteAdd = await botonAgregarAutocomplete.isVisible({ timeout: 4000 }).catch(() => false);
+    if (visibleAutocompleteAdd) { 
+
+      await botonAgregarAutocomplete.click();
+      await page.isVisible(productos.productoagregadoAlert);
+      await headerPage.safeClick(headerPage.logoImg);
+      await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
+      return true;
+    }
+
+    // Fallback: flujo anterior (seleccionar sugerido y agregar desde la ficha/listado).
     await sugerido.waitFor({ state: 'visible' });
     await sugerido.click();
 
@@ -147,10 +279,11 @@ async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
   }
 
   // --- Espera resultados (legacy vs empathy) ---
-  const legacyResultadosLocator = page.locator('//*[@id="gallery-layout-container"]//*[contains(@class,"global__card--name") and contains(@class,"t-small")] >> visible=true');
+  const legacyResultadosLocator = this._legacyProductCards(page);
+  const empathyResultadosLocator = this._empathyProductCards(page);
   const resultadosLocator = modo === "legacy"
     ? legacyResultadosLocator
-    : page.locator('[data-test="result-title"]');
+    : empathyResultadosLocator;
 
   if (modo === "legacy") {
     await Promise.race([
@@ -173,8 +306,42 @@ async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
 
     if (modo === "legacy") {
       const elementos = resultadosLocator;
-      visibles = await elementos.count();
-      console.log("Legacy: visibles directos = " + visibles);
+      let prevVisibleCount = -1;
+      let stableRounds = 0;
+
+      const legacyTargetCount = 20;
+
+      for (let i = 0; i < 20; i++) {
+        visibles = await elementos.count().catch(() => 0);
+        console.log("Legacy iteracion " + i + " -> visibles: " + visibles + ", prev: " + prevVisibleCount);
+
+        if (visibles === prevVisibleCount) {
+          stableRounds++;
+          console.log("Legacy visibilidad estable (" + stableRounds + ")");
+
+          if (visibles >= legacyTargetCount && stableRounds >= 1) {
+            console.log("Legacy completado: la lista dejo de crecer");
+            break;
+          }
+
+          if (stableRounds >= 5) {
+            console.log("Legacy completado: maximas rondas estables alcanzadas");
+            break;
+          }
+        } else {
+          console.log("Legacy cambio detectado (visibles: " + visibles + "), reseteando...");
+          stableRounds = 0;
+        }
+
+        prevVisibleCount = visibles;
+        await page.evaluate((iteracion) => {
+          const gallery = document.querySelector("#gallery-layout-container");
+          if (gallery) gallery.scrollIntoView({ block: iteracion % 2 === 0 ? "start" : "end" });
+          window.scrollBy(0, 900);
+        }, i).catch(() => {});
+        await page.mouse.wheel(0, 900).catch(() => {});
+        await page.waitForTimeout(900);
+      }
     } else {
       const elementos = resultadosLocator;
       let prevVisibleCount = -1;
@@ -208,10 +375,12 @@ async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
       }
     }
 
-    const hayMensajeNoResultados = await page
-      .locator(productos.sinresultadosLabel)
-      .isVisible()
-      .catch(() => false);
+    const hayMensajeNoResultados = modo === "legacy"
+      ? await this._hayLegacySinResultados(page, productos)
+      : await page
+        .locator(productos.sinresultadosLabel)
+        .isVisible()
+        .catch(() => false);
 
     if (hayMensajeNoResultados) {
       console.log("El sistema muestra sin resultados. Los " + visibles + " visibles son sugerencias.");
@@ -226,9 +395,10 @@ async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
 
   if (modo !== "legacy") {
     const cTitle = await page.locator('[data-test="result-title"]').count().catch(() => 0);
+    const cVtexCard = await page.locator('article[class*="vtex-product-summary-2-x-element"]').count().catch(() => 0);
     const cGrid = await page.locator('ul[data-test="base-grid"]').count().catch(() => 0);
     const cHost = await page.locator('div.x-base-teleport.x-base-teleport--onlychild').count().catch(() => 0);
-    console.log("DEBUG empathy sin resultados -> result-title=" + cTitle + ", base-grid=" + cGrid + ", teleport-hosts=" + cHost);
+    console.log("DEBUG empathy sin resultados -> result-title=" + cTitle + ", vtex-cards=" + cVtexCard + ", base-grid=" + cGrid + ", teleport-hosts=" + cHost);
   }
   console.log(' No se encontraron resultados');
   return false;
@@ -252,18 +422,19 @@ async buscarProducto(page, headerPage, productos, producto, modo = "empathy") {
 
       correccion = (correccion || "").toString().trim();
 
-      // A veces llega como array: ["shampoo"].
-      const esperadoBase = Array.isArray(correccionEsperada)
-        ? (correccionEsperada[0] ?? "")
-        : (correccionEsperada ?? "");
-
-      const esperado = esperadoBase.toString().trim().toLowerCase();
-      const real = correccion.toLowerCase();
+      // La correccion puede venir separada por comas: todos sus tokens deben aparecer.
+      const esperados = Array.isArray(correccionEsperada)
+        ? correccionEsperada.map(x => this._normalizarComparacion(x)).filter(x => x.length > 0)
+        : String(correccionEsperada || "")
+          .split(",")
+          .map(x => this._normalizarComparacion(x))
+          .filter(x => x.length > 0);
+      const real = this._normalizarComparacion(correccion);
       hayCorreccion = real.length > 0;
 
       // Si no se pasa esperado, mantenemos compatibilidad: "corregido" = "hay correccion".
-      if (esperado.length > 0) {
-        corregido = hayCorreccion && real === esperado;
+      if (esperados.length > 0) {
+        corregido = hayCorreccion && esperados.every(esperado => real.includes(esperado));
       } else {
         corregido = hayCorreccion;
       }
@@ -292,6 +463,7 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
   console.log("=== DEBUG INICIO evaluarBusquedaErroresOrtograficos ===");
   console.log("Correccion recibido:", Correccion, "tipo:", typeof Correccion);
   console.log("Equivalencias recibido:", equivalencias);
+  const normalizar = (valor) => this._normalizarComparacion(valor);
 
 
   // === 1. DETECTAR CORRECCIN EMPATHY ===
@@ -305,8 +477,8 @@ async evaluarBusquedaErroresOrtograficos(page, productos, Correccion, equivalenc
 
   // === Normalizar textos ===
   const correccionEsperada = typeof Correccion === "string"
-    ? Correccion.toLowerCase().trim()
-    : String(Correccion || "").toLowerCase().trim();
+    ? this._normalizarComparacion(Correccion)
+    : this._normalizarComparacion(Correccion);
 
 // === Normalizar equivalencias ===
 let equivalenciasArr = [];
@@ -315,18 +487,18 @@ if (typeof equivalencias === "string") {
   // caso normal: string separado por comas
   equivalenciasArr = equivalencias
     .split(",")
-    .map(e => e.trim().toLowerCase());
+    .map(e => this._normalizarComparacion(e));
 }
 
 else if (Array.isArray(equivalencias)) {
   // ya vena en array
   equivalenciasArr = equivalencias
-    .map(e => String(e).trim().toLowerCase());
+    .map(e => this._normalizarComparacion(e));
 }
 
 else if (equivalencias != null) {
   // vena un objeto, nmero, booleano, lo que sea -> convertir a string
-  equivalenciasArr = [String(equivalencias).trim().toLowerCase()];
+  equivalenciasArr = [this._normalizarComparacion(equivalencias)];
 }
 
 console.log("equivalenciasArr normalizado:", equivalenciasArr);
@@ -369,7 +541,7 @@ console.log("equivalenciasArr normalizado:", equivalenciasArr);
       try {
         let txt = await locator.textContent({ timeout: 500 });
         if (txt && txt.trim().length > 0) {
-          return txt.toLowerCase().trim();
+          return normalizar(txt);
         }
       } catch {}
 
@@ -448,19 +620,54 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
 
   const textos = [];
   const locator = modo === "legacy"
-    ? page.locator('//*[@id="gallery-layout-container"]//*[contains(@class,"global__card--name") and contains(@class,"t-small")] >> visible=true')
-    : page.locator('[data-test="result-title"]');
+    ? this._legacyProductCards(page)
+    : this._empathyProductCards(page);
 
   // Espera corta para no impactar el runtime.
-  await locator.first().waitFor({ state: "visible", timeout: 2500 }).catch(() => {});
+  await locator.first().waitFor({ state: "visible", timeout: modo === "legacy" ? 5000 : 2500 }).catch(() => {});
 
-  const countRaw = await locator.count().catch(() => 0);
+  let countRaw = 0;
+  if (modo === "legacy") {
+    let prevCount = -1;
+    let stableRounds = 0;
+    const legacyTargetCount = Math.min(maxResultados, 20);
+
+    for (let i = 0; i < 18; i++) {
+      countRaw = await locator.count().catch(() => 0);
+      console.log("Legacy lectura iteracion " + i + " -> productos: " + countRaw + ", prev: " + prevCount);
+
+      if (countRaw === prevCount) {
+        stableRounds++;
+        if (countRaw >= legacyTargetCount && stableRounds >= 1) break;
+        if (stableRounds >= 5) break;
+      } else {
+        stableRounds = 0;
+      }
+
+      prevCount = countRaw;
+      await page.evaluate((iteracion) => {
+        const gallery = document.querySelector("#gallery-layout-container");
+        if (gallery) gallery.scrollIntoView({ block: iteracion % 2 === 0 ? "start" : "end" });
+        window.scrollBy(0, 900);
+      }, i).catch(() => {});
+      await page.mouse.wheel(0, 900).catch(() => {});
+      await page.waitForTimeout(800);
+    }
+  } else {
+    countRaw = await locator.count().catch(() => 0);
+  }
+
   const limite = modo === "legacy" ? maxResultados : Math.min(maxResultados, 20);
   const count = Math.min(countRaw, limite);
 
   for (let i = 0; i < count; i++) {
     try {
-      const txt = await locator.nth(i).innerText().catch(() => "");
+      let txt = "";
+      if (modo === "legacy") {
+        txt = await this._leerTituloLegacyCard(locator.nth(i));
+      } else {
+        txt = await this._leerTituloEmpathyCard(locator.nth(i));
+      }
       if (txt && txt.trim().length > 0) textos.push(txt.trim());
     } catch (e) {
       console.warn("No se pudo leer un producto:", e);
@@ -473,21 +680,41 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
     if (valor === null || valor === undefined) return [];
     const s = String(valor).trim();
     if (!s) return [];
-    return s.split(",").map(x => x.trim().toLowerCase()).filter(x => x.length > 0);
+    return s.split(",").map(x => this._normalizarComparacion(x)).filter(x => x.length > 0);
   }
 
   _contieneAlguno(texto, tokens) {
     if (!texto) return false;
     if (!Array.isArray(tokens) || tokens.length === 0) return false;
-    const t = String(texto).toLowerCase();
+    const t = this._normalizarComparacion(texto);
     return tokens.some(tok => tok && t.includes(tok));
   }
 
   _contieneTodos(texto, tokens) {
     if (!texto) return false;
     if (!Array.isArray(tokens) || tokens.length === 0) return false;
-    const t = String(texto).toLowerCase();
+    const t = this._normalizarComparacion(texto);
     return tokens.every(tok => tok && t.includes(tok));
+  }
+
+  _contieneGrupoCategoria(texto, valor) {
+    if (!texto || valor === null || valor === undefined) return false;
+    const grupos = String(valor)
+      .split("|")
+      .map(grupo => this._splitTokens(grupo))
+      .filter(tokens => tokens.length > 0);
+
+    return grupos.some(tokens => this._contieneTodos(texto, tokens));
+  }
+
+  _contieneGrupoAndOr(texto, valor) {
+    if (!texto || valor === null || valor === undefined) return false;
+    const grupos = String(valor)
+      .split("|")
+      .map(grupo => this._splitTokens(grupo))
+      .filter(tokens => tokens.length > 0);
+
+    return grupos.some(tokens => this._contieneTodos(texto, tokens));
   }
 
   evaluarFrecuenciaAlta(productosEncontrados, categoriaYAttr, marca, attrSecundario, intencionDiferente) {
@@ -543,9 +770,7 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
   }
 
   evaluarFrecuenciaAltaEquivalencias(productosEncontrados, termino, equivalencia, relacionados) {
-    const eqTokens = this._splitTokens(equivalencia);
-    const relTokens = this._splitTokens(relacionados);
-    const terminoLower = String(termino || "").trim().toLowerCase();
+    const terminoLower = this._normalizarComparacion(termino);
 
     const detalles = [];
     const lista = Array.isArray(productosEncontrados) ? productosEncontrados : [];
@@ -558,11 +783,12 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
 
     for (const titulo of lista) {
       const t = String(titulo || "");
-      // Regla: 2 puntos si contiene al menos 1 equivalencia, o si coincide con el termino buscado.
-      const tLower = t.toLowerCase();
-      const eq = this._contieneAlguno(tLower, eqTokens) || (terminoLower.length > 0 && tLower.includes(terminoLower));
+      // Frecuencia Alta: "|" funciona como OR y "," como AND dentro de cada grupo.
+      // Regla: 2 puntos si contiene un grupo de equivalencia, o si coincide con el termino buscado.
+      const tLower = this._normalizarComparacion(t);
+      const eq = this._contieneGrupoAndOr(tLower, equivalencia) || (terminoLower.length > 0 && tLower.includes(terminoLower));
       // Solo evaluamos relacionados si equivalencia es false.
-      const rel = !eq && this._contieneAlguno(tLower, relTokens);
+      const rel = !eq && this._contieneGrupoAndOr(tLower, relacionados);
 
       const cal = eq ? 2 : (rel ? 1 : 0);
 
@@ -584,8 +810,120 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
     };
   }
 
+  evaluarBusquedaErroresOrtograficosDesdeSnapshot(snapshot = {}, modo = "empathy") {
+    const normalizar = (valor) => this._normalizarComparacion(valor);
+    const correccionEsperadaArr = Array.isArray(snapshot.correccionEsperada)
+      ? snapshot.correccionEsperada.map(x => normalizar(x)).filter(x => x.length > 0)
+      : String(snapshot.correccionEsperada || "")
+        .split(",")
+        .map(x => normalizar(x))
+        .filter(x => x.length > 0);
+
+    const equivalenciasArr = Array.isArray(snapshot.equivalencias)
+      ? snapshot.equivalencias.map(x => normalizar(x)).filter(x => x.length > 0)
+      : String(snapshot.equivalencias || "")
+        .split(",")
+        .map(x => normalizar(x))
+        .filter(x => x.length > 0);
+
+    const productos = Array.isArray(snapshot.productos) ? snapshot.productos.slice(0, 20) : [];
+    const correccionReal = String(snapshot.correccionMostrada || snapshot.correccion || "").trim();
+    const correccionRealNormalizada = normalizar(correccionReal);
+    const corregido = modo !== "legacy" &&
+      correccionEsperadaArr.length > 0 &&
+      correccionRealNormalizada.length > 0 &&
+      correccionEsperadaArr.every(token => correccionRealNormalizada.includes(token));
+
+    let ccProductos = 0;
+    let cpProductos = 0;
+    const coincidencias = [];
+    const noCoincidencias = [];
+    const listaDetallada = [];
+
+    for (const producto of productos) {
+      const textoProducto = normalizar(producto);
+      if (!textoProducto) {
+        listaDetallada.push({ texto: "[NO LEIDO]", correccion: false, equivalencia: false, coincide: false });
+        noCoincidencias.push("[NO LEIDO]");
+        continue;
+      }
+
+      const tieneCorreccion = correccionEsperadaArr.length > 0 &&
+        correccionEsperadaArr.every(token => textoProducto.includes(token));
+      const tieneEquivalencia = equivalenciasArr.length > 0 &&
+        equivalenciasArr.some(eq => textoProducto.includes(eq));
+      const coincide = tieneCorreccion || tieneEquivalencia;
+
+      if (tieneCorreccion) ccProductos++;
+      if (tieneEquivalencia) cpProductos++;
+      if (coincide) coincidencias.push(textoProducto);
+      else noCoincidencias.push(textoProducto);
+
+      listaDetallada.push({ texto: textoProducto, correccion: tieneCorreccion, equivalencia: tieneEquivalencia, coincide });
+    }
+
+    const totalProductos = productos.length;
+    const allCorreccion = totalProductos > 0 && ccProductos === totalProductos;
+    const anyCorreccion = ccProductos > 0;
+    const anyEquivalencia = cpProductos > 0;
+
+    let CC = false;
+    let CP = false;
+    let SR = false;
+    let SN = false;
+    let calificacion = "";
+
+    if (totalProductos === 0) {
+      SN = true;
+      calificacion = "SN";
+    } else if (modo === "legacy") {
+      if (anyCorreccion) {
+        CP = true;
+        calificacion = "CP";
+      } else if (anyEquivalencia) {
+        SR = true;
+        calificacion = "SR";
+      } else {
+        SN = true;
+        calificacion = "SN";
+      }
+    } else if (corregido) {
+      if (allCorreccion) {
+        CC = true;
+        calificacion = "CC";
+      } else if (anyCorreccion || anyEquivalencia) {
+        CP = true;
+        calificacion = "CP";
+      } else {
+        SN = true;
+        calificacion = "SN";
+      }
+    } else if (anyEquivalencia) {
+      SR = true;
+      calificacion = "SR";
+    } else {
+      SN = true;
+      calificacion = "SN";
+    }
+
+    return {
+      correccion: correccionReal,
+      corregido,
+      CC,
+      CP,
+      SR,
+      SN,
+      coincidencias,
+      noCoincidencias,
+      listaDetallada,
+      calificacion,
+      totalProductos,
+      ccProductos,
+      cpProductos
+    };
+  }
+
   evaluarLongTail(productosEncontrados, categoria, marca, especificacion, formato, intencion) {
-    const catTokens = this._splitTokens(categoria);
     const marcaTokens = this._splitTokens(marca);
     const espTokens = this._splitTokens(especificacion);
     const formatoTokens = this._splitTokens(formato);
@@ -602,7 +940,7 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
 
     for (const titulo of lista) {
       const t = String(titulo || "");
-      const c1 = this._contieneAlguno(t, catTokens);      // Categoria
+      const c1 = this._contieneGrupoCategoria(t, categoria); // Categoria: "|" OR, "," AND.
       const c2 = this._contieneAlguno(t, marcaTokens);    // Marca
       const c3 = this._contieneAlguno(t, espTokens);      // Especificacion
       const c4 = this._contieneAlguno(t, formatoTokens);  // Formato
@@ -672,6 +1010,19 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
         }
       }
 
+      // Fallback: selector definido en el POM de ResumenCarritoPage (por si el del Header cambia).
+      try {
+        await resumencarritos.safeClick(resumencarritos.cerrarminicartButton);
+        return;
+      } catch (e) {
+        try {
+          await page.locator(resumencarritos.cerrarminicartButton).first().click({ timeout: 2000, force: true });
+          return;
+        } catch {
+          // ignore
+        }
+      }
+
       try {
         await page.keyboard.press("Escape");
       } catch {
@@ -689,9 +1040,11 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
  
       // Cerrar minicart
       await cerrarMiniCart();
+      
     } else {
       console.log(" El carrito ya estaba vacio.");
       await cerrarMiniCart();
+      
     }
   }
 
@@ -721,6 +1074,7 @@ async obtenerProductosEncontrados(page, productosPage, modo = "empathy", maxResu
       if (exito) {
         productosAgregados++;
         console.log(` Producto agregado: ${producto} (total agregados: ${productosAgregados})`);
+
       }
     } catch (err) {
       console.warn(` No se pudo agregar producto: ${producto} -> ${err.message}`);
@@ -738,6 +1092,39 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
   await page.waitForTimeout(2000);
   console.warn("Validando formulario de: " + tiposdepago);
 
+  const esPaypal = formapago.includes("Paypal") || tiposdepago.includes("PayPal") || tiposdepago.includes("Paypal");
+
+  if (esPaypal) {
+    const locator = page.locator(headerPage.formapago(tiposdepago));
+    await locator.scrollIntoViewIfNeeded();
+    await headerPage.safeClick(headerPage.formapago(tiposdepago));
+
+    console.warn("Tipo de formulario detectado:\n" + formapago);
+    console.warn("PayPal no muestra formulario; se valida apertura desde boton Pagar");
+
+    const pagarBtn = page.locator(headerPage.pagar_Button).first();
+    await pagarBtn.waitFor({ state: "visible", timeout: 5000 });
+    await headerPage.safeClick(headerPage.pagar_Button);
+
+    await page.locator(headerPage.paypalModal)
+      .first()
+      .waitFor({ state: "visible", timeout: 15000 })
+      .catch(() => console.warn(" No se encontro modal de PayPal"));
+
+    await page.locator(headerPage.pagarconpaypalButton)
+      .first()
+      .waitFor({ state: "visible", timeout: 5000 })
+      .catch(() => console.warn(" No se encontro boton Pagar con PayPal"));
+
+    const cerrarPaypalModal = page.locator(headerPage.cerrarmodalButton).first();
+    if (await cerrarPaypalModal.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await cerrarPaypalModal.click();
+    }
+
+    console.log("\n Validacin finalizada para: " + formapago);
+    return;
+  }
+
   // 1 Determinar contexto (iframe o page)
   let iframe;
   let ctx; //  contexto unificado
@@ -748,7 +1135,7 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
     await headerPage.safeClick(headerPage.formapago(tiposdepago));
     ctx = page; //  Vales NO usa iframe
     console.warn("Tipo de formulario detectado:\n" + tiposdepago);
-  } else {
+  } else {    
     const locator = page.locator(headerPage.iframeformapago(tiposdepago));
     await locator.scrollIntoViewIfNeeded();
     iframe = page.frameLocator(headerPage.iframeformapago(tiposdepago));
@@ -785,7 +1172,7 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
       .waitFor({ state: 'visible', timeout: 5000 })
       .catch(() => console.warn(" No se encontr"));
   }
-
+  await page.pause();
   // 4 Validar botones segn tipo de pago
   console.warn("\n Validando botn pagar fuera del frame");
   const pagarBtn = page.locator(headerPage.pagar_Button);
@@ -815,7 +1202,7 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
       .waitFor({ state: "visible", timeout: 5000 })
       .catch(() => console.warn(" No se encontr"));
 
-    await headerPage.safeClick(pagarBtn);
+    await headerPage.safeClick(headerPage.pagar_Button);
 
     // 5 Validar mensajes obligatorios
     console.warn("\n Validando mensajes de campo obligatorio...");
@@ -845,6 +1232,217 @@ async ValidarFormulario(page, headerPage, tiposdepago, formapago) {
   async salircheckout(resumencarritos,page) {
     await resumencarritos.safeClick(resumencarritos.logoprincipal);
     await page.waitForLoadState('domcontentloaded');
+  }
+
+  normalizarSku(valorSku) {
+    return String(valorSku || "").trim().split("-")[0].trim();
+  }
+
+  convertirPrecioANumero(textoPrecio) {
+    const valorLimpio = String(textoPrecio || "")
+      .replace(/[^0-9.,-]/g, "")
+      .replace(/,/g, "");
+
+    const precio = Number(valorLimpio);
+    if (!Number.isFinite(precio)) {
+      throw new Error("No fue posible convertir precio a numero: " + textoPrecio);
+    }
+
+    return precio;
+  }
+
+  normalizarPreciosEsperados(preciosEsperadosPorSku) {
+    if (Array.isArray(preciosEsperadosPorSku)) {
+      return preciosEsperadosPorSku.map(item => ({
+        sku: this.normalizarSku(item.sku || item.SKU || item.id || item.ID),
+        precioEsperado: this.convertirPrecioANumero(item.precioEsperado || item.precio || item.price || item.expectedPrice)
+      }));
+    }
+
+    return Object.entries(preciosEsperadosPorSku || {}).map(([sku, precioEsperado]) => ({
+      sku: this.normalizarSku(sku),
+      precioEsperado: this.convertirPrecioANumero(precioEsperado)
+    }));
+  }
+
+  async obtenerPreciosPaso3PorSku(page, resumencarritos) {
+    const productosPaso3 = page.locator(resumencarritos.checkoutPaso3Producto);
+    await productosPaso3.first().waitFor({ state: "visible", timeout: 10000 });
+
+    const totalProductos = await productosPaso3.count();
+    const preciosPorSku = [];
+
+    for (let indiceProducto = 0; indiceProducto < totalProductos; indiceProducto++) {
+      const producto = productosPaso3.nth(indiceProducto);
+      const sku = await producto.getAttribute("data-id");
+      const precioTexto = await producto.locator(resumencarritos.checkoutPaso3PrecioProducto).innerText();
+
+      preciosPorSku.push({
+        sku: this.normalizarSku(sku),
+        precioTexto: precioTexto.trim(),
+        precio: this.convertirPrecioANumero(precioTexto)
+      });
+    }
+
+    return preciosPorSku;
+  }
+
+  async validarPreciosPaso3PorSku(page, resumencarritos, preciosEsperadosPorSku, tolerancia = 0.01) {
+    const preciosEsperados = this.normalizarPreciosEsperados(preciosEsperadosPorSku);
+    const preciosActuales = await this.obtenerPreciosPaso3PorSku(page, resumencarritos);
+
+    if (preciosEsperados.length === 0) {
+      throw new Error("No se recibieron precios esperados para validar en paso 3.");
+    }
+
+    for (const esperado of preciosEsperados) {
+      const actual = preciosActuales.find(item => item.sku === esperado.sku);
+
+      if (!actual) {
+        throw new Error("No se encontro SKU en paso 3: " + esperado.sku);
+      }
+
+      const diferencia = Math.abs(actual.precio - esperado.precioEsperado);
+      if (diferencia > tolerancia) {
+        throw new Error(
+          "Precio incorrecto para SKU " + esperado.sku +
+          ". Esperado: " + esperado.precioEsperado +
+          ", actual: " + actual.precio +
+          " (" + actual.precioTexto + ")"
+        );
+      }
+
+      console.log("Precio correcto para SKU " + esperado.sku + ": " + actual.precioTexto);
+    }
+
+    return preciosActuales;
+  }
+
+  async obtenerResumenPaso3(page, resumencarritos) {
+    const leerPrecio = async (selector, etiqueta) => {
+      const locator = page.locator(selector).first();
+      await locator.waitFor({ state: "visible", timeout: 10000 });
+      const texto = (await locator.innerText()).trim();
+
+      return {
+        texto,
+        valor: this.convertirPrecioANumero(texto),
+        etiqueta
+      };
+    };
+
+    const subtotal = await leerPrecio(resumencarritos.checkoutPaso3SubtotalProductos, "subtotal productos");
+    const envio = await leerPrecio(resumencarritos.checkoutPaso3CostoEnvio, "costo envio");
+    const total = await leerPrecio(resumencarritos.checkoutPaso3TotalCarrito, "total carrito");
+
+    return {
+      subtotalProductos: subtotal.valor,
+      subtotalProductosTexto: subtotal.texto,
+      costoEnvio: envio.valor,
+      costoEnvioTexto: envio.texto,
+      totalCarrito: total.valor,
+      totalCarritoTexto: total.texto
+    };
+  }
+
+  async validarResumenPaso3(page, resumencarritos, resumenEsperado, tolerancia = 0.01) {
+    const resumenActual = await this.obtenerResumenPaso3(page, resumencarritos);
+    const campos = [
+      { key: "subtotalProductos", aliases: ["subtotalProductos", "subtotal", "Subtotal"] },
+      { key: "costoEnvio", aliases: ["costoEnvio", "envio", "Envio"] },
+      { key: "totalCarrito", aliases: ["totalCarrito", "total", "Total"] }
+    ];
+
+    for (const campo of campos) {
+      const alias = campo.aliases.find(nombre => resumenEsperado[nombre] !== undefined && resumenEsperado[nombre] !== "");
+      if (!alias) continue;
+
+      const esperado = this.convertirPrecioANumero(resumenEsperado[alias]);
+      const actual = resumenActual[campo.key];
+      const diferencia = Math.abs(actual - esperado);
+
+      if (diferencia > tolerancia) {
+        throw new Error(
+          "Monto incorrecto en paso 3 para " + campo.key +
+          ". Esperado: " + esperado +
+          ", actual: " + actual
+        );
+      }
+
+      console.log("Monto correcto en paso 3 para " + campo.key + ": " + actual);
+    }
+
+    return resumenActual;
+  }
+
+  async obtenerResumenPaso4(page, resumencarritos) {
+    const leerPrecio = async (selector) => {
+      const locator = page.locator(selector).first();
+      await locator.waitFor({ state: "visible", timeout: 10000 });
+      const texto = (await locator.innerText()).trim();
+
+      return {
+        texto,
+        valor: this.convertirPrecioANumero(texto)
+      };
+    };
+
+    const subtotal = await leerPrecio(resumencarritos.checkoutPaso4Subtotal);
+    const envio = await leerPrecio(resumencarritos.checkoutPaso4Envio);
+    const total = await leerPrecio(resumencarritos.checkoutPaso4Total);
+    const envioPaqueteVisible = await page
+      .locator(resumencarritos.checkoutPaso4EnvioPaquete)
+      .first()
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+    const envioPaquete = envioPaqueteVisible
+      ? await leerPrecio(resumencarritos.checkoutPaso4EnvioPaquete)
+      : null;
+
+    return {
+      subtotal: subtotal.valor,
+      subtotalTexto: subtotal.texto,
+      envio: envio.valor,
+      envioTexto: envio.texto,
+      total: total.valor,
+      totalTexto: total.texto,
+      envioPaquete: envioPaquete ? envioPaquete.valor : null,
+      envioPaqueteTexto: envioPaquete ? envioPaquete.texto : ""
+    };
+  }
+
+  async validarResumenPaso4(page, resumencarritos, resumenEsperado, tolerancia = 0.01) {
+    const resumenActual = await this.obtenerResumenPaso4(page, resumencarritos);
+    const campos = [
+      { key: "subtotal", aliases: ["subtotal", "Subtotal"] },
+      { key: "envio", aliases: ["envio", "Envio", "costoEnvio"] },
+      { key: "total", aliases: ["total", "Total"] },
+      { key: "envioPaquete", aliases: ["envioPaquete", "EnvioPaquete"] }
+    ];
+
+    for (const campo of campos) {
+      const alias = campo.aliases.find(nombre => resumenEsperado[nombre] !== undefined && resumenEsperado[nombre] !== "");
+      if (!alias) continue;
+
+      const esperado = this.convertirPrecioANumero(resumenEsperado[alias]);
+      const actual = resumenActual[campo.key];
+      if (actual === null || actual === undefined) {
+        throw new Error("No se encontro monto en paso 4 para " + campo.key);
+      }
+
+      const diferencia = Math.abs(actual - esperado);
+      if (diferencia > tolerancia) {
+        throw new Error(
+          "Monto incorrecto en paso 4 para " + campo.key +
+          ". Esperado: " + esperado +
+          ", actual: " + actual
+        );
+      }
+
+      console.log("Monto correcto en paso 4 para " + campo.key + ": " + actual);
+    }
+
+    return resumenActual;
   }
 
 async ValidarEntregas(page, headerPage, TipoTienda, Sucursal) { 
@@ -953,18 +1551,24 @@ async crearDatosPago(row) {
 
     let correccionReal = "";
     let corregido = false;
-    let correccionEsperada = "";
+    let correccionEsperadaArr = [];
     if (Array.isArray(Correccion)) {
-      correccionEsperada = Correccion.map(x => String(x).trim()).find(x => x.length > 0) || "";
+      correccionEsperadaArr = Correccion
+        .map(x => this._normalizarComparacion(x))
+        .filter(x => x.length > 0);
     } else if (typeof Correccion === "string") {
-      correccionEsperada = Correccion.trim();
+      correccionEsperadaArr = Correccion
+        .split(",")
+        .map(x => this._normalizarComparacion(x))
+        .filter(x => x.length > 0);
     } else if (Correccion != null) {
-      correccionEsperada = String(Correccion).trim();
+      const val = this._normalizarComparacion(Correccion);
+      if (val.length > 0) correccionEsperadaArr = [val];
     }
-    correccionEsperada = correccionEsperada.toLowerCase();
+    const correccionEsperada = correccionEsperadaArr.join(", ");
 
     if (modo !== "legacy") {
-      const det = await this.detectarCorreccion(page, correccionEsperada);
+      const det = await this.detectarCorreccion(page, correccionEsperadaArr);
       correccionReal = det.correccion;
       corregido = det.corregido;
     }
@@ -977,14 +1581,14 @@ async crearDatosPago(row) {
     if (typeof equivalencias === "string") {
       equivalenciasArr = equivalencias
         .split(",")
-        .map(e => e.trim().toLowerCase())
+        .map(e => this._normalizarComparacion(e))
         .filter(e => e.length > 0);
     } else if (Array.isArray(equivalencias)) {
       equivalenciasArr = equivalencias
-        .map(e => String(e).trim().toLowerCase())
+        .map(e => this._normalizarComparacion(e))
         .filter(e => e.length > 0);
     } else if (equivalencias != null) {
-      const val = String(equivalencias).trim().toLowerCase();
+      const val = this._normalizarComparacion(equivalencias);
       if (val.length > 0) equivalenciasArr = [val];
     }
 
@@ -996,16 +1600,50 @@ async crearDatosPago(row) {
 
     let resultadosLocator;
     if (modo === "legacy") {
-      resultadosLocator = page.locator(`${productos.resultadobusquedaLabel} >> visible=true`);
+      resultadosLocator = this._legacyProductCards(page);
     } else {
-      resultadosLocator = page.locator('[data-test="result-title"] >> visible=true');
+      resultadosLocator = this._empathyProductCards(page);
     }
 
     console.log("=== DEBUG esperando resultados ===");
-    console.log("Selector utilizado:", modo === "legacy" ? `${productos.resultadobusquedaLabel} >> visible=true` : `[data-test="result-title"]`);
+    console.log("Selector utilizado:", modo === "legacy" ? `legacy product cards` : `empathy product cards`);
+
+    if (modo === "legacy" && await this._hayLegacySinResultados(page, productos)) {
+      console.log("Legacy muestra sin resultados; se ignoran productos sugeridos/fallback.");
+      return {
+        correccion: correccionReal,
+        corregido,
+        CC: false,
+        CP: false,
+        SR: false,
+        SN: true,
+        coincidencias: [],
+        noCoincidencias: [],
+        listaDetallada: [],
+        totalProductos: 0,
+        calificacion: "SN"
+      };
+    }
 
     await resultadosLocator.first().waitFor({ timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(500);
+
+    if (modo === "legacy" && await this._hayLegacySinResultados(page, productos)) {
+      console.log("Legacy muestra sin resultados despues de esperar; se ignoran productos sugeridos/fallback.");
+      return {
+        correccion: correccionReal,
+        corregido,
+        CC: false,
+        CP: false,
+        SR: false,
+        SN: true,
+        coincidencias: [],
+        noCoincidencias: [],
+        listaDetallada: [],
+        totalProductos: 0,
+        calificacion: "SN"
+      };
+    }
 
     let count = await resultadosLocator.count();
     const sinResultadosIcon = await page
@@ -1020,7 +1658,7 @@ async crearDatosPago(row) {
     }
 
     const countDetectado = count;
-    const limiteEvaluacion = modo === "legacy" ? count : Math.min(count, 20);
+    const limiteEvaluacion = Math.min(count, 20);
 
     // Para Empathy solo evaluamos hasta 20 items (aunque existan mas en pantalla).
     if (limiteEvaluacion !== countDetectado) {
@@ -1044,13 +1682,14 @@ async crearDatosPago(row) {
     let listaDetallada = [];
     let ccProductos = 0;
     let cpProductos = 0;
+    const normalizar = (valor) => this._normalizarComparacion(valor);
 
     async function obtenerTextoConReintento(locator) {
       for (let intento = 0; intento < 3; intento++) {
         try {
           let txt = await locator.textContent({ timeout: 500 });
           if (txt && txt.trim().length > 0) {
-            return txt.toLowerCase().trim();
+            return normalizar(txt);
           }
         } catch {}
 
@@ -1062,7 +1701,14 @@ async crearDatosPago(row) {
 
     for (let i = 0; i < count; i++) {
       console.log("=== DEBUG leyendo producto #" + i + " ===");
-      let textoProducto = await obtenerTextoConReintento(resultadosLocator.nth(i));
+      let textoProducto = null;
+      if (modo === "legacy") {
+        const tituloLegacy = await this._leerTituloLegacyCard(resultadosLocator.nth(i));
+        textoProducto = tituloLegacy ? normalizar(tituloLegacy) : null;
+      } else {
+        const tituloEmpathy = await this._leerTituloEmpathyCard(resultadosLocator.nth(i));
+        textoProducto = tituloEmpathy ? normalizar(tituloEmpathy) : await obtenerTextoConReintento(resultadosLocator.nth(i));
+      }
 
       console.log("Texto leido:", textoProducto);
 
@@ -1072,7 +1718,8 @@ async crearDatosPago(row) {
         continue;
       }
 
-      const tieneCorreccion = !!correccionEsperada && textoProducto.includes(correccionEsperada);
+      const tieneCorreccion = correccionEsperadaArr.length > 0 &&
+        correccionEsperadaArr.every(token => textoProducto.includes(token));
       const tieneEquivalencia = equivalenciasArr.length > 0 && equivalenciasArr.some(eq => textoProducto.includes(eq));
 
       console.log("Tiene correccion esperada?", tieneCorreccion);
@@ -1099,7 +1746,16 @@ async crearDatosPago(row) {
       SN = true;
       calificacion = "SN";
     } else if (modo === "legacy") {
-      calificacion = "";
+      if (anyCorreccion) {
+        CP = true;
+        calificacion = "CP";
+      } else if (anyEquivalencia) {
+        SR = true;
+        calificacion = "SR";
+      } else {
+        SN = true;
+        calificacion = "SN";
+      }
     } else {
       if (corregido) {
         if (allCorreccion) {

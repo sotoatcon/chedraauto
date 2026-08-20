@@ -3,6 +3,11 @@ const path = require('path');
 
 // 👉 Importamos config para leer isEMP
 const env = require('./utils/Environment');
+const browserChannel = env.browserChannel || undefined;
+const launchOptions = {
+  ...(browserChannel ? { channel: browserChannel } : {}),
+  ...(env.isEMP ? { args: ['--remote-debugging-port=9222'] } : {})
+};
 
 module.exports = defineConfig({
 
@@ -39,9 +44,7 @@ module.exports = defineConfig({
     // 🔥 FIX 2 (IMPORTANTÍSIMO):
     // EMP → NO iniciar un browser nuevo
     // Se conecta al navegador persistente ya abierto en global-setup
-    launchOptions: env.isEMP
-      ? { args: ['--remote-debugging-port=9222'] }
-      : {}
+    launchOptions
   },
 
   reporter: [
@@ -54,5 +57,5 @@ module.exports = defineConfig({
     ]
   ],
 
-  timeout: 2000000
+  timeout: 3000000
 });

@@ -21,7 +21,8 @@ class ResumenCarritoPage extends BasePage {
     this.vaciarcarritoButton = "//button[@class]//*[contains(text(),'Vaciar carrito')]";
     this.vaciarButton = "//button[@class='chedrauimx-checkout-io-1-x-alert--button-accept' and contains(text(),'Vaciar')]";
     this.comprarcarritoButton = "//*[contains(text(),'Comprar')]";
-    this.cerrarminicartButton = "//*[contains(@class,'minicart')]//*[@href='#sti-close--line']";
+    // Cerrar minicart (fallback si se usa este POM directamente).
+    this.cerrarminicartButton = "//*[contains(@class,'vtex-minicart-2-x-closeIconButton')]";
     this.codigodescuentoInput = "//*[@placeholder='Escribe el código']";
     this.codigodescuentoaplicarButton = "//button//*[contains(text(),'Aplicar')]";
     this.continuarconlacompraButton = "//button//*[contains(text(),'Continuar con la compra')]";
@@ -42,6 +43,16 @@ class ResumenCarritoPage extends BasePage {
     this.confirmarCambiarDireccionButton = "//*[contains(text(),'Continuar')]";
     this.telefonoCapturadoCheck = "//*[@id='phoneNumber']/..//*[@class='chedrauimx-checkout-io-1-x-user-form__icon']";
     this.logoprincipal = "//*[@class='checkout-header__logo']";
+    this.checkoutPaso3CantidadProductos = "//*[@class='chedrauimx-checkout-io-2-x-package__quantity']";
+    this.checkoutPaso3Producto = "//*[@class='chedrauimx-checkout-io-2-x-package-product']";
+    this.checkoutPaso3PrecioProducto = ".//*[@class='chedrauimx-checkout-io-2-x-price']";
+    this.checkoutPaso3CostoEnvio = "//*[@class='chedrauimx-checkout-io-2-x-summary__item chedrauimx-checkout-io-2-x-summary__item--shipping']//*[@class='chedrauimx-checkout-io-2-x-price']";
+    this.checkoutPaso3SubtotalProductos = "//*[@class='chedrauimx-checkout-io-2-x-summary__item chedrauimx-checkout-io-2-x-summary__item--items']//*[@class='chedrauimx-checkout-io-2-x-price']";
+    this.checkoutPaso3TotalCarrito = "//*[@class='chedrauimx-checkout-io-2-x-summary-totalizers__totals']//*[@class='chedrauimx-checkout-io-2-x-price']";
+    this.checkoutPaso4Subtotal = "//*[@class='itemTotalizer subTotalCustom']//*[@class='valueCustom']";
+    this.checkoutPaso4Envio = "//*[@class='itemTotalizer shippingCostCustom']//*[@class='valueCustom']";
+    this.checkoutPaso4Total = "//*[@class='itemTotalizer totalCustom']//*[@class='valueCustom']";
+    this.checkoutPaso4EnvioPaquete = "//*[@class='total-package']//*[@class='shipping-value']";
   }
 
   // 🔹 Locators dinámicos
@@ -55,6 +66,14 @@ class ResumenCarritoPage extends BasePage {
 
   productoespecificoOption(producto){
     return `//*[contains(@class,'productMinicartContainer')]//*[@class='vtex-flex-layout-0-x-flexColChild pb0']//a[contains(text(),'${producto}')]`;
+  }
+
+  checkoutPaso3ProductoPorSku(sku){
+    return `//*[@class='chedrauimx-checkout-io-2-x-package-product' and @data-id='${sku}']`;
+  }
+
+  checkoutPaso3PrecioProductoPorSku(sku){
+    return `${this.checkoutPaso3ProductoPorSku(sku)}//*[@class='chedrauimx-checkout-io-2-x-price']`;
   }
 
 

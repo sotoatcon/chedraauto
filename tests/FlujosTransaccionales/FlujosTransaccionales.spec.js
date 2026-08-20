@@ -5,6 +5,7 @@ const { getExcelData } = require('../../utils/excelReader');
 const ProductosEncontradosPage = require('../../pages/ProductosEncontradosPage'); 
 const ResumenCarritoPage = require('../../pages/ResumenCarritoPage');
 const config = require('../../utils/Environment');
+const { loginConCorreo } = require('../../utils/LoginActions');
 const fs = require('fs');
 const path = require('path');
 const NavegacionActions = require('../../utils/NavegacionActions');
@@ -18,6 +19,20 @@ const exceltab = 'Datos Flujos';
 const exceltab2 = 'Validaciones Tarjeta';
 const exceltab3 = 'Repetir Compra';
 
+// =========================================================
+//  Flags de debug (activar manualmente)
+// =========================================================
+// Poner en true para ejecutar el caso. Por defecto C1/C2 en true y C3 en false.
+const C1 = false;
+const C2 = true;
+const C3 = false;
+
+const getBaseUrl = () => {
+  if (config.isQA) return config.urls.QA;
+  if (config.isEMP) return config.urls.EMPATHY;
+  return config.urls.PROD;
+};
+
 let context;
 let page;
 let headerPage;
@@ -26,65 +41,108 @@ let productos;
 let carritoUtils;
 let directionsPage;
 
+let empContext;
+let empPage;
+let empHeaderPage;
+let empResumencarritos;
+let empProductos;
+let empCarritoUtils;
+let empDirectionsPage;
+
 // ------------------------
 // BEFORE ALL
 // ------------------------
-test.beforeAll(async () => {
+test.beforeAll(async ({ browser }) => {
+  if (!config.isEMP) return;
 
-  context = await chromium.launchPersistentContext('', {
-    headless: false,
-    args: ['--start-maximized','--disable-blink-features=AutomationControlled']
+  console.log("EMP MODE -- ejecutando login completo (beforeAll)...");
+
+  empContext = await browser.newContext({
+    viewport: { width: 1280, height: 720 }
   });
 
-  page = await context.newPage();
+  empPage = await empContext.newPage();
+  empHeaderPage = new HeaderPage(empPage);
+
+  console.log("Ejecutando loginConCorreo...");
+  await loginConCorreo(empPage, empHeaderPage, empHeaderPage);
+
+  empResumencarritos = new ResumenCarritoPage(empPage);
+  empProductos = new ProductosEncontradosPage(empPage);
+  empCarritoUtils = new NavegacionActions();
+  empDirectionsPage = new DirectionsPage(empPage);
+
+  // --- Sesión persistente ---
+  if (fs.existsSync('./sessionLocalStorage.json')) {
+    // Primero navegar UNA sola vez
+    // Inyectar localStorage ANTES de cualquier otra navegación
+    // Recargar SOLO después de setear localStorage
+  }
+
+});
+
+test.afterAll(async () => {
+  if (empContext) {
+    await empContext.close();
+    empContext = null;
+  }
+});
+
+test.beforeEach(async ({ page: playwrightPage }) => {
+
+  // ============================
+  //  EMP -- LOGIN COMPLETO
+  // ============================
+  if (config.isEMP) {
+    // En EMP mode reutilizamos empPage, cerramos el page fixture para no abrir ventanas extra.
+    try {
+      if (playwrightPage && !playwrightPage.isClosed()) {
+        await playwrightPage.close();
+      }
+    } catch {}
+
+    page = empPage;
+    headerPage = empHeaderPage;
+    resumencarritos = empResumencarritos;
+    productos = empProductos;
+    carritoUtils = empCarritoUtils;
+    directionsPage = empDirectionsPage;
+
+    return;
+  }
+
+  // ==============================================
+  //  QA/PROD -- Reutiliza sesion de storageState
+  // ==============================================
+  console.log("-> QA/PROD -> Reutilizando sesion existente...");
+
+  page = playwrightPage;
   headerPage = new HeaderPage(page);
   resumencarritos = new ResumenCarritoPage(page);
   productos = new ProductosEncontradosPage(page);
   carritoUtils = new NavegacionActions();
   directionsPage = new DirectionsPage(page);
 
-  // --- Sesión persistente ---
-  if (fs.existsSync('./sessionCookies.json')) { 
-    const cookies = JSON.parse(fs.readFileSync('./sessionCookies.json'));
-    await context.addCookies(cookies);
-  }
-
-  if (fs.existsSync('./sessionLocalStorage.json')) {
-    const localStorageData = JSON.parse(fs.readFileSync('./sessionLocalStorage.json'));
-
-    // Primero navegar UNA sola vez
-    await page.goto(config.urls.PROD, { waitUntil: 'domcontentloaded' });
-
-    // Inyectar localStorage ANTES de cualquier otra navegación
-    await page.evaluate((data) => {
-      for (const [key, value] of Object.entries(data)) {
-        localStorage.setItem(key, value);
-      }
-    }, localStorageData);
-
-    // Recargar SOLO después de setear localStorage
-    await page.reload({ waitUntil: 'domcontentloaded' });
-  }
-
 });
 
 // ------------------------
 // TEST CASE
 // ------------------------
-/*
-test('C1 - Visualizar metodos de pago', async () => { 
+
+(C1 ? test : test.skip)('C1 - Visualizar metodos de pago', async () => { 
   test.setTimeout(300000);
 
   // --- Flujo principal ---
-  await page.goto(config.urls.PROD);
-  await headerPage.safeClick(headerPage.aceptarCookiesButton);
-  await page.goto(config.urls.PROD);
+  const baseUrl = getBaseUrl();
+  await page.goto(baseUrl);
+  await headerPage.acceptCookiesIfPresent();
+  await page.goto(baseUrl);
   await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
   await headerPage.safeClick(headerPage.minicartButton);  
   await page.waitForTimeout(2000);
   await carritoUtils.vaciarCarrito(page, resumencarritos, headerPage);
-  await carritoUtils.AgregarProductosDefault(page,headerPage,productos,config,1);
 
+  await carritoUtils.AgregarProductosDefault(page,headerPage,productos,config,1);
   await headerPage.safeClick(headerPage.minicartButton);
   await page.waitForTimeout(2000);
   await resumencarritos.safeClick(resumencarritos.comprarcarritoButton);
@@ -120,15 +178,14 @@ test('C1 - Visualizar metodos de pago', async () => {
 
 
 });
-*/
-/*
-test('C2 - Flujos Transaccionales', async () => { 
+(C2 ? test : test.skip)('C2 - Flujos Transaccionales', async () => { 
   test.setTimeout(300000);
 
   // --- Flujo principal ---
-  await page.goto(config.urls.PROD);
-  await headerPage.safeClick(headerPage.aceptarCookiesButton);
-  await page.goto(config.urls.PROD);
+  const baseUrl = getBaseUrl();
+  await page.goto(baseUrl);
+  await headerPage.acceptCookiesIfPresent();
+  await page.goto(baseUrl);
   await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
   await headerPage.safeClick(headerPage.minicartButton);  
   await page.waitForTimeout(2000);
@@ -226,14 +283,15 @@ test('C2 - Flujos Transaccionales', async () => {
 
 
 });
-*/
-test('C3 - Repetir Compra', async () => { 
+
+(C3 ? test : test.skip)('C3 - Repetir Compra', async () => { 
   test.setTimeout(300000);
 
   // --- Flujo principal ---
-  await page.goto(config.urls.PROD);
-  await headerPage.safeClick(headerPage.aceptarCookiesButton);
-  await page.goto(config.urls.PROD);
+  const baseUrl = getBaseUrl();
+  await page.goto(baseUrl);
+  await headerPage.acceptCookiesIfPresent();
+  await page.goto(baseUrl);
   await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
   await page.waitForTimeout(2000);
   
@@ -247,6 +305,8 @@ test('C3 - Repetir Compra', async () => {
   
 
   await headerPage.safeClick(headerPage.micuentaButton);
+  // DEBUG: pausar antes de esperar el locator de Mis pedidos (revisar por que no aparece)
+  await page.pause();
   await headerPage.safeClick(headerPage.mispedidosHref);
   await headerPage.safeClick(headerPage.detalleorden(orden));
   await page.pause();
@@ -256,3 +316,4 @@ test('C3 - Repetir Compra', async () => {
   }
 
 });
+

@@ -10,10 +10,11 @@ class HeaderPage extends BasePage {
     this.pagonoprocesadoPopUp ="//*[@class='payment-unauthorized-hello']";
     this.cerrarpagonoprocesadoPopIp = "//*[@class='btn btn-large payment-unauthorized-button']";
     //Paypal
-    this.paypalIframe ="//iframe[contains(@name,'paypal') and @class='component-frame visible']";
-    this.titulopaypalPopup ="//*[@class='paypalstore-payment-auth-app-1-x-logoSection']";
-    this.pagarconpaypalButton ="//*[@class='paypal-button-label-container']";
-    this.cerrarmodalButton ="//*[@class='paypalstore-payment-auth-app-1-x-closeModal']";
+    this.paypalIframe ="//iframe[contains(@name,'paypal') and contains(@class,'component-frame') and contains(@class,'visible')]";
+    this.paypalModal = "//*[contains(@class,'paypalstore-payment-auth-app') and contains(@class,'wrapper')]";
+    this.titulopaypalPopup ="//*[contains(@class,'paypalstore-payment-auth-app') and contains(@class,'logoSection')]";
+    this.pagarconpaypalButton ="//*[@id='pyp-btn-container']//*[self::button or @role='button' or contains(@class,'paypal-button-label-container')] | //*[@id='pyp-btn-container']";
+    this.cerrarmodalButton ="//*[contains(@class,'paypalstore-payment-auth-app') and contains(@class,'closeModal')]";
     this.aceptarCookiespaypalButton ="//*[@id='acceptAllButton']";
     this.emailpaypalInput ="//*[@id='email']";
     this.siguienteButton ="//*[@id='btnNext']";
@@ -41,8 +42,15 @@ class HeaderPage extends BasePage {
     this.micuentaButton = "//*[contains(@class,'header-top__login')]//button";
     this.logoImg = "//*[contains(@class,'header--logo')]//*[@href]";
     this.holaUser = "//*[contains(text(),'Hola,')]";
-    // Prefer the real close button (avoid clicking the SVG and avoid hidden duplicates).
-    this.cerrarminicartButton = "button.vtex-minicart-2-x-closeIconButton:visible";
+    // Login sitio Chedraui/Auth0.
+    this.loginEmailInput = "#email-d";
+    this.loginContinuarButton = "#btn-continuar-mail-d";
+    this.loginOtpInput = (digit) => `#otp-form-d input.otp-input[aria-label="Dígito ${digit}"]`;
+    this.loginValidarCodigoButton = "#btn-continuar-validate-d";
+    this.loginEmailErrorMessage = "#error-msg-mail-d";
+    this.loginReenviarCodigoLink = "#validate-login-d a";
+    // Cerrar minicart (el DOM puede variar; preferimos XPath para compatibilidad con BasePage.safeClick).
+    this.cerrarminicartButton = "//*[contains(@class,'vtex-minicart-2-x-closeIconButton')]";
     this.tarjeta_numeroInput = "//*[@id='creditCardpayment-card-0Number']";
     this.tarjeta_nombreInput = "//*[@id='creditCardpayment-card-0Name']";
     this.tarjeta_codigoInput = "//*[@id='creditCardpayment-card-0Code']";
@@ -53,7 +61,7 @@ class HeaderPage extends BasePage {
     this.tarjetachedrahui_numeroInput = "//*[@id='card-number-vale']";
     this.tarjetachedrahui_montoInput = "//*[@id='amount-vale']";
     this.tarjetachedrahui_validarButton = "//*[@id='vales-confirm-button']";
-    this.pagar_Button = "//*[@id='payment-data-submit'][2]";
+    this.pagar_Button = "//*[@id='payment-data-submit' and contains(@data-bind,'isPaymentButtonVisible')]";
     this.validacioncampoobligatorio_Label = "/..//*[contains(text(),'Este campo es obligatorio')]";
     this.pagorechazado_alert  = "//*[@class='btn btn-large payment-unauthorized-button']";
     this.enviadopor_span = "//*[@class='chedrauimx-checkout-io-1-x-package__delivery']";

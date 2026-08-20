@@ -41,6 +41,53 @@ function obtenerSucursalPorDireccion(texto) {
   return "Desconocida";
 }
 
+function obtenerSucursalSeleccionada() {
+  const direccion = config.SucursalaSeleccionar || "";
+  if (!direccion) return "Desconocida";
+
+  const dirNorm = normalizarTexto(direccion);
+
+  // Preferimos el alias (llave) del mapa de RecogerEnDirecciones si coincide.
+  const rec = config.RecogerEnDirecciones || {};
+  for (const [nombre, dirConfig] of Object.entries(rec)) {
+    const cfgNorm = normalizarTexto(String(dirConfig || ""));
+    if (!cfgNorm) continue;
+    if (dirNorm === cfgNorm || dirNorm.includes(cfgNorm) || cfgNorm.includes(dirNorm)) {
+      return nombre;
+    }
+  }
+
+  // Si no encontramos alias, devolvemos la direccion tal cual para el reporte.
+  return direccion;
+}
+
+function obtenerNombreSucursalReporte() {
+  const nombre = String(config.nombreSucursal || "").trim();
+  if (nombre) return nombre;
+  return obtenerSucursalSeleccionada();
+}
+
+function obtenerDireccionSucursalReporte() {
+  const direccion = String(config.SucursalaSeleccionar || "").trim();
+  return direccion || "Desconocida";
+}
+
+function sanitizarParteNombreArchivo(valor) {
+  return String(valor || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function obtenerPrefijoSucursalArchivo() {
+  const sucursal = sanitizarParteNombreArchivo(obtenerNombreSucursalReporte());
+  return sucursal ? `${sucursal}_` : "";
+}
+
 function formatearFechaArchivo(fecha = new Date(), timeZone = 'America/Mexico_City') {
   // Formato DD_MM_YYYY (sin hora) para nombres de archivo.
   const fmt = new Intl.DateTimeFormat('es-MX', {
@@ -328,6 +375,12 @@ async function generarReporteCoincidenciasPDF({
 
     const buildSection = (resultadosArr, modoLocal) => {
       const esLegacy = modoLocal === "legacy";
+      const obtenerCalificacionNumericaC1 = (calificacion) => {
+        if (calificacion === "CC") return 3;
+        if (calificacion === "CP") return 2;
+        if (calificacion === "SR") return 1;
+        return 0;
+      };
 
       const resultadosAdaptados = resultadosArr.map(r => {
         let listaDetallada = [];
@@ -418,32 +471,41 @@ async function generarReporteCoincidenciasPDF({
       contenido.push(
         { text: esLegacy ? "Reporte Errores Ortograficos Legacy" : "Reporte Errores Ortograficos Empathy", style: "titulo", margin: [0, 0, 0, 10] },
         { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-        { text: `Sucursal evaluada: ${Object.keys(config.RecogerEnDirecciones || {})[0] || "Por definir"}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Sucursal: ${obtenerNombreSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Dirección: ${obtenerDireccionSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 10] },
         { text: `Terminos buscados: ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
       );
 
       if (tieneCalificacion) {
-        contenido.push(
-          { text: `CC: ${metricas.CC}`, style: "subtitulo" },
-          { text: `CP: ${metricas.CP}`, style: "subtitulo" },
-          { text: `SR: ${metricas.SR}`, style: "subtitulo" },
-          { text: `SN: ${metricas.SN}`, style: "subtitulo" },
-          { text: "\n" }
-        );
+        if (esLegacy) {
+          contenido.push(
+            { text: "CC: NA", style: "subtitulo" },
+            { text: `CP: ${metricas.CP}`, style: "subtitulo" },
+            { text: `SR: ${metricas.SR}`, style: "subtitulo" },
+            { text: `SN: ${metricas.SN}`, style: "subtitulo" },
+            { text: "\n" }
+          );
+        } else {
+          contenido.push(
+            { text: `CC: ${metricas.CC}`, style: "subtitulo" },
+            { text: `CP: ${metricas.CP}`, style: "subtitulo" },
+            { text: `SR: ${metricas.SR}`, style: "subtitulo" },
+            { text: `SN: ${metricas.SN}`, style: "subtitulo" },
+            { text: "\n" }
+          );
+        }
       }
 
       // Estandarizacion resumen
       if (!esLegacy) {
         contenido.push(
           { text: `Cobertura Exitosa: ${coberturaExitosa} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-          { text: `Resultado relevante: ${metricas.CC} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+          { text: `Resultado Relevante: ${metricas.CC + metricas.CP} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
         );
       } else {
         contenido.push(
           { text: `Cobertura Exitosa: ${coberturaExitosa} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-          { text: `% Correcto: ${legacyPct ? legacyPct.correcto : 0}%`, style: "subtitulo", margin: [0, 0, 0, 2] },
-          { text: `% Equivalente: ${legacyPct ? legacyPct.equivalente : 0}%`, style: "subtitulo", margin: [0, 0, 0, 2] },
-          { text: `% Incorrecto: ${legacyPct ? legacyPct.incorrecto : 0}%`, style: "subtitulo", margin: [0, 0, 0, 10] }
+          { text: `Resultado Relevante: ${metricas.CP} de ${totalEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
         );
       }
 
@@ -488,7 +550,8 @@ async function generarReporteCoincidenciasPDF({
           { text: "CC: Hay correccion global y todos los productos tienen la correccion esperada.", style: "textoDef" },
           { text: "CP: Hay correccion global, no todos los productos tienen correccion, pero si hay equivalencias.", style: "textoDef" },
           { text: "SR: No hay correccion global, pero si hay equivalencias en los resultados.", style: "textoDef" },
-          { text: "SN: No hay correccion ni equivalencias, o no hay resultados.", style: "textoDef" }
+          { text: "SN: No hay correccion ni equivalencias, o no hay resultados.", style: "textoDef" },
+          { text: "Escala de calificacion: CC = 3, CP = 2, SR = 1, SN = 0.", style: "textoDef" }
         );
       }
 
@@ -553,21 +616,31 @@ async function generarReporteCoincidenciasPDF({
           ? termino.totalProductos
           : termino.listaDetallada.length;
         const calificacionTexto = termino.calificacion || "SN";
+        const calificacionNumerica = obtenerCalificacionNumericaC1(calificacionTexto);
         const correccionEsperadaTexto = termino.ccProductos === totalEncontrados && totalEncontrados > 0 ? "Si" : "No";
 
         contenido.push(
-          { text: `Busqueda: ${termino.termino}`, style: "texto" },
-          { text: `Correccion: ${correccionTexto}`, style: "texto" },
-          { text: `Equivalencias: ${equivalenciasTexto}`, style: "texto" },
-          { text: `Resultados encontrados: ${totalEncontrados}`, style: "texto" }
+          { text: `Busqueda: ${termino.termino}`, style: "texto" }
         );
         if (!esLegacy) {
+          const correccionMostradaTexto = termino.correccion && String(termino.correccion).trim()
+            ? String(termino.correccion).trim()
+            : "Sin correccion";
           contenido.push(
+            { text: `Correccion mostrada: ${correccionMostradaTexto}`, style: "texto" },
+            { text: `Correccion: ${correccionTexto}`, style: "texto" },
+            { text: `Equivalencias: ${equivalenciasTexto}`, style: "texto" },
+            { text: `Resultados encontrados: ${totalEncontrados}`, style: "texto" },
             { text: `Correccion esperada: ${correccionEsperadaTexto}`, style: "texto" },
-            { text: `Calificacion busqueda: ${calificacionTexto}`, style: "texto", margin: [0, 0, 0, 10] }
+            { text: `Calificacion busqueda: ${calificacionNumerica}`, style: "texto", margin: [0, 0, 0, 10] }
           );
         } else {
-          contenido.push({ text: "", style: "texto", margin: [0, 0, 0, 10] });
+          contenido.push(
+            { text: `Correccion: ${correccionTexto}`, style: "texto" },
+            { text: `Equivalencias: ${equivalenciasTexto}`, style: "texto" },
+            { text: `Resultados encontrados: ${totalEncontrados}`, style: "texto" },
+            { text: "", style: "texto", margin: [0, 0, 0, 10] }
+          );
         }
         if (esLegacy) {
           const totalLegacy = termino.listaDetallada.length;
@@ -601,13 +674,19 @@ async function generarReporteCoincidenciasPDF({
         ];
 
         ordenados.forEach(row => {
+          const resultadoTexto = row.correccion
+            ? (termino.calificacion === "CC" ? "Corregido y Correcto" : "Correcto")
+            : row.equivalencia
+              ? "Equivalente"
+              : "Incorrecto";
+
           tablaBody.push([
             { text: row.texto, style: "texto", alignment: "left" },
             row.correccion
-              ? { text: "Correccion", alignment: "center", color: "green", fontSize: 11 }
+              ? { text: resultadoTexto, alignment: "center", color: "green", fontSize: 11 }
               : row.equivalencia
-                ? { text: "Equivalencia", alignment: "center", color: "#ff9900", fontSize: 11 }
-                : { text: "Incorrecto", alignment: "center", color: "red", fontSize: 11 }
+                ? { text: resultadoTexto, alignment: "center", color: "#ff9900", fontSize: 11 }
+                : { text: resultadoTexto, alignment: "center", color: "red", fontSize: 11 }
           ]);
         });
 
@@ -671,9 +750,10 @@ async function generarReporteCoincidenciasPDF({
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
     const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
-    let nombreArchivo = `ReporteBusqueda_${nombreTestCase}_${fechaArchivo}.pdf`;
+    const prefijoSucursal = obtenerPrefijoSucursalArchivo();
+    let nombreArchivo = `${prefijoSucursal}ReporteBusqueda_${nombreTestCase}_${fechaArchivo}.pdf`;
     if (/C1/i.test(nombreTestCase) || /ErroresOrtograficos/i.test(nombreTestCase)) {
-      nombreArchivo = `ReporteBusqueda_ErroresOrtograficos_${fechaArchivo}.pdf`;
+      nombreArchivo = `${prefijoSucursal}ReporteBusqueda_ErroresOrtograficos_${fechaArchivo}.pdf`;
     }
     const pdfPath = path.join(reportDir, nombreArchivo);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
@@ -804,6 +884,8 @@ async function generarReporteFrecuenciaAltaPDF({
       contenidoLocal.push(
         { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
         { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Sucursal: ${obtenerNombreSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Dirección: ${obtenerDireccionSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 10] },
         { text: `Relevancia Resultado: ${promPorResultado} sobre ${MAX_RELEVANCIA}`, style: "subtitulo", margin: [0, 0, 0, 6] },
         { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
         { text: `Cobertura Exitosa: ${coberturaExitosa} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
@@ -913,7 +995,7 @@ async function generarReporteFrecuenciaAltaPDF({
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
     const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
-    const pdfPath = path.join(reportDir, `ReporteBusqueda_FrecuenciaAlta_${fechaArchivo}.pdf`);
+    const pdfPath = path.join(reportDir, `${obtenerPrefijoSucursalArchivo()}ReporteBusqueda_FrecuenciaAlta_${fechaArchivo}.pdf`);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -986,6 +1068,22 @@ async function generarReporteLongTailPDF({
         : 0;
     };
 
+    const calcularPromPorTermino = (arr) => {
+      const resultadosLocal = Array.isArray(arr) ? arr : [];
+      const totalTerminos = resultadosLocal.length;
+      const sumaPromedios = resultadosLocal.reduce((acc, r) => acc + (Number(r.calificacionPromedio) || 0), 0);
+      return totalTerminos > 0
+        ? Math.round((sumaPromedios / totalTerminos) * 100) / 100
+        : 0;
+    };
+
+    const formatearGanadores = (items) => {
+      if (items.length === 0) return "Ninguno";
+      if (items.length === 1) return items[0];
+      if (items.length === 2) return `${items[0]} y ${items[1]}`;
+      return `${items.slice(0, -1).join(", ")} y ${items[items.length - 1]}`;
+    };
+
     const calcularGanadoresEmpathy = () => {
       if (!esResultadosCombinados) return null;
       const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
@@ -1004,10 +1102,12 @@ async function generarReporteLongTailPDF({
 
       const ganaPorTerminos = coberturaEmp > coberturaLeg || totalResEmp > totalResLeg;
       const ganaPorRelevancia = calcularPromPorResultado(emp) > calcularPromPorResultado(leg);
-      if (ganaPorTerminos && ganaPorRelevancia) return "Terminos evaluados y Relevancia resultado";
-      if (ganaPorTerminos) return "Terminos evaluados";
-      if (ganaPorRelevancia) return "Relevancia resultado";
-      return "Ninguno";
+      const ganaPorPromedioTerminos = calcularPromPorTermino(emp) > calcularPromPorTermino(leg);
+      const ganadores = [];
+      if (ganaPorTerminos) ganadores.push("Terminos evaluados");
+      if (ganaPorRelevancia) ganadores.push("Relevancia resultado");
+      if (ganaPorPromedioTerminos) ganadores.push("Calificación promedio por término");
+      return formatearGanadores(ganadores);
     };
 
     const terminosGanadosEmpathy = calcularGanadoresEmpathy();
@@ -1048,10 +1148,13 @@ async function generarReporteLongTailPDF({
       contenidoLocal.push(
         { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
         { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
-        { text: `Relevancia Resultado: ${promPorResultado} sobre ${MAX_RELEVANCIA}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-        { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-        { text: `Cobertura Exitosa: ${coberturaExitosa} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
-        { text: `Resultado relevante: ${resultadoRelevante} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 10] }
+        { text: `Sucursal: ${obtenerNombreSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Dirección: ${obtenerDireccionSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Terminos Evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Cobertura Exitosa: ${coberturaExitosa} sobre ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Resultado Relevante: ${resultadoRelevante} sobre ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Calificación promedio por término: ${promBusqueda} sobre ${MAX_RELEVANCIA}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Relevancia Resultado: ${promPorResultado} sobre ${MAX_RELEVANCIA}`, style: "subtitulo", margin: [0, 0, 0, 10] }
       );
 
       if (!esLegacyLocal && terminosGanadosEmpathy !== null) {
@@ -1162,7 +1265,7 @@ async function generarReporteLongTailPDF({
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
     const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
-    const pdfPath = path.join(reportDir, `ReporteBusqueda_LongTail_${fechaArchivo}.pdf`);
+    const pdfPath = path.join(reportDir, `${obtenerPrefijoSucursalArchivo()}ReporteBusqueda_LongTail_${fechaArchivo}.pdf`);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -1229,6 +1332,8 @@ async function generarReporteResultadosVaciosPDF({
     contenido.push(
       { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
       { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+      { text: `Sucursal: ${obtenerNombreSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+      { text: `Dirección: ${obtenerDireccionSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 10] },
       { text: `Terminos evaluados: ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
       { text: `Cobertura Exitosa: ${coberturaExitosa} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
       { text: `Resultado relevante: ${counts.R} de ${terminosEvaluados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
@@ -1289,7 +1394,7 @@ async function generarReporteResultadosVaciosPDF({
           ]
         ];
 
-        const max = Math.min(titulos.length, 24);
+        const max = Math.min(titulos.length, 20);
         for (let idx = 0; idx < max; idx++) {
           const t = titulos[idx];
           const d = det[idx] || {};
@@ -1327,7 +1432,7 @@ async function generarReporteResultadosVaciosPDF({
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
     const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
-    const pdfPath = path.join(reportDir, `ReporteBusqueda_ResultadosVacios_${fechaArchivo}.pdf`);
+    const pdfPath = path.join(reportDir, `${obtenerPrefijoSucursalArchivo()}ReporteBusqueda_ResultadosVacios_${fechaArchivo}.pdf`);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -1427,6 +1532,8 @@ async function generarReporteBusquedaContextoPDF({
       contenidoLocal.push(
         { text: titulo, style: "titulo", margin: [0, 0, 0, 10] },
         { text: `Fecha ejecucion: ${fechaEjecucion}`, style: "subtitulo", margin: [0, 0, 0, 10] },
+        { text: `Sucursal: ${obtenerNombreSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 6] },
+        { text: `Dirección: ${obtenerDireccionSucursalReporte()}`, style: "subtitulo", margin: [0, 0, 0, 10] },
         { text: `Terminos buscados: ${terminosBuscados}`, style: "subtitulo", margin: [0, 0, 0, 6] },
         { text: `Resultados obtenidos: ${resultadosObtenidos}`, style: "subtitulo", margin: [0, 0, 0, 6] },
         { text: `Resultados correctos: ${resultadosCorrectos}`, style: "subtitulo", margin: [0, 0, 0, 6] },
@@ -1536,7 +1643,7 @@ async function generarReporteBusquedaContextoPDF({
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
 
     const fechaArchivo = formatearFechaArchivo(new Date(), 'America/Mexico_City');
-    const pdfPath = path.join(reportDir, `ReporteBusqueda_BusquedaPorContexto_${fechaArchivo}.pdf`);
+    const pdfPath = path.join(reportDir, `${obtenerPrefijoSucursalArchivo()}ReporteBusqueda_BusquedaPorContexto_${fechaArchivo}.pdf`);
     if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
@@ -1554,11 +1661,177 @@ async function generarReporteBusquedaContextoPDF({
   }
 }
 
+// ------------------------------------------------------
+//  REPORTE C7: HOTSALE 2026 (POR TAB)
+// ------------------------------------------------------
+async function generarReporteHotSale2026PDF({
+  sheetName = "",
+  resultados = { empathy: [], legacy: [] }
+}) {
+  try {
+    const fonts = {
+      Roboto: {
+        normal: "Helvetica",
+        bold: "Helvetica-Bold",
+        italics: "Helvetica-Oblique",
+        bolditalics: "Helvetica-BoldOblique"
+      }
+    };
+
+    const printer = new PdfPrinter(fonts);
+    printer.vfs = vfsFonts.vfs;
+
+    const fechaHora = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
+    const fechaArchivo = formatearFechaArchivo(new Date(), "America/Mexico_City");
+
+    const reportDir = path.join(process.cwd(), "reports");
+    if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+
+    const safeSheet = String(sheetName || "").trim();
+    const pdfPath = path.join(reportDir, `${safeSheet}_${fechaArchivo}.pdf`);
+    if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+
+    const buildSection = (resultadosLocal, modoLocal) => {
+      const lista = Array.isArray(resultadosLocal) ? resultadosLocal : [];
+      const contenidoLocal = [];
+
+      const titulo = `${safeSheet} ${modoLocal === "legacy" ? "Legacy" : "Empathy"}`;
+      const totalResultados = lista.reduce((acc, r) => acc + (Number(r.resultadosEncontrados) || 0), 0);
+      const totalCorrectos = lista.reduce((acc, r) => acc + (Number(r.resultadosCorrectos) || 0), 0);
+      const porcentaje = totalResultados > 0
+        ? Math.round(((totalCorrectos / totalResultados) * 100) * 100) / 100
+        : 0;
+
+      contenidoLocal.push({ text: titulo, style: "titulo" });
+      contenidoLocal.push({ text: `Fecha ejecucion: ${fechaHora}`, style: "subtitulo" });
+      contenidoLocal.push({ text: `Sucursal evaluada: ${obtenerSucursalSeleccionada()}`, style: "texto" });
+      contenidoLocal.push({ text: `Resultados totales: ${totalResultados}`, style: "texto" });
+      contenidoLocal.push({ text: `Resultados correctos: ${totalCorrectos}`, style: "texto" });
+      contenidoLocal.push({ text: `Porcentaje correcto: ${porcentaje}%`, style: "texto" });
+
+      const resumenBody = [
+        [
+          { text: "Termino", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Resultados", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Correctos", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" },
+          { text: "Porcentaje", style: "encabezadoNaranja", alignment: "center", fillColor: "#ffe6cc" }
+        ]
+      ];
+
+      lista.forEach((r) => {
+        const term = String(r.termino || "");
+        const res = Number(r.resultadosEncontrados) || 0;
+        const cor = Number(r.resultadosCorrectos) || 0;
+        const pct = res > 0 ? Math.round(((cor / res) * 100) * 100) / 100 : 0;
+        resumenBody.push([
+          { text: term, style: "textoResumen", alignment: "left" },
+          { text: String(res), style: "textoResumen", alignment: "center" },
+          { text: String(cor), style: "textoResumen", alignment: "center" },
+          { text: `${pct}%`, style: "textoResumen", alignment: "center" }
+        ]);
+      });
+
+      contenidoLocal.push({ text: "Resumen de terminos", style: "subtitulo", margin: [0, 10, 0, 8] });
+      contenidoLocal.push({
+        table: { widths: ["55%", "15%", "15%", "15%"], body: resumenBody },
+        layout: "lightHorizontalLines"
+      });
+
+      contenidoLocal.push({ text: "", pageBreak: "after" });
+
+      for (let i = 0; i < lista.length; i++) {
+        const r = lista[i] || {};
+        const det = Array.isArray(r.detalles) ? r.detalles : [];
+
+        const terminoTexto = String(r.termino || "");
+        const equivalentesTexto = String(r.equivalentes || "");
+        const resultadosEncontrados = Number(r.resultadosEncontrados) || det.length || 0;
+        const resultadosCorrectos = Number(r.resultadosCorrectos) || 0;
+        const pct = resultadosEncontrados > 0
+          ? Math.round(((resultadosCorrectos / resultadosEncontrados) * 100) * 100) / 100
+          : 0;
+
+        contenidoLocal.push(
+          { text: `Termino: \"${terminoTexto}\"`, style: "encabezadoNaranja", margin: [0, 0, 0, 10] },
+          { text: `Equivalentes: ${equivalentesTexto}`, style: "texto" },
+          { text: `Resultados: ${resultadosEncontrados}`, style: "texto" },
+          { text: `Resultados correctos: ${resultadosCorrectos}`, style: "texto" },
+          { text: `Porcentaje correcto: ${pct}%`, style: "texto", margin: [0, 0, 0, 10] }
+        );
+
+        if (det.length === 0) {
+          contenidoLocal.push({ text: "Sin resultados para evaluar.", style: "texto" });
+        } else {
+          const tablaBody = [
+            [
+              { text: "Resultados", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" },
+              { text: "Resultado", style: "encabezadoNaranja", fillColor: "#ffe6cc", alignment: "center" }
+            ]
+          ];
+
+          det.forEach((d) => {
+            tablaBody.push([
+              { text: String(d.titulo || ""), style: "texto", alignment: "left" },
+              { text: String(d.resultado || (d.correcto ? "Correcto" : "Incorrecto")), style: "texto", alignment: "center" }
+            ]);
+          });
+
+          contenidoLocal.push({
+            table: { widths: ["85%", "15%"], body: tablaBody },
+            layout: "lightHorizontalLines"
+          });
+        }
+
+        if (i < lista.length - 1) {
+          contenidoLocal.push({ text: "", pageBreak: "after" });
+        }
+      }
+
+      return contenidoLocal;
+    };
+
+    const contenido = [];
+    const emp = Array.isArray(resultados.empathy) ? resultados.empathy : [];
+    const leg = Array.isArray(resultados.legacy) ? resultados.legacy : [];
+
+    if (emp.length > 0) contenido.push(...buildSection(emp, "empathy"));
+    if (emp.length > 0 && leg.length > 0) contenido.push({ text: "", pageBreak: "after" });
+    if (leg.length > 0) contenido.push(...buildSection(leg, "legacy"));
+
+    const docDefinition = {
+      content: contenido,
+      styles: {
+        titulo: { fontSize: 18, bold: true, color: "#ff8800", margin: [0, 0, 0, 10] },
+        subtitulo: { fontSize: 12, italics: true, color: "#555", margin: [0, 0, 0, 10] },
+        texto: { fontSize: 10, margin: [0, 2, 0, 2] },
+        textoResumen: { fontSize: 9, margin: [0, 1, 0, 1] },
+        encabezadoNaranja: { fontSize: 12, bold: true, color: "#ff8800", margin: [0, 6, 0, 4] }
+      },
+      defaultStyle: { font: "Roboto" },
+      pageMargins: [40, 60, 40, 60]
+    };
+
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
+    const stream = fs.createWriteStream(pdfPath);
+    pdfDoc.pipe(stream);
+    pdfDoc.end();
+
+    return new Promise((resolve, reject) => {
+      stream.on("finish", () => resolve(pdfPath));
+      stream.on("error", reject);
+    });
+  } catch (err) {
+    console.error("Error al generar PDF HotSale 2026:", err);
+    throw err;
+  }
+}
+
 module.exports = {
   generarReportePDF,
   generarReporteCoincidenciasPDF,
   generarReporteFrecuenciaAltaPDF,
   generarReporteLongTailPDF,
   generarReporteResultadosVaciosPDF,
-  generarReporteBusquedaContextoPDF
+  generarReporteBusquedaContextoPDF,
+  generarReporteHotSale2026PDF
 };

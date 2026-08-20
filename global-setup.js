@@ -66,7 +66,7 @@ module.exports = async function globalSetup() {
     }
 
     console.log("🍪 Aceptando cookies…");
-    await directionsPage.safeClick(directionsPage.aceptarCookiesButton);
+    await directionsPage.acceptCookiesIfPresent();
     await page.waitForTimeout(8000);
 
     console.log("➡️ Seleccionar dirección…");

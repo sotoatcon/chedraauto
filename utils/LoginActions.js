@@ -1,19 +1,143 @@
 const LoginPageVtex = require('../pages/LoginPageVtex');
 const config = require('./Environment');
-const { getFixedInbox, waitForCode, deleteEmail } = require('./mailslurp-utils');
+// Flujo anterior MailSlurp (conservar como referencia/fallback):
+// const { getFixedInbox, waitForCode, deleteEmail } = require('./mailslurp-utils');
+const { getOtpInbox, waitForOtpCode, clearOtpInbox } = require('./otp-utils');
 const { expect } = require('@playwright/test');
 const fs = require('fs');
 
 //const { getExcelData } = require('../../utils/excelReader');
+async function ingresarCodigoVtex(page, loginvtex, code) {
+  if (!/^\d{6}$/.test(code)) {
+    throw new Error(`Codigo OTP VTEX invalido recibido: ${code}`);
+  }
+
+  console.log("El codigo VTEX recibido es: " + code);
+  const input = page.locator(loginvtex.codigoInput).first();
+  await input.waitFor({ state: 'visible', timeout: 15000 });
+  await input.fill("");
+  await input.type(code, { delay: 20 }).catch(async () => {
+    await input.fill(code);
+  });
+  await page.locator(loginvtex.loginButton).first().click();
+}
+
+async function hayCodigoVtexInvalido(page, loginvtex) {
+  const input = page.locator(loginvtex.codigoInput).first();
+  const invalidLabel = page.locator(loginvtex.invalidCodeLabel).first();
+  const startMs = Date.now();
+
+  // Si el codigo fue correcto, VTEX suele cerrar/navegar y el input desaparece.
+  // Si fue incorrecto, el input permanece visible junto con el mensaje de error.
+  while (Date.now() - startMs < 7000) {
+    if (typeof page.isClosed === "function" && page.isClosed()) return false;
+
+    const inputVisible = await input.isVisible({ timeout: 500 }).catch(() => false);
+    if (!inputVisible) return false;
+
+    await page.waitForTimeout(500);
+  }
+
+  const inputVisible = await input.isVisible({ timeout: 1000 }).catch(() => false);
+  if (!inputVisible) return false;
+
+  return await invalidLabel.isVisible({ timeout: 1000 }).catch(() => false);
+}
+
+async function esperarPantallaCodigoVtex(page, loginvtex) {
+  const inputVisible = await page
+    .locator(loginvtex.codigoInput)
+    .first()
+    .waitFor({ state: 'visible', timeout: 30000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (inputVisible) return true;
+
+  const urlActual = page.url();
+  const titulo = await page.title().catch(() => "");
+  throw new Error("No se mostro pantalla de codigo VTEX. URL: " + urlActual + " Title: " + titulo);
+}
+
+async function ingresarCodigoVtexConRetry(page, loginvtex, code, obtenerNuevoCodigo) {
+  await ingresarCodigoVtex(page, loginvtex, code);
+
+  if (!(await hayCodigoVtexInvalido(page, loginvtex))) {
+    return code;
+  }
+
+  console.warn("VTEX: codigo invalido detectado. Solicitando nuevo codigo...");
+  const resend = page.locator(loginvtex.resendCodeButton).first();
+  const resendVisible = await resend
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!resendVisible) {
+    throw new Error("VTEX rechazo el codigo y no se encontro Resend Code.");
+  }
+
+  const resendRequestMs = Date.now();
+  await resend.click();
+  const nuevoCodigo = await obtenerNuevoCodigo(resendRequestMs, [code]);
+  await ingresarCodigoVtex(page, loginvtex, nuevoCodigo);
+
+  if (await hayCodigoVtexInvalido(page, loginvtex)) {
+    throw new Error("VTEX rechazo tambien el codigo reenviado.");
+  }
+
+  return nuevoCodigo;
+}
+
+async function waitForSiteOtpCodeConReenvio({ loginTarget, headerPage, inboxId, otpRequestMs }) {
+  const totalTimeoutMs = config.timeouts.waitForEmail;
+  const firstWaitMs = Math.min(Number(process.env.SITE_OTP_FIRST_WAIT_MS || 60000), totalTimeoutMs);
+
+  try {
+    return await waitForOtpCode({
+      inboxId,
+      timeoutMs: firstWaitMs,
+      notBeforeMs: otpRequestMs
+    });
+  } catch (error) {
+    const message = String(error && error.message ? error.message : "");
+    if (message.includes("Token OAuth invalido") || message.includes("invalid_grant")) {
+      throw error;
+    }
+
+    console.warn("No llego OTP del sitio en el primer intento. Intentando reenviar codigo...");
+    const resend = loginTarget.locator(headerPage.loginReenviarCodigoLink).first();
+    const resendVisible = await resend
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (!resendVisible) {
+      throw error;
+    }
+
+    const resendRequestMs = Date.now();
+    await resend.click();
+    await loginTarget.waitForTimeout(1000);
+
+    return await waitForOtpCode({
+      inboxId,
+      timeoutMs: Math.max(totalTimeoutMs - firstWaitMs, 60000),
+      notBeforeMs: resendRequestMs
+    });
+  }
+}
+
 async function loginConCorreo(page, headerPage, loginPage) {
-  const inbox = await getFixedInbox();
+  const inbox = await getOtpInbox();
   const emailAddress = inbox.emailAddress;
   const inboxId = inbox.id;
   console.log("🔎 process.env.TEST_ENV =", process.env.TEST_ENV);
 
 
   console.log("➡️ Entramos a loginConCorreo()");
-  await deleteEmail(inboxId);
+  // Flujo anterior MailSlurp:
+  // await deleteEmail(inboxId);
+  await clearOtpInbox(inboxId);
   console.log("➡️ inbox obtenido:", inbox);
   console.log("🧩 DEBUG isQA =", config.isQA);
   console.log("🧩 DEBUG isPROD =", config.isPROD);
@@ -46,16 +170,12 @@ async function loginConCorreo(page, headerPage, loginPage) {
       await loginvtex.humanType(loginvtex.emailInput, config.emails.validUser);
       const otpRequestMs = Date.now();
       await loginvtex.safeClick(loginvtex.nextButton);
+      await esperarPantallaCodigoVtex(page, loginvtex);
       const code = await obtenerCodigoVtexDesdeOutlook(page, config, { notBeforeMs: otpRequestMs });
 
-      if (!/^\d{6}$/.test(code)) {
-        throw new Error(`Código OTP inválido recibido: ${code}`);
-      } else {
-        console.log("El código recibido es: " + code);
-      }
-
-      await page.fill('//*[@data-testid="token-input"]//input', code);
-      await page.click('//button[@tabindex="0"]');
+      await ingresarCodigoVtexConRetry(page, loginvtex, code, async (notBeforeMs, ignoreCodes = []) => {
+        return await obtenerCodigoVtexDesdeOutlook(page, config, { notBeforeMs, ignoreCodes });
+      });
 
     }
     else if (config.isPROD) {
@@ -75,24 +195,70 @@ async function loginConCorreo(page, headerPage, loginPage) {
   const ipbaneada=false;
   if(!ipbaneada){
           // Ir al login
+      const popupPromise = page.waitForEvent('popup', { timeout: 7000 }).catch(() => null);
       await page.click(headerPage.ingresarButton);
+      const popup = await popupPromise;
+      const loginTarget = popup || page;
+
+      if (popup) {
+        await popup.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+        await popup.bringToFront().catch(() => {});
+      }
 
       // Llenar email de forma "humana"
-      await page.isVisible('#email-d');
-      await headerPage.humanType('#email-d', emailAddress);
+      const emailInput = loginTarget.locator(headerPage.loginEmailInput);
+      await emailInput.waitFor({ state: 'visible', timeout: 30000 });
+      await emailInput.fill("");
+      for (const char of emailAddress) {
+        await emailInput.type(char, { delay: 15 });
+      }
+      const emailCapturado = await emailInput.inputValue().catch(() => "");
+      console.log("Email capturado en login sitio: " + emailCapturado);
+      if (emailCapturado.trim().toLowerCase() !== String(emailAddress).trim().toLowerCase()) {
+        console.log("Email capturado no coincide, corrigiendo con fill().");
+        await emailInput.fill(emailAddress);
+      }
 
       // Esperar botón activo y clic
-      const nextBtn = page.locator('#btn-continuar-mail-d');
+      const nextBtn = loginTarget.locator(headerPage.loginContinuarButton);
       //await nextBtn.waitFor({ state: 'visible' });
       await expect(nextBtn).toBeEnabled();
-      await nextBtn.click();
+      const otpRequestMs = Date.now();
+      const otpVisibleAntesClick = await loginTarget
+        .locator(headerPage.loginOtpInput(1))
+        .isVisible({ timeout: 1000 })
+        .catch(() => false);
 
-      //modificaciones
-      // Seleccionar todos los inputs del OTP (6 dígitos)
-    const baseXPath =   "xpath=//*[@class='d-flex justify-content-center gap-3 mb-2']//*[@class='otp-input form-control text-center']";
+      if (!otpVisibleAntesClick) {
+        console.log("Solicitando OTP del sitio para: " + emailAddress);
+        await nextBtn.click();
+      } else {
+        console.log("OTP del sitio ya visible tras pausa manual; se omite click automatico.");
+      }
+
+      const otpVisible = await loginTarget
+        .locator(headerPage.loginOtpInput(1))
+        .waitFor({ state: 'visible', timeout: 15000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (!otpVisible) {
+        const errorText = await loginTarget
+          .locator(headerPage.loginEmailErrorMessage)
+          .innerText({ timeout: 2000 })
+          .catch(() => "");
+        throw new Error("No se mostro pantalla OTP del sitio. Error visible: " + (errorText || "Sin mensaje visible."));
+      }
 
     // Obtener el código real
-    const code = await waitForCode(inboxId, config.timeouts.waitForEmail);
+    // Flujo anterior MailSlurp:
+    // const code = await waitForCode(inboxId, config.timeouts.waitForEmail);
+    const code = await waitForSiteOtpCodeConReenvio({
+      loginTarget,
+      headerPage,
+      inboxId,
+      otpRequestMs
+    });
 
     // Validar formato del código
     if (!/^\d{6}$/.test(code)) {
@@ -102,15 +268,22 @@ async function loginConCorreo(page, headerPage, loginPage) {
             console.log("El codigo recibido es: "+code);
     }
 
-    // 🔥 Llenar cada input usando TU método humanType()
-    const selector = `${baseXPath}[1]`;
-    const input = page.locator(selector);
-
     for (let i = 0; i < 6; i++) {
       const digit = code[i];
+      const input = loginTarget.locator(headerPage.loginOtpInput(i + 1));
+      await input.waitFor({ state: 'visible', timeout: 15000 });
       await input.type(digit);
     }
-    await page.click('#btn-continuar-validate-d');
+    await loginTarget.click(headerPage.loginValidarCodigoButton);
+
+    if (popup) {
+      await Promise.race([
+        popup.waitForEvent('close', { timeout: 20000 }).catch(() => null),
+        page.waitForURL(/.*chedraui.*/i, { timeout: 20000 }).catch(() => null),
+        page.waitForTimeout(5000)
+      ]);
+      await page.bringToFront().catch(() => {});
+    }
 
     //modificaciones
     console.log('Se presionó boton login');
@@ -265,6 +438,12 @@ async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
     ? opts.skewMs
     : 5000;
   const baselineCodes = new Set();
+  const ignoredCodes = new Set(
+    Array.isArray(opts.ignoreCodes)
+      ? opts.ignoreCodes.map(codigo => String(codigo || "").trim()).filter(Boolean)
+      : []
+  );
+  const codigoIgnorado = (codigo) => ignoredCodes.has(String(codigo || "").trim());
 
   async function _tryParseTimestampFromItem(item) {
     try {
@@ -360,62 +539,38 @@ async function obtenerCodigoVtexDesdeOutlook(page, config, opts = {}) {
   console.log("VTEX: leyendo baseline...");
   let baseMain = { codigo: null, tsMs: null };
   try { baseMain = await _leerCodigoYMetaEnTabActual(); } catch {}
-  if (baseMain.codigo && !esReciente(baseMain.tsMs, baseMain.tsPrecision)) baselineCodes.add(baseMain.codigo);
+  if (baseMain.codigo && typeof baseMain.tsMs === 'number' && !Number.isNaN(baseMain.tsMs) && !esReciente(baseMain.tsMs, baseMain.tsPrecision)) {
+    baselineCodes.add(baseMain.codigo);
+  }
   let baseOther = { codigo: null, tsMs: null };
   try { baseOther = await _leerCodigoYMetaEnOtros(); } catch {}
-  if (baseOther.codigo && !esReciente(baseOther.tsMs, baseOther.tsPrecision)) baselineCodes.add(baseOther.codigo);
+  if (baseOther.codigo && typeof baseOther.tsMs === 'number' && !Number.isNaN(baseOther.tsMs) && !esReciente(baseOther.tsMs, baseOther.tsPrecision)) {
+    baselineCodes.add(baseOther.codigo);
+  }
   console.log("VTEX: baseline listo. Iniciando espera de OTP...");
 
   while (true) {
     const main = await _leerCodigoYMetaEnTabActual().catch(() => ({ codigo: null, tsMs: null, tsPrecision: null }));
     if (main && main.codigo) {
-      if (esReciente(main.tsMs, main.tsPrecision)) {
+      if (codigoIgnorado(main.codigo)) {
+        console.log("VTEX: codigo ignorado por retry previo (main): " + main.codigo);
+        baselineCodes.add(main.codigo);
+      } else {
         console.log("Codigo VTEX detectado:", main.codigo);
         await browser.close();
         return main.codigo;
-      }
-      if (typeof main.tsMs === 'number' && !Number.isNaN(main.tsMs)) {
-        console.log("VTEX: codigo ignorado por timestamp viejo (main): " + main.codigo);
-      }
-
-      // Sin timestamp: primero sembramos baseline, luego solo aceptamos si cambia.
-      if (main.tsMs === null || main.tsMs === undefined) {
-        if (baselineCodes.size === 0) {
-          baselineCodes.add(main.codigo);
-          console.log("VTEX: baseline(seed main, no timestamp): " + main.codigo);
-        } else if (!baselineCodes.has(main.codigo)) {
-          console.log("Codigo VTEX detectado (main, sin timestamp):", main.codigo);
-          await browser.close();
-          return main.codigo;
-        }
-      } else {
-        // Timestamp viejo: lo marcamos como baseline y esperamos uno nuevo.
-        if (!baselineCodes.has(main.codigo)) baselineCodes.add(main.codigo);
       }
     }
 
     const other = await _leerCodigoYMetaEnOtros().catch(() => ({ codigo: null, tsMs: null, tsPrecision: null }));
     if (other && other.codigo) {
-      if (esReciente(other.tsMs, other.tsPrecision)) {
+      if (codigoIgnorado(other.codigo)) {
+        console.log("VTEX: codigo ignorado por retry previo (Otros): " + other.codigo);
+        baselineCodes.add(other.codigo);
+      } else {
         console.log("Codigo VTEX detectado en pestana Otros:", other.codigo);
         await browser.close();
         return other.codigo;
-      }
-      if (typeof other.tsMs === 'number' && !Number.isNaN(other.tsMs)) {
-        console.log("VTEX: codigo ignorado por timestamp viejo (Otros): " + other.codigo);
-      }
-
-      if (other.tsMs === null || other.tsMs === undefined) {
-        if (baselineCodes.size === 0) {
-          baselineCodes.add(other.codigo);
-          console.log("VTEX: baseline(seed other, no timestamp): " + other.codigo);
-        } else if (!baselineCodes.has(other.codigo)) {
-          console.log("Codigo VTEX detectado (Otros, sin timestamp):", other.codigo);
-          await browser.close();
-          return other.codigo;
-        }
-      } else {
-        if (!baselineCodes.has(other.codigo)) baselineCodes.add(other.codigo);
       }
     }
 

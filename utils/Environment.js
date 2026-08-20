@@ -1,6 +1,13 @@
 // utils/Environment.js
 const ambiente = (process.env.TEST_ENV || 'PROD').trim().replace(/^\uFEFF/, '');
 const headless = process.env.HEADLESS !== 'false';
+const browserChannel = (process.env.BROWSER_CHANNEL || process.env.PW_CHANNEL || 'msedge').trim();
+const otpProvider = (process.env.OTP_PROVIDER || process.env.OPT_PROVIDER || 'gmail').trim().toLowerCase();
+// Si es true, los reportes que comparan Empathy vs Legacy solo correran Empathy.
+// Default: false (puedes sobreescribir con ONLY_EMPATHY=true).
+const OnlyEmpathy = String(process.env.ONLY_EMPATHY || 'false').trim().toLowerCase() === 'true';
+// Si es true, no ejecuta navegador/login: regenera PDFs desde el ultimo JSON crudo guardado.
+const OnlyReport = ['1', 'true', 'yes'].includes(String(process.env.ONLY_REPORT || process.env.ONLYREPORT || '0').trim().toLowerCase());
 
 const isEMP = ambiente.toUpperCase() === "EMP";
 const isQA = ambiente.toUpperCase() === "QA";
@@ -20,9 +27,20 @@ const sucursales = {
 
 const RecogerEnDirecciones = {
 //  "Texmelucan": "AV. XICOTÉNCATL KM. 1 CARRET. SAN MARTÍN TEXMELUCAN-TLAX. S/N",
+//'AV. XICOTÉNCATL KM. 1 CARRET. SAN MARTÍN TEXMELUCAN-TLAX. S/N'
   "Polanco": "calle socrates 112 polanco",
 
 };
+
+
+//const nombreSucursal = "Polanco";
+//const SucursalaSeleccionar = "Av. Horacio 147, Polanco, Polanco I Secc, Miguel Hidalgo, 11510 Ciudad de México, CDMX";
+//const nombreSucursal = "Sante fe";
+//const SucursalaSeleccionar = "Vasco de Quiroga 3800, Lomas de Santa Fe, Cuajimalpa, Cuajimalpa de Morelos, 05348 Ciudad de México, CDMX";
+//const nombreSucursal = "Interlomas";
+//const SucursalaSeleccionar = "Parque de Valencia, 17, 52786, Parques de la Herradura, naucalpan de juárez";
+const nombreSucursal = "Xalapa Animas";
+const SucursalaSeleccionar = "AV. LAZARO CARDENAS ESQ, Federico Menzel S/N, LOMAS DE ANIMAS, 91194 Xalapa-Enríquez, Ver";
 
 const correos = [
   "kmartinez@gdcpc.com",
@@ -33,9 +51,15 @@ const correos = [
 const config = {
   ambiente,
   headless,
+  browserChannel,
+  otpProvider,
+  OnlyEmpathy,
+  OnlyReport,
   sucursales,
   correos,
   RecogerEnDirecciones,
+  nombreSucursal,
+  SucursalaSeleccionar,
   isQA,         
   isPROD,      
   isEMP,  
@@ -57,8 +81,13 @@ const config = {
 
   mailslurp: {
     apiKey: "d1840d194ec422cbe0664c8985d1afe8cec89868d0882c9586aa8f146533ce65",
-    inboxId: "22c2a5a6-586d-4fe7-91a2-a2997ec75647",
-    emailAddress: "22c2a5a6-586d-4fe7-91a2-a2997ec75647@mailslurp.biz",
+    inboxId: "130525fa-0c6b-48b2-927c-4b7ad017ee84",
+    emailAddress: "130525fa-0c6b-48b2-927c-4b7ad017ee84@zazamail.link",
+  },
+  gmail: {
+    emailAddress: process.env.GMAIL_OTP_EMAIL || 'qa.automation.uat@gmail.com',
+    credentialsPath: process.env.GMAIL_CREDENTIALS_PATH || './secrets/gmail-credentials.json',
+    tokenPath: process.env.GMAIL_TOKEN_PATH || './secrets/gmail-token.json',
   },
 
   emails: {

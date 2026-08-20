@@ -5,7 +5,28 @@ const { expect } = require('@playwright/test');
 class BasePage {
     constructor(page) {
         this.page = page; // instancia de Playwright
-        this.aceptarCookiesButton = "//*[contains(@class,'cookiesButtonAccept')]";
+        // Selector robusto para aceptar cookies (el DOM puede variar por ambiente/implementaciÃ³n).
+        // Mantener en XPath para compatibilidad con safeClick (usa document.evaluate).
+        this.aceptarCookiesButton =
+            "//*[@id='onetrust-accept-btn-handler']" +
+            " | //*[@id='acceptAllButton']" +
+            " | //button[contains(@class,'cookiesButtonAccept')]" +
+            " | //*[contains(@class,'cookiesButtonAccept')]" +
+            " | //button[contains(.,'Aceptar') and (contains(@class,'cookie') or contains(@id,'cookie'))]" +
+            " | //*[@data-testid='accept-cookies']";
+    }
+
+    // Aceptar cookies si el banner aparece; no falla si no existe.
+    async acceptCookiesIfPresent(timeoutMs = 4000) {
+        try {
+            const locator = this.page.locator(this.aceptarCookiesButton).first();
+            const visible = await locator.isVisible({ timeout: timeoutMs }).catch(() => false);
+            if (!visible) return false;
+            await this.safeClick(this.aceptarCookiesButton);
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     // Navegar a una URL
@@ -18,7 +39,7 @@ class BasePage {
     const el = this.page.locator(selector).first();
 
     try {
-        await this.page.waitForSelector(selector, { state: 'visible', timeout: 25000 });
+        await this.page.waitForSelector(selector, { state: 'visible', timeout: 30000 });
         await this.page.waitForTimeout(300);
 
         await expect(el).toBeVisible({ timeout: 10000 });

@@ -66,7 +66,7 @@ test('C1 - TimeSlot Scraper', async () => {
 
   // --- Flujo principal ---
   await page.goto(config.urls.PROD);
-  await headerPage.safeClick(headerPage.aceptarCookiesButton);
+  await headerPage.acceptCookiesIfPresent();
   await page.goto(config.urls.PROD);
   await page.waitForSelector('iframe#launcher', { state: 'visible', timeout: 30000 });
 

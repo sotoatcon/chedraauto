@@ -11,3 +11,4 @@
 sessionCookies.json
 sessionLocalStorage.json
 storageState.json
+secrets/
